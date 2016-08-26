@@ -1,0 +1,20 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.ExtStateMapper">
+
+    <resultMap id="extMap" type="com.coretree.defaultconfig.mapper.Extension">
+        <id		property="extension"	column="extension" />
+        <result property="username"		column="username" />
+        <result property="uname"		column="uname" />
+        <result property="state"		column="state" />
+    </resultMap>
+    
+    <select id="getAll" resultMap="extMap">
+    	select 
+			a.extension
+			, iif((select uname from users where username=b.username) is null, '-', (select uname from users where username=b.username)) uname
+			, (select state from users where username=b.username) state
+			from extensions a left join users_exts b
+				on a.extension=b.extension
+			 order by a.extension asc
+    </select>
+</mapper>

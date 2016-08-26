@@ -1,0 +1,316 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.statis.mapper.AgentStatMapper">
+
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.statis.model.AgentStat">
+        <result property="agentStatCd"		column="agent_stat_cd" />
+        <result property="startDate"		column="start_date" />
+        <result property="startHms"		column="start_hms" />
+        <result property="endDate"		column="end_date" />
+        <result property="endHms"		column="end_hms" />
+        <result property="agentStatSec"	column="agent_stat_sec" />
+		<result property="empNo"		column="emp_no" />
+		<result property="empNm"		column="emp_nm" />
+		
+		<result property="totIbAgTransCount"		column="TOT_IB_AG_TRANS_COUNT" />
+		<result property="totIbAgTransTime"		column="TOT_IB_AG_TRANS_TIME" />
+		<result property="totOutCount"		column="TOT_OUT_COUNT" />
+		<result property="totOutTime"		column="TOT_OUT_TIME" />
+		<result property="totExtCount"		column="TOT_EXT_COUNT" />
+		<result property="totExtTime"		column="TOT_EXT_TIME" />
+		<result property="agtStat1001Time"		column="AGT_STAT_1001_TIME" />
+		<result property="agtStat1002Time"		column="AGT_STAT_1002_TIME" />
+		<result property="agtStat1003Time"		column="AGT_STAT_1003_TIME" />
+		<result property="agtStat1004Time"		column="AGT_STAT_1004_TIME" />
+		<result property="agtStat1005Time"		column="AGT_STAT_1005_TIME" />
+		
+		<result property="leadStartDate"		column="leadStartDate" />
+		<result property="leadEndDate"		column="leadEndDate" />
+		
+    </resultMap>
+	
+    <select id="selectAgentStatList" parameterType="com.coretree.defaultconfig.statis.model.AgentStat" resultMap="resultMap">
+	select  
+	      case when a.START_DATE is null then (SELECT p.RET_VALUE FROM GET_FORMAT_DATE(b.REG_DATE) p ) else (SELECT p.RET_VALUE FROM GET_FORMAT_DATE(a.START_DATE) p ) end as START_DATE  <!-- 일자 -->
+	    , case when a.EMP_NO is null  then b.EMP_NO  else a.EMP_NO  end as EMP_NO   <!-- 사번 -->    
+	    , case when a.EMP_NM is null  then b.EMP_NM  else a.EMP_NM end as EMP_NM   <!-- 이름 -->    
+	    , case when b.TOT_IB_AG_TRANS_COUNT is null  then 0  else TOT_IB_AG_TRANS_COUNT  end as TOT_IB_AG_TRANS_COUNT   <!-- TOT_IB_AG_TRANS_COUNT -->
+	    , case when b.TOT_IB_AG_TRANS_TIME is null  then 0  else TOT_IB_AG_TRANS_TIME  end as TOT_IB_AG_TRANS_TIME   <!-- TOT_IB_AG_TRANS_TIME -->
+	    , case when b.TOT_OUT_COUNT is null  then 0  else TOT_OUT_COUNT  end as TOT_OUT_COUNT   <!-- TOT_OUT_COUNT -->
+	    , case when b.TOT_OUT_TIME is null  then 0  else TOT_OUT_TIME  end as TOT_OUT_TIME  <!-- TOT_OUT_TIME -->
+	    , case when b.TOT_EXT_COUNT is null  then 0  else TOT_EXT_COUNT  end as TOT_EXT_COUNT   <!--  TOT_EXT_COUNT -->
+	    , case when B.TOT_EXT_TIME is null  then 0  else TOT_EXT_TIME  end as TOT_EXT_TIME   <!-- TOT_EXT_TIME -->
+	    , case when a.AGT_STAT_1001_TIME is null  then 0  else AGT_STAT_1001_TIME  end as AGT_STAT_1001_TIME   <!--1001	: 대기 -->
+	    , case when a.AGT_STAT_1002_TIME is null  then 0  else AGT_STAT_1002_TIME  end as AGT_STAT_1002_TIME   <!--1002	:후처리 -->
+	    , case when a.AGT_STAT_1003_TIME is null  then 0  else AGT_STAT_1003_TIME  end as AGT_STAT_1003_TIME   <!--1003	:이석 -->
+	    , case when a.AGT_STAT_1004_TIME is null  then 0  else AGT_STAT_1004_TIME  end as AGT_STAT_1004_TIME   <!--1004	: 휴식 -->
+	    , case when a.AGT_STAT_1005_TIME is null  then 0  else AGT_STAT_1005_TIME  end as AGT_STAT_1005_TIME   <!--1005	:교육 -->
+	
+	 from 
+	  ( SELECT 
+	          START_DATE
+	        , EMP_NO, EMP_NM
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1001' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1001_TIME			<!-- 1001	: 대기 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1002' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1002_TIME			<!-- 1002	: 후처리 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1003' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1003_TIME			<!-- 1003	: 이석 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1004' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1004_TIME			<!-- 1004	: 휴식 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1005' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1005_TIME			<!-- 1005	: 교육 -->
+	    FROM TAGENT_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND START_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND START_DATE <![CDATA[<=]]> #{leadEndDate}
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+			  
+	    GROUP BY START_DATE 
+	            , EMP_NO, EMP_NM
+	  ) A   full join 
+	 (   SELECT 
+	         REG_DATE	
+	        , EMP_NO, EMP_NM 
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT  <!-- AGENT_TRANS_COUNT -->
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end) as TOT_IB_AG_TRANS_TIME  <!-- AGENT_TRANS_COUNT -->
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT	<!--  Outbound Count -->
+	        , SUM(case when CALL_TYP_CD	= '1002' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_OUT_TIME	<!-- Outbound TIME -->
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT	<!--  EXTENSION Count -->
+	        , SUM(case when CALL_TYP_CD	= '1003' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_EXT_TIME	<!-- EXTENSION TIME -->
+	    FROM TCALL_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND REG_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND REG_DATE <![CDATA[<=]]> #{leadEndDate}
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+	    group by REG_DATE 
+	            , EMP_NO, EMP_NM 
+	  ) B
+	on a.START_DATE = b.REG_DATE
+	AND A.EMP_NO = B.EMP_NO
+	AND A.EMP_NM = B.EMP_NM
+    </select>
+    
+    <select id="selectAgentStatListDay" parameterType="com.coretree.defaultconfig.statis.model.AgentStat" resultMap="resultMap">
+	select  
+	      case when a.START_DATE is null then b.REG_DATE else a.START_DATE end as START_DATE  <!-- 일자 -->
+	    , case when a.EMP_NO is null  then b.EMP_NO  else a.EMP_NO  end as EMP_NO   <!-- 사번 -->    
+	    , case when a.EMP_NM is null  then b.EMP_NM  else a.EMP_NM end as EMP_NM   <!-- 이름 -->    
+	    , case when b.TOT_IB_AG_TRANS_COUNT is null  then 0  else TOT_IB_AG_TRANS_COUNT  end as TOT_IB_AG_TRANS_COUNT   <!-- TOT_IB_AG_TRANS_COUNT -->
+	    , case when b.TOT_IB_AG_TRANS_TIME is null  then 0  else TOT_IB_AG_TRANS_TIME  end as TOT_IB_AG_TRANS_TIME   <!-- TOT_IB_AG_TRANS_TIME -->
+	    , case when b.TOT_OUT_COUNT is null  then 0  else TOT_OUT_COUNT  end as TOT_OUT_COUNT   <!-- TOT_OUT_COUNT -->
+	    , case when b.TOT_OUT_TIME is null  then 0  else TOT_OUT_TIME  end as TOT_OUT_TIME  <!-- TOT_OUT_TIME -->
+	    , case when b.TOT_EXT_COUNT is null  then 0  else TOT_EXT_COUNT  end as TOT_EXT_COUNT   <!--  TOT_EXT_COUNT -->
+	    , case when B.TOT_EXT_TIME is null  then 0  else TOT_EXT_TIME  end as TOT_EXT_TIME   <!-- TOT_EXT_TIME -->
+	    , case when a.AGT_STAT_1001_TIME is null  then 0  else AGT_STAT_1001_TIME  end as AGT_STAT_1001_TIME   <!--1001	: 대기 -->
+	    , case when a.AGT_STAT_1002_TIME is null  then 0  else AGT_STAT_1002_TIME  end as AGT_STAT_1002_TIME   <!--1002	:후처리 -->
+	    , case when a.AGT_STAT_1003_TIME is null  then 0  else AGT_STAT_1003_TIME  end as AGT_STAT_1003_TIME   <!--1003	:이석 -->
+	    , case when a.AGT_STAT_1004_TIME is null  then 0  else AGT_STAT_1004_TIME  end as AGT_STAT_1004_TIME   <!--1004	: 휴식 -->
+	    , case when a.AGT_STAT_1005_TIME is null  then 0  else AGT_STAT_1005_TIME  end as AGT_STAT_1005_TIME   <!--1005	:교육 -->
+	
+	 from 
+	  ( SELECT 
+	          START_DATE
+	        , EMP_NO, EMP_NM
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1001' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1001_TIME			<!-- 1001	: 대기 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1002' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1002_TIME			<!-- 1002	: 후처리 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1003' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1003_TIME			<!-- 1003	: 이석 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1004' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1004_TIME			<!-- 1004	: 휴식 -->
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1005' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1005_TIME			<!-- 1005	: 교육 -->
+	    FROM TAGENT_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND START_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND START_DATE <![CDATA[<=]]> #{leadEndDate}
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+			  
+	    GROUP BY START_DATE 
+	            , EMP_NO, EMP_NM
+	  ) A   full join 
+	 (   SELECT 
+	         REG_DATE	
+	        , EMP_NO, EMP_NM 
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT  <!-- AGENT_TRANS_COUNT -->
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end) as TOT_IB_AG_TRANS_TIME  <!-- AGENT_TRANS_COUNT -->
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT	<!--  Outbound Count -->
+	        , SUM(case when CALL_TYP_CD	= '1002' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_OUT_TIME	<!-- Outbound TIME -->
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT	<!--  EXTENSION Count -->
+	        , SUM(case when CALL_TYP_CD	= '1003' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_EXT_TIME	<!-- EXTENSION TIME -->
+	    FROM TCALL_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND REG_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND REG_DATE <![CDATA[<=]]> #{leadEndDate}
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+	    group by REG_DATE 
+	            , EMP_NO, EMP_NM 
+	  ) B
+	on a.START_DATE = b.REG_DATE
+	AND A.EMP_NO = B.EMP_NO
+	AND A.EMP_NM = B.EMP_NM
+    </select>
+    
+    <select id="selectAgentStatListMonth" parameterType="com.coretree.defaultconfig.statis.model.AgentStat" resultMap="resultMap">
+	select  
+	      case when a.START_DATE is null then b.REG_DATE else a.START_DATE end as START_DATE  
+	    , case when a.EMP_NO is null  then b.EMP_NO  else a.EMP_NO  end as EMP_NO       
+	    , case when a.EMP_NM is null  then b.EMP_NM  else a.EMP_NM end as EMP_NM        
+	    , case when b.TOT_IB_AG_TRANS_COUNT is null  then 0  else TOT_IB_AG_TRANS_COUNT  end as TOT_IB_AG_TRANS_COUNT     
+	    , case when b.TOT_IB_AG_TRANS_TIME is null  then 0  else TOT_IB_AG_TRANS_TIME  end as TOT_IB_AG_TRANS_TIME     
+	    , case when b.TOT_OUT_COUNT is null  then 0  else TOT_OUT_COUNT  end as TOT_OUT_COUNT     
+	    , case when b.TOT_OUT_TIME is null  then 0  else TOT_OUT_TIME  end as TOT_OUT_TIME    
+	    , case when b.TOT_EXT_COUNT is null  then 0  else TOT_EXT_COUNT  end as TOT_EXT_COUNT     
+	    , case when B.TOT_EXT_TIME is null  then 0  else TOT_EXT_TIME  end as TOT_EXT_TIME     
+	    , case when a.AGT_STAT_1001_TIME is null  then 0  else AGT_STAT_1001_TIME  end as AGT_STAT_1001_TIME    
+	    , case when a.AGT_STAT_1002_TIME is null  then 0  else AGT_STAT_1002_TIME  end as AGT_STAT_1002_TIME   
+	    , case when a.AGT_STAT_1003_TIME is null  then 0  else AGT_STAT_1003_TIME  end as AGT_STAT_1003_TIME    
+	    , case when a.AGT_STAT_1004_TIME is null  then 0  else AGT_STAT_1004_TIME  end as AGT_STAT_1004_TIME   
+	    , case when a.AGT_STAT_1005_TIME is null  then 0  else AGT_STAT_1005_TIME  end as AGT_STAT_1005_TIME   
+	
+	 from 
+	  ( SELECT 
+	           substring(START_DATE from 1 for 6) as START_DATE
+	        , EMP_NO, EMP_NM
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1001' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1001_TIME			 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1002' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1002_TIME			 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1003' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1003_TIME		 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1004' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1004_TIME		 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1005' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1005_TIME		 
+	    FROM TAGENT_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND START_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND (START_DATE <![CDATA[<=]]> #{leadEndDate}  OR START_DATE CONTAINING #{leadEndDate})
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+	    GROUP BY START_DATE 
+	            , EMP_NO, EMP_NM
+	  ) A   full join 
+	 (   SELECT 
+	         	substring(REG_DATE from 1 for 6) as REG_DATE
+	        , EMP_NO, EMP_NM 
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT   
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end) as TOT_IB_AG_TRANS_TIME   
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT
+	        , SUM(case when CALL_TYP_CD	= '1002' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_OUT_TIME	 
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT
+	        , SUM(case when CALL_TYP_CD	= '1003' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_EXT_TIME	
+	    FROM TCALL_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND REG_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND (REG_DATE <![CDATA[<=]]> #{leadEndDate}  OR REG_DATE CONTAINING #{leadEndDate})
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+	    group by REG_DATE 
+	            , EMP_NO, EMP_NM 
+	  ) B
+	on a.START_DATE = b.REG_DATE
+	AND A.EMP_NO = B.EMP_NO
+	AND A.EMP_NM = B.EMP_NM
+    </select>
+    
+     <select id="selectAgentStatListYear" parameterType="com.coretree.defaultconfig.statis.model.AgentStat" resultMap="resultMap">
+	select  
+	      case when a.START_DATE is null then b.REG_DATE else a.START_DATE end as START_DATE  
+	    , case when a.EMP_NO is null  then b.EMP_NO  else a.EMP_NO  end as EMP_NO       
+	    , case when a.EMP_NM is null  then b.EMP_NM  else a.EMP_NM end as EMP_NM        
+	    , case when b.TOT_IB_AG_TRANS_COUNT is null  then 0  else TOT_IB_AG_TRANS_COUNT  end as TOT_IB_AG_TRANS_COUNT     
+	    , case when b.TOT_IB_AG_TRANS_TIME is null  then 0  else TOT_IB_AG_TRANS_TIME  end as TOT_IB_AG_TRANS_TIME     
+	    , case when b.TOT_OUT_COUNT is null  then 0  else TOT_OUT_COUNT  end as TOT_OUT_COUNT     
+	    , case when b.TOT_OUT_TIME is null  then 0  else TOT_OUT_TIME  end as TOT_OUT_TIME    
+	    , case when b.TOT_EXT_COUNT is null  then 0  else TOT_EXT_COUNT  end as TOT_EXT_COUNT     
+	    , case when B.TOT_EXT_TIME is null  then 0  else TOT_EXT_TIME  end as TOT_EXT_TIME     
+	    , case when a.AGT_STAT_1001_TIME is null  then 0  else AGT_STAT_1001_TIME  end as AGT_STAT_1001_TIME    
+	    , case when a.AGT_STAT_1002_TIME is null  then 0  else AGT_STAT_1002_TIME  end as AGT_STAT_1002_TIME   
+	    , case when a.AGT_STAT_1003_TIME is null  then 0  else AGT_STAT_1003_TIME  end as AGT_STAT_1003_TIME    
+	    , case when a.AGT_STAT_1004_TIME is null  then 0  else AGT_STAT_1004_TIME  end as AGT_STAT_1004_TIME   
+	    , case when a.AGT_STAT_1005_TIME is null  then 0  else AGT_STAT_1005_TIME  end as AGT_STAT_1005_TIME   
+	
+	 from 
+	  ( SELECT 
+	           substring(START_DATE from 1 for 4) as START_DATE
+	        , EMP_NO, EMP_NM
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1001' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1001_TIME			 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1002' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1002_TIME			 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1003' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1003_TIME		 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1004' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1004_TIME		 
+	        , SUM( CASE WHEN AGENT_STAT_CD = '1005' THEN AGENT_STAT_SEC ELSE 0 END	) AS AGT_STAT_1005_TIME		 
+	    FROM TAGENT_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND START_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND (START_DATE <![CDATA[<=]]> #{leadEndDate}  OR START_DATE CONTAINING #{leadEndDate})
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+	    GROUP BY START_DATE 
+	            , EMP_NO, EMP_NM
+	  ) A   full join 
+	 (   SELECT 
+	         	substring(REG_DATE from 1 for 4) as REG_DATE
+	        , EMP_NO, EMP_NM 
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT   
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end) as TOT_IB_AG_TRANS_TIME   
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT
+	        , SUM(case when CALL_TYP_CD	= '1002' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_OUT_TIME	 
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT
+	        , SUM(case when CALL_TYP_CD	= '1003' then ( CASE WHEN CALL_STAT_SEC IS NULL THEN 0 ELSE CALL_STAT_SEC END ) else 0 end)	as TOT_EXT_TIME	
+	    FROM TCALL_STAT
+	    WHERE 
+	    	1=1
+	    	<if test="leadStartDate != ''">
+				AND REG_DATE <![CDATA[>=]]> #{leadStartDate}
+			 </if>
+		  	<if test="leadEndDate != ''">
+				AND (REG_DATE <![CDATA[<=]]> #{leadEndDate}  OR REG_DATE CONTAINING #{leadEndDate})
+			 </if>
+			<if test="empNm != ''">
+				AND EMP_NM = #{empNm}
+			 </if>
+	    group by REG_DATE 
+	            , EMP_NO, EMP_NM 
+	  ) B
+	on a.START_DATE = b.REG_DATE
+	AND A.EMP_NO = B.EMP_NO
+	AND A.EMP_NM = B.EMP_NM
+    </select>
+    <select id="selectAgentEmpNmList" parameterType="com.coretree.defaultconfig.statis.model.AgentStat" resultMap="resultMap">
+    	select distinct EMP_NM, EMP_NO from TAGENT_STAT
+    	order by EMP_NM
+    </select>
+</mapper>

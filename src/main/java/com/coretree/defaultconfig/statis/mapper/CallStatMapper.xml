@@ -1,0 +1,330 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.statis.mapper.CallStatMapper">
+
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.statis.model.CallStat">
+        <result property="callId"		column="call_id" />
+        <result property="regDate"		column="reg_date" />
+        <result property="regHms"		column="reg_hms" />
+        <result property="genDirNo"		column="gen_dir_no" />
+        <result property="telNo"		column="tel_no" />
+        <result property="callTypCd"	column="call_typ_cd" />
+		<result property="agentTransYn"		column="agent_trans_yn" />
+		<result property="empNo"		column="emp_no" />
+		<result property="empNm"		column="emp_nm" />
+		<result property="callStatSec"		column="call_stat_sec" />
+		<result property="answer"		column="answer" />
+		
+		<result property="totIbCount"		column="TOT_IB_COUNT" />
+		<result property="totIbAgTransCount"		column="TOT_IB_AG_TRANS_COUNT" />
+		<result property="totCbCount"		column="TOT_CB_COUNT" />
+		<result property="totAbnCount"		column="TOT_ABN_COUNT" />
+		<result property="totOutCount"		column="TOT_OUT_COUNT" />
+		<result property="totExtCount"		column="TOT_EXT_COUNT" />
+		<result property="totResCount"		column="TOT_RES_COUNT" />
+		
+		<result property="startDate"		column="startDate" />
+		<result property="endDate"		column="endDate" />
+		
+    </resultMap>
+	
+    <select id="selectCallStatList" parameterType="com.coretree.defaultconfig.statis.model.CallStat" resultMap="resultMap">
+	select
+	case when a.REG_DATE is null then (SELECT p.RET_VALUE FROM GET_FORMAT_DATE(b.RES_DATE) p ) else (SELECT p.RET_VALUE FROM GET_FORMAT_DATE(a.REG_DATE) p ) end as REG_DATE  <!-- 일자 -->
+    , case when a.REG_HMS is null  then b.RES_HMS  else a.REG_HMS  end as REG_HMS   <!-- 시간 -->
+    , case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end as TOT_IB_COUNT  <!-- 총인입건수 -->
+    , case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end as TOT_IB_AG_TRANS_COUNT   <!-- 상담원 연결건수 -->
+    , case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end as TOT_CB_COUNT      <!-- 콜백건수 -->
+    , ( case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end
+      - case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end 
+      - case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end ) as TOT_ABN_COUNT      <!--  포기건수 = 총인입건수 - 상담원 연결건수 - 콜백건수 -->
+    , case when a.TOT_OUT_COUNT is null then 0 else a.TOT_OUT_COUNT end as TOT_OUT_COUNT    <!-- 아웃바운드 건수 -->
+    , case when TOT_RES_COUNT is null  then 0 else TOT_RES_COUNT end as TOT_RES_COUNT      <!-- 상담예약건수 -->
+    , case when a.TOT_EXT_COUNT is null then 0 else a.TOT_EXT_COUNT end as TOT_EXT_COUNT    <!-- 내선건수 -->
+	, case when TOT_IB_COUNT is null then 0
+     else cast(cast(a.TOT_IB_AG_TRANS_COUNT as FLOAT)/ cast(a.TOT_IB_COUNT as float) * 100 as DECIMAL(5,2)) end || '%' as ANSWER <!-- 응답율 -->
+	, a.GEN_DIR_NO <!-- 대표번호 -->
+	from    
+	  ( SELECT 
+	         REG_DATE
+	          , GEN_DIR_NO	
+	        , substring(REG_HMS from 1 for 2)	as REG_HMS   
+	        , SUM(case when CALL_TYP_CD = '1001' then 1 else 0 end)	as TOT_IB_COUNT                    <!-- Inbound Count -->
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT  <!-- AGENT_TRANS_COUNT -->
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT	<!-- Outbound Count -->
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT	<!-- EXTENSION Count -->
+	    FROM TCALL_STAT
+	    where 
+	    1=1
+		 <if test="startDate != ''">
+			AND REG_DATE <![CDATA[>=]]> #{startDate}
+		 </if>
+		 <if test="endDate != ''">
+			AND REG_DATE <![CDATA[<=]]> #{endDate}
+		 </if>
+	    group by REG_DATE,GEN_DIR_NO, substring(REG_HMS from 1 for 2)
+	  ) a full join 
+	  ( 
+	      select 
+	          case when a1.RES_DATE is null then b1.RES_DATE  else a1.RES_DATE end as RES_DATE  <!-- 일자 -->
+	        , case when a1.RES_HMS is null  then b1.RES_HMS  else a1.RES_HMS  end as RES_HMS   <!-- 시간 -->
+	        , case when a1.TOT_CB_COUNT is null then 0        else a1.TOT_CB_COUNT end as TOT_CB_COUNT  <!--  콜백건수 -->
+	        , case when b1.TOT_RES_COUNT is null then 0       else b1.TOT_RES_COUNT end as TOT_RES_COUNT  <!-- 상담예약건수 -->
+	    from 
+	      ( SELECT 
+	              RES_DATE
+	            , substring(RES_HMS from 1 for 2)	as RES_HMS
+	            , COUNT(*) as TOT_CB_COUNT
+	        FROM TCALLBACK
+	        where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND RES_DATE <![CDATA[<=]]> #{endDate}
+			 </if>		 
+	        group by RES_DATE, substring(RES_HMS from 1 for 2)
+	      ) a1 full join 
+	      ( SELECT 
+	              RES_DATE
+	            , substring(RES_HMS from 1 for 2)	as RES_HMS
+	            , COUNT(*) as TOT_RES_COUNT
+	        FROM TRESERVATION
+	       	where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND RES_DATE <![CDATA[<=]]> #{endDate}
+			 </if>
+	        group by RES_DATE, substring(RES_HMS from 1 for 2)
+	      ) b1
+	    on a1.RES_DATE = b1.RES_DATE
+	    and a1.RES_HMS = b1.RES_HMS
+	  ) b
+	on  a.REG_DATE = b.RES_DATE
+	and a.REG_HMS  = b.RES_HMS
+    </select>
+    
+    <select id="selectCallStatListDay" parameterType="com.coretree.defaultconfig.statis.model.CallStat" resultMap="resultMap">
+		select
+      case when a.REG_DATE is null then b.RES_DATE else a.REG_DATE end as REG_DATE
+    , case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end as TOT_IB_COUNT  
+    , case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end as TOT_IB_AG_TRANS_COUNT  
+    , case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end as TOT_CB_COUNT     
+    , ( case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end
+      - case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end 
+      - case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end ) as TOT_ABN_COUNT    
+    , case when a.TOT_OUT_COUNT is null then 0 else a.TOT_OUT_COUNT end as TOT_OUT_COUNT    
+    , case when a.TOT_EXT_COUNT is null then 0 else a.TOT_EXT_COUNT end as TOT_EXT_COUNT    
+    , case when TOT_RES_COUNT is null  then 0 else TOT_RES_COUNT end as TOT_RES_COUNT      
+	, a.GEN_DIR_NO
+    , case when (TOT_IB_COUNT = 0) then 0 
+     else cast(cast(a.TOT_IB_AG_TRANS_COUNT as FLOAT)/ cast(a.TOT_IB_COUNT as float) * 100 as DECIMAL(5,2)) end || '%' as ANSWER 
+	from    
+	  ( SELECT 
+	         REG_DATE
+	          , GEN_DIR_NO	
+	        , SUM(case when CALL_TYP_CD = '1001' then 1 else 0 end)	as TOT_IB_COUNT               
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT  
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT	
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT	
+	    FROM TCALL_STAT
+	    where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND REG_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND REG_DATE <![CDATA[<=]]> #{endDate}
+			 </if>
+	    group by REG_DATE,GEN_DIR_NO
+	  ) a full join 
+	  ( 
+	      select 
+	          case when a1.RES_DATE is null then b1.RES_DATE  else a1.RES_DATE end as RES_DATE 
+	        , case when a1.TOT_CB_COUNT is null then 0        else a1.TOT_CB_COUNT end as TOT_CB_COUNT
+	        , case when b1.TOT_RES_COUNT is null then 0       else b1.TOT_RES_COUNT end as TOT_RES_COUNT
+	    from 
+	      ( SELECT 
+	              RES_DATE
+	            , COUNT(*) as TOT_CB_COUNT
+	        FROM TCALLBACK
+	        where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND RES_DATE <![CDATA[<=]]> #{endDate}
+			 </if>
+	        group by RES_DATE
+	      ) a1 full join 
+	      ( SELECT 
+	              RES_DATE
+	            , COUNT(*) as TOT_RES_COUNT
+	        FROM TRESERVATION
+	        where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND RES_DATE <![CDATA[<=]]> #{endDate}
+			 </if>
+	        group by RES_DATE 
+	      ) b1
+	    on a1.RES_DATE = b1.RES_DATE
+	  ) b
+	on  a.REG_DATE = b.RES_DATE
+    </select>
+    
+    <select id="selectCallStatListMonth" parameterType="com.coretree.defaultconfig.statis.model.CallStat" resultMap="resultMap">
+    select
+      case when a.REG_DATE is null then b.RES_DATE else a.REG_DATE end as REG_DATE 
+    , case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end as TOT_IB_COUNT  
+    , case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end as TOT_IB_AG_TRANS_COUNT    
+    , case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end as TOT_CB_COUNT      
+    , ( case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end
+      - case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end 
+      - case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end ) as TOT_ABN_COUNT      
+    , case when a.TOT_OUT_COUNT is null then 0 else a.TOT_OUT_COUNT end as TOT_OUT_COUNT   
+    , case when a.TOT_EXT_COUNT is null then 0 else a.TOT_EXT_COUNT end as TOT_EXT_COUNT    
+    , case when TOT_RES_COUNT is null  then 0 else TOT_RES_COUNT end as TOT_RES_COUNT      
+	, a.GEN_DIR_NO 
+    , case when (TOT_IB_COUNT = 0) then 0 
+     else cast(cast(a.TOT_IB_AG_TRANS_COUNT as FLOAT)/ cast(a.TOT_IB_COUNT as float) * 100 as DECIMAL(5,2)) end || '%' as ANSWER 
+	from    
+	  ( SELECT 
+	         substring(REG_DATE from 1 for 6) as REG_DATE
+	          , GEN_DIR_NO	
+	        , SUM(case when CALL_TYP_CD = '1001' then 1 else 0 end)	as TOT_IB_COUNT                  
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT  
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT	
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT	
+	    FROM TCALL_STAT
+     	where 
+	   	1=1
+		 <if test="startDate != ''">
+			AND REG_DATE <![CDATA[>=]]> #{startDate}
+		 </if>
+		 <if test="endDate != ''">
+			AND (REG_DATE <![CDATA[<=]]> #{endDate} OR REG_DATE CONTAINING #{endDate})
+		 </if>
+	    group by  substring(REG_DATE from 1 for 6),GEN_DIR_NO 
+	  ) a full join 
+	  ( 
+	      select 
+	          case when a1.RES_DATE is null then b1.RES_DATE  else a1.RES_DATE end as RES_DATE  
+	        , case when a1.TOT_CB_COUNT is null then 0        else a1.TOT_CB_COUNT end as TOT_CB_COUNT  
+	        , case when b1.TOT_RES_COUNT is null then 0       else b1.TOT_RES_COUNT end as TOT_RES_COUNT  
+	    from 
+	      ( SELECT 
+	              substring(RES_DATE from 1 for 6) as RES_DATE
+	            , COUNT(*) as TOT_CB_COUNT
+	        FROM TCALLBACK
+	      	where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND (RES_DATE <![CDATA[<=]]> #{endDate} OR RES_DATE CONTAINING #{endDate})
+			 </if>
+	        group by  substring(RES_DATE from 1 for 6) 
+	      ) a1 full join 
+	      ( SELECT 
+	              substring(RES_DATE from 1 for 6)  as RES_DATE
+	            , COUNT(*) as TOT_RES_COUNT
+	        FROM TRESERVATION
+	      	where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND (RES_DATE <![CDATA[<=]]> #{endDate} OR RES_DATE CONTAINING #{endDate})
+			 </if>
+	        group by  substring(RES_DATE from 1 for 6) 
+	      ) b1
+	    on a1.RES_DATE = b1.RES_DATE
+	
+	  ) b
+	on  a.REG_DATE = b.RES_DATE
+    </select>
+    
+     <select id="selectCallStatListYear" parameterType="com.coretree.defaultconfig.statis.model.CallStat" resultMap="resultMap">
+    select
+      case when a.REG_DATE is null then b.RES_DATE else a.REG_DATE end as REG_DATE 
+    , case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end as TOT_IB_COUNT  
+    , case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end as TOT_IB_AG_TRANS_COUNT    
+    , case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end as TOT_CB_COUNT      
+    , ( case when a.TOT_IB_COUNT is null then 0      else a.TOT_IB_COUNT end
+      - case when a.TOT_IB_AG_TRANS_COUNT is null then 0 else a.TOT_IB_AG_TRANS_COUNT end 
+      - case when b.TOT_CB_COUNT is null  then 0 else b.TOT_CB_COUNT end ) as TOT_ABN_COUNT      
+    , case when a.TOT_OUT_COUNT is null then 0 else a.TOT_OUT_COUNT end as TOT_OUT_COUNT   
+    , case when a.TOT_EXT_COUNT is null then 0 else a.TOT_EXT_COUNT end as TOT_EXT_COUNT    
+    , case when TOT_RES_COUNT is null  then 0 else TOT_RES_COUNT end as TOT_RES_COUNT      
+	, a.GEN_DIR_NO 
+    , case when (TOT_IB_COUNT = 0) then 0 
+     else cast(cast(a.TOT_IB_AG_TRANS_COUNT as FLOAT)/ cast(a.TOT_IB_COUNT as float) * 100 as DECIMAL(5,2)) end || '%' as ANSWER 
+	from    
+	  ( SELECT 
+	         substring(REG_DATE from 1 for 4) as REG_DATE
+	          , GEN_DIR_NO	
+	        , SUM(case when CALL_TYP_CD = '1001' then 1 else 0 end)	as TOT_IB_COUNT                  
+	        , SUM(case when CALL_TYP_CD = '1001' and AGENT_TRANS_YN = 'Y' then 1 else 0 end) as TOT_IB_AG_TRANS_COUNT  
+	        , SUM(case when CALL_TYP_CD	= '1002' then 1 else 0 end)	as TOT_OUT_COUNT	
+	        , SUM(case when CALL_TYP_CD	= '1003' then 1 else 0 end)	as TOT_EXT_COUNT	
+	    FROM TCALL_STAT
+     	where 
+	   	1=1
+		 <if test="startDate != ''">
+			AND REG_DATE <![CDATA[>=]]> #{startDate}
+		 </if>
+		 <if test="endDate != ''">
+			AND (REG_DATE <![CDATA[<=]]> #{endDate} OR REG_DATE CONTAINING #{endDate})
+		 </if>
+	    group by  substring(REG_DATE from 1 for 4),GEN_DIR_NO 
+	  ) a full join 
+	  ( 
+	      select 
+	          case when a1.RES_DATE is null then b1.RES_DATE  else a1.RES_DATE end as RES_DATE  
+	        , case when a1.TOT_CB_COUNT is null then 0        else a1.TOT_CB_COUNT end as TOT_CB_COUNT  
+	        , case when b1.TOT_RES_COUNT is null then 0       else b1.TOT_RES_COUNT end as TOT_RES_COUNT  
+	    from 
+	      ( SELECT 
+	              substring(RES_DATE from 1 for 4) as RES_DATE
+	            , COUNT(*) as TOT_CB_COUNT
+	        FROM TCALLBACK
+	      	where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND (RES_DATE <![CDATA[<=]]> #{endDate} OR RES_DATE CONTAINING #{endDate})
+			 </if>
+	        group by  substring(RES_DATE from 1 for 4) 
+	      ) a1 full join 
+	      ( SELECT 
+	              substring(RES_DATE from 1 for 4)  as RES_DATE
+	            , COUNT(*) as TOT_RES_COUNT
+	        FROM TRESERVATION
+	      	where 
+	    	1=1
+			 <if test="startDate != ''">
+				AND RES_DATE <![CDATA[>=]]> #{startDate}
+			 </if>
+			 <if test="endDate != ''">
+				AND (RES_DATE <![CDATA[<=]]> #{endDate} OR RES_DATE CONTAINING #{endDate})
+			 </if>
+	        group by  substring(RES_DATE from 1 for 4) 
+	      ) b1
+	    on a1.RES_DATE = b1.RES_DATE
+	
+	  ) b
+	on  a.REG_DATE = b.RES_DATE
+    </select>
+</mapper>

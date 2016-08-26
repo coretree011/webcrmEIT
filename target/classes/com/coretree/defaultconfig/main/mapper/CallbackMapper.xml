@@ -1,0 +1,166 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.main.mapper.CallbackMapper">
+	
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.main.model.Callback">
+        <result property="cbSeq"		column="CB_SEQ" />
+        <result property="resTelNo"			column="RES_TEL_NO" />
+       <result property="resDate"	column="RES_DATE" />
+        <result property="resHms"		column="RES_HMS" />
+        <result property="counDate"		column="COUN_DATE" />
+        <result property="counHms"		column="COUN_HMS" />
+        <result property="counCd"		column="COUN_CD" />
+        <result property="counCdNm"		column="COUN_CDNM" />
+        <result property="extensionNo"		column="EXTENSION_NO" />
+        <result property="empNo"		column="EMP_NO" />
+        <result property="empNm"		column="EMP_NM" />
+        <result property="custNo"		column="CUST_NO" />
+        <result property="genDirNo"		column="GEN_DIR_NO " />
+    </resultMap>
+	
+    <resultMap id="resultMap2" type="com.coretree.defaultconfig.main.model.Callback">
+        <result property="resSeq"		column="RES_SEQ" />
+        <result property="custNo"		column="CUST_NO" />
+        <result property="custNm"		column="CUST_NM" />
+        <result property="resTelNo"			column="RES_TEL_NO" />
+        <result property="resDate"	column="RES_DATE" />
+        <result property="resHms"		column="RES_HMS" />
+        <result property="counDate"		column="COUN_DATE" />
+        <result property="counHms"		column="COUN_HMS" />
+        <result property="counCd"		column="COUN_CD" />
+        <result property="counCdNm"		column="COUN_CDNM" />
+        <result property="extensionNo"		column="EXTENSION_NO" />
+        <result property="empNo"		column="EMP_NO" />
+        <result property="empNm"		column="EMP_NM" />
+        <result property="resNote"		column="RES_NOTE" />
+    </resultMap>
+	
+    <select id="callbackList" parameterType="com.coretree.defaultconfig.main.model.Callback"  resultMap="resultMap">
+    	SELECT
+				  CB_SEQ	                  
+				, RES_TEL_NO		
+				, ( SELECT * FROM GET_FORMAT_DATE(RES_DATE) p )		as RES_DATE	 
+				, ( SELECT * FROM GET_FORMAT_HM(RES_HMS) p )		as RES_HMS	 
+				, ( SELECT * FROM GET_FORMAT_DATE(COUN_DATE) p )	as COUN_DATE	 
+				, ( SELECT * FROM GET_FORMAT_HM(COUN_HMS) p )		as COUN_HMS	 
+				, COUN_CD				
+				, ( SELECT * FROM GET_CODE_NAME('1011', COUN_CD) p ) as  COUN_CDNM	
+				, EXTENSION_NO			
+				, EMP_NO					
+				, EMP_NM				
+				, CUST_NO	
+				, GEN_DIR_NO 			
+		FROM TCALLBACK
+		 WHERE 1=1
+		 <if test="resDate != ''">
+			<![CDATA[
+				AND RES_DATE between #{resDate} and #{resDate2}
+			]]>	
+		 </if>
+		 <if test="empNo != ''">
+		 	AND EMP_NO = #{empNo}
+		 </if>
+		 <if test="counCd != ''">
+		 	AND COUN_CD = #{counCd}
+		 </if>
+		 ORDER BY RES_DATE DESC, RES_HMS DESC
+    </select>
+    
+    <update  id="updateCallback" parameterType="com.coretree.defaultconfig.main.model.Callback">
+    	UPDATE TCALLBACK set 
+                COUN_CD = #{counCd}
+               , COUN_DATE = (SELECT p.RET_VALUE FROM GET_CHAR_DATE(0) p)
+               , COUN_HMS  = (SELECT p.RET_VALUE FROM GET_CHAR_HMS p)
+               , EMP_NO = #{empNo}
+               , EMP_NM = #{empNm}
+               , CUST_NO = #{custNo}
+  		Where CB_SEQ = #{cbSeq}
+
+    </update>
+    
+    <select id="reservationList" parameterType="com.coretree.defaultconfig.main.model.Callback"  resultMap="resultMap2">
+    	select 
+				   RES_SEQ		
+				 , CUST_NO		
+				 , CUST_NM		
+				 , RES_TEL_NO		
+				 , ( SELECT * FROM GET_FORMAT_DATE(RES_DATE) p )	as RES_DATE		
+				 , ( SELECT * FROM GET_FORMAT_HM(RES_HMS) p )	as RES_HMS		
+				 , ( SELECT * FROM GET_FORMAT_DATE(COUN_DATE) p )	as COUN_DATE	
+				 , ( SELECT * FROM GET_FORMAT_HM(COUN_HMS) p )	as COUN_HMS		
+				 , COUN_CD		
+				 , ( SELECT * FROM GET_CODE_NAME('1012', COUN_CD) p ) as  COUN_CDNM	
+				 , EXTENSION_NO	
+				 , EMP_NO		
+				 , EMP_NM		
+				 , RES_NOTE		
+		FROM TRESERVATION
+		 WHERE 1=1
+		 <if test="resDate != ''">
+			<![CDATA[
+				AND RES_DATE between #{resDate} and #{resDate2}
+			]]>	
+		 </if>
+		 <if test="empNo != ''">
+		 	AND EMP_NO = #{empNo}
+		 </if>
+		 <if test="counCd != ''">
+		 	AND COUN_CD = #{counCd}
+		 </if>
+		 ORDER BY RES_DATE DESC, RES_HMS DESC
+    </select>
+    
+    <insert  id="insertReservation" parameterType="com.coretree.defaultconfig.main.model.Customer">
+   		INSERT INTO TRESERVATION( RES_SEQ,
+   											CUST_NO,
+   											CUST_NM, 
+   											RES_TEL_NO, 
+   											RES_DATE,
+   											RES_HMS, 
+   											COUN_CD, 
+   											EMP_NO, 
+   											EMP_NM, 
+   											RES_NOTE) 
+						 	VALUES (	GEN_ID(SEQ_RESERVE,1) ,
+						 					#{custNo},
+						 					#{custNm},
+						 					#{resTelNo},
+						 					#{resDate},
+						 					#{resHms},
+						 					#{counCd},
+						 					#{empNo},
+						 					#{empNm},
+						 					#{resNote})
+    </insert>
+    
+    <update  id="updateReservation" parameterType="com.coretree.defaultconfig.main.model.Callback">
+  		UPDATE TRESERVATION SET  
+                COUN_CD = #{counCd}
+               , COUN_DATE = (SELECT p.RET_VALUE FROM GET_CHAR_DATE(0) p)
+               , COUN_HMS  = (SELECT p.RET_VALUE FROM GET_CHAR_HMS p)
+               , EMP_NO = #{empNo}
+               , EMP_NM = #{empNm}
+  		Where RES_SEQ= #{resSeq}
+    </update>
+
+    <insert id="insTCallback" parameterType="com.coretree.defaultconfig.main.model.Callback">
+    	insert into tcallback (
+    		cb_seq
+    		, res_tel_no
+    		, res_date
+    		, res_hms
+    		, gen_dir_no
+    		, coun_cd
+    	) values (
+    		GEN_ID(SEQ_CALLBACK, 1)
+    		, #{resTelNo}
+    		, #{resDate}
+    		, #{resHms}
+    		, #{genDirNo}
+    		, '1001' 
+    	)
+    </insert>
+    
+    <delete id="delTCallback">
+    	delete from tcallback where cb_seq=#{cdseq}
+    </delete>
+</mapper>

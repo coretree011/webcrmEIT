@@ -1,0 +1,20 @@
+{
+  "groups": [
+    {
+      "name": "fbdb",
+      "type": "com.coretree.defaultconfig.FirebirdSqlConfiguration",
+      "sourceType": "com.coretree.defaultconfig.FirebirdSqlConfiguration"
+    },
+    {
+      "name": "uc",
+      "type": "com.coretree.defaultconfig.azure.WebUcServiceConfig",
+      "sourceType": "com.coretree.defaultconfig.azure.WebUcServiceConfig"
+    }
+  ],
+  "properties": [{
+    "name": "uc.pbxip",
+    "type": "java.lang.String",
+    "sourceType": "com.coretree.defaultconfig.azure.WebUcServiceConfig"
+  }],
+  "hints": []
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.CounsellorMapper">
+
+    <resultMap id="resMap" type="com.coretree.defaultconfig.mapper.Counsellor">
+        <id     property="username"		column="username" />
+        <result property="password"		column="password" />
+        <result property="uname"		column="uname" />
+        <result property="posi"			column="posi" />
+        <result property="tel"			column="tel" />
+        <result property="extension"	column="extension" />
+		<result property="role"			column="role" />
+		<result property="state"		column="state" />
+		<result property="enabled"		column="enabled" />
+    </resultMap>
+    
+    <select id="count" resultType="java.lang.Integer">
+    	select count(a.username)
+			from users a left join users_exts b
+			on a.username=b.username
+			<if test="txt != null">
+				where a.username like #{txt} or a.cellular like #{txt} or b.extension like #{txt}
+			</if>
+    </select>
+    
+    <select id="selectAll" resultMap="resMap">
+    	select first #{rowsperpage} skip ((#{curpage} - 1) * #{rowsperpage})
+			a.username, a.uname, a.posi, a.tel, a.cellular, a.role, a.state, a.enabled, b.extension
+			from users a left join users_exts b
+				on a.username=b.username
+			<if test="txt != null">
+				where a.username like #{txt} or a.cellular like #{txt} or b.extension like #{txt}
+			</if>
+			order by a.uname asc
+    </select>
+
+    <select id="getUserState" resultMap="resMap">
+		select a.username, a.uname, a.posi, a.tel, a.cellular, a.role, a.state, a.enabled, b.extension
+			from users a join users_exts b
+				on a.username=b.username
+			where a.enabled=1
+			order by a.uname asc
+    </select>
+    
+    <select id="add" resultType="java.lang.Void">
+    	{call INS_MEMBER ( 
+    		#{username, mode=IN, jdbcType=VARCHAR},
+    		#{password, mode=IN, jdbcType=VARCHAR},
+    		#{uname, mode=IN, jdbcType=VARCHAR},
+    		#{posi, mode=IN, jdbcType=VARCHAR},
+    		#{tel, mode=IN, jdbcType=VARCHAR},
+    		#{cellular, mode=IN, jdbcType=VARCHAR},
+    		#{extension, mode=IN, jdbcType=VARCHAR}
+		)}
+    </select>
+
+    <select id="chkById" resultType="java.lang.Integer">
+    	select case when count(username) > 0 then 0 else 1 end from users where username=#{username}
+    </select>
+    
+    <select id="del" resultType="java.lang.Void">
+    	{call RMV_MEMBER ( #{username, mode=IN, jdbcType=VARCHAR} )}
+    </select>
+    
+    <select id="modi" resultType="java.lang.Void">
+		{call UDP_MEMBER (
+    		#{username, mode=IN, jdbcType=VARCHAR},
+    		#{password, mode=IN, jdbcType=VARCHAR},
+    		#{uname, mode=IN, jdbcType=VARCHAR},
+    		#{posi, mode=IN, jdbcType=VARCHAR},
+    		#{tel, mode=IN, jdbcType=VARCHAR},
+    		#{cellular, mode=IN, jdbcType=VARCHAR},
+    		#{extension, mode=IN, jdbcType=VARCHAR}
+		)}
+    </select>
+</mapper>

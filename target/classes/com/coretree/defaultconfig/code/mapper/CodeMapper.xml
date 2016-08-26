@@ -1,0 +1,48 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.code.mapper.CodeMapper">
+	
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.code.model.Code">
+        <result property="lcd"		column="LCD" />
+        <result property="scd"			column="SCD" />
+        <result property="scdNm"			column="SCD_NM" />
+        <result property="useYn"			column="USE_YN" />
+        <result property="note"			column="NOTE" />
+    </resultMap>
+	
+    <select id="selectCode" parameterType="com.coretree.defaultconfig.code.model.Code"  resultMap="resultMap">
+    	SELECT  * 
+    	FROM TCODE_SMALL
+    	WHERE 1=1
+    		AND USE_YN = 'Y'
+    	 	<if test="lcd != ''">
+		 		AND LCD = #{lcd}
+ 		 	</if>
+ 		ORDER BY LCD, SCD ASC
+    </select>
+    
+    <delete id="deleteExtension" parameterType="com.coretree.defaultconfig.code.model.Code">
+    	DELETE FROM TCODE_SMALL 
+    	WHERE LCD = '1007' 
+    		AND SCD in
+			<foreach collection="scds" item="scd" open="(" separator="," close=")">
+				 #{scd}
+			</foreach>
+    </delete>
+
+ 	<insert id="insertExtension" parameterType="com.coretree.defaultconfig.code.model.Code">
+ 		INSERT INTO TCODE_SMALL
+ 		(LCD, SCD, SCD_NM, USE_YN, NOTE)
+ 		VALUES
+ 		('1007', #{scd} ,#{scdNm}, 'Y', '')
+ 	</insert>
+ 	
+ 	<update id="updateExtension" parameterType="com.coretree.defaultconfig.code.model.Code">
+ 	UPDATE 
+	  TCODE_SMALL  
+	SET 
+		SCD_NM = #{scdNm}
+	WHERE 
+		 SCD = #{scd}
+		 AND LCD = '1007' 
+ 	</update>
+</mapper>

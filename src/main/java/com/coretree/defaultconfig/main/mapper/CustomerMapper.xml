@@ -1,0 +1,320 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.main.mapper.CustomerMapper">
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.main.model.Customer">
+        <result property="custCd"		column="CUST_CD" />
+        <result property="custCdNm"			column="CUST_CDNM" />
+        <result property="custNo"		column="CUST_NO" />
+        <result property="custNm"		column="CUST_NM" />
+        <result property="tel1No"		column="TEL1_NO" />
+        <result property="tel2No"		column="TEL2_NO" />
+        <result property="tel3No"		column="TEL3_NO" />
+        <result property="faxNo"	column="FAX_NO" />
+        <result property="addr"		column="ADDR" />
+        <result property="emailId"		column="EMAILID" />
+        <result property="custNote"		column="CUST_NOTE" />
+        <result property="gradeCd"		column="GRADE_CD" />
+        <result property="gradeNm"		column="GRADE_NM" />
+        <result property="custTypCd"		column="CUST_TYP_CD" />
+        <result property="custTypNm"		column="CUST_TYP_NM" />
+        <result property="recogTypCd"		column="RECOGNITION_TYP_CD" />
+        <result property="recogTypNm"		column="RECOGNITION_TYP_NM" />
+        <result property="sexCd"		column="SEX_CD" />
+        <result property="sexNm"		column="SEX_NM" />
+        <result property="birthDate"		column="BIRTH_DATE" />
+        <result property="coRegNo"		column="CO_REG_NO" />
+        <result property="lastCounDate"		column="LAST_COUN_DATE" />
+        <result property="regDate"		column="REG_DATE" />
+         <result property="outValue"		column="outValue" />
+    </resultMap>
+	
+      <select id="selectCustomerList" parameterType="com.coretree.defaultconfig.main.model.Customer"  resultMap="resultMap">
+		SELECT FIRST 30 CUST_CD,
+			      (SELECT * FROM GET_CODE_NAME('1008',CUST_CD) p) as CUST_CDNM,
+			      CUST_NO,
+			      CUST_NM,
+			      TEL1_NO,
+			      TEL2_NO,
+			      TEL3_NO,
+			      FAX_NO,
+			      case when char_length( ADDR ) >= 20 then substring( ADDR from 1 for 20) || '...' else ADDR end AS ADDR,
+			      case when char_length( EMAILID ) >= 20 then substring( EMAILID from 1 for 20) || '...' else EMAILID end AS EMAILID,
+			      case when char_length( CUST_NOTE ) >= 20 then substring( CUST_NOTE from 1 for 20) || '...' else CUST_NOTE end AS CUST_NOTE,
+			      GRADE_CD,
+			      (SELECT * FROM GET_CODE_NAME('1013',GRADE_CD) p) as GRADE_NM,
+			      CUST_TYP_CD,
+			      (SELECT * FROM GET_CODE_NAME('1014',CUST_TYP_CD) p) as CUST_TYP_NM,
+			      RECOGNITION_TYP_CD, 
+			      (SELECT * FROM GET_CODE_NAME('1015',RECOGNITION_TYP_CD) p) as RECOGNITION_TYP_NM,
+			      SEX_CD, 
+			      (SELECT * FROM GET_CODE_NAME('1016',SEX_CD) p) as SEX_NM,
+			      ( SELECT * FROM GET_FORMAT_DATE(BIRTH_DATE) p ) as BIRTH_DATE, 
+			      ( SELECT * FROM GET_FORMAT_CO_REG_NO(CO_REG_NO) p ) as CO_REG_NO,
+			      ( SELECT * FROM GET_FORMAT_DATE(REG_DATE) p ) as REG_DATE,
+			      ( SELECT * FROM GET_FORMAT_DATE(LAST_COUN_DATE) p ) as LAST_COUN_DATE
+		 FROM TCUSTOMER
+		 where 1=1
+ 		  <if test="telNo != ''">
+		 	AND (TEL1_NO STARTING WITH #{telNo} or TEL2_NO STARTING WITH #{telNo} or TEL3_NO  STARTING WITH #{telNo} )
+ 		 </if>
+		 <if test="custNm != '' ">
+		 	AND   CUST_NM STARTING WITH #{custNm}
+		 </if>
+		 <if test="coRegNo != '' ">
+		 	AND CO_REG_NO = #{coRegNo}
+		 </if>  
+		 <if test="sexCd != '' ">
+		 	AND SEX_CD = #{sexCd}
+		 </if>  
+		 <if test="regDate != ''">
+			<![CDATA[
+				AND REG_DATE between #{regDate} and #{regDate2}
+			]]>	
+		 </if>
+		 <if test="lastCounDate != ''">
+			<![CDATA[
+				AND LAST_COUN_DATE between #{lastCounDate} and #{lastCounDate2}
+			]]>	
+		 </if>
+		 <if test="gradeCd != '' ">
+		 	AND GRADE_CD = #{gradeCd}
+		 </if>  
+		 <if test="custTypCd != '' ">
+		 	AND CUST_TYP_CD = #{custTypCd}
+		 </if>  
+		 <if test="recogTypCd != '' ">
+		 	AND RECOGNITION_TYP_CD = #{recogTypCd}
+		 </if>  
+    </select>
+	
+    <select id="selectCustomerListExcel" parameterType="com.coretree.defaultconfig.main.model.Customer"  resultMap="resultMap">
+		SELECT CUST_CD,
+			      (SELECT * FROM GET_CODE_NAME('1008',CUST_CD) p) as CUST_CDNM,
+			      CUST_NO,
+			      CUST_NM,
+			      TEL1_NO,
+			      TEL2_NO,
+			      TEL3_NO,
+			      FAX_NO,
+			      ADDR,
+			      EMAILID,
+			      CUST_NOTE,
+			      GRADE_CD,
+			      (SELECT * FROM GET_CODE_NAME('1013',GRADE_CD) p) as GRADE_NM,
+			      CUST_TYP_CD,
+			      (SELECT * FROM GET_CODE_NAME('1014',CUST_TYP_CD) p) as CUST_TYP_NM,
+			      RECOGNITION_TYP_CD, 
+			      (SELECT * FROM GET_CODE_NAME('1015',RECOGNITION_TYP_CD) p) as RECOGNITION_TYP_NM,
+			      SEX_CD, 
+			      (SELECT * FROM GET_CODE_NAME('1016',SEX_CD) p) as SEX_NM,
+			      ( SELECT * FROM GET_FORMAT_DATE(BIRTH_DATE) p ) as BIRTH_DATE, 
+			      ( SELECT * FROM GET_FORMAT_CO_REG_NO(CO_REG_NO) p ) as CO_REG_NO,
+			      ( SELECT * FROM GET_FORMAT_DATE(REG_DATE) p ) as REG_DATE,
+			      ( SELECT * FROM GET_FORMAT_DATE(LAST_COUN_DATE) p ) as LAST_COUN_DATE
+		 FROM TCUSTOMER
+		 where 1=1
+ 		  <if test="telNo != ''">
+		 	AND (TEL1_NO STARTING WITH #{telNo} or TEL2_NO STARTING WITH #{telNo} or TEL3_NO  STARTING WITH #{telNo} )
+ 		 </if>
+		 <if test="custNm != '' ">
+		 	AND   CUST_NM STARTING WITH #{custNm}
+		 </if>
+		 <if test="custNo != '' ">
+		 	AND CUST_NO = #{custNo}
+		 </if>  
+		 <if test="coRegNo != '' ">
+		 	AND CO_REG_NO = #{coRegNo}
+		 </if>  
+		 <if test="sexCd != '' ">
+		 	AND SEX_CD = #{sexCd}
+		 </if>  
+		 <if test="regDate != ''">
+			<![CDATA[
+				AND REG_DATE between #{regDate} and #{regDate2}
+			]]>	
+		 </if>
+		 <if test="lastCounDate != ''">
+			<![CDATA[
+				AND LAST_COUN_DATE between #{lastCounDate} and #{lastCounDate2}
+			]]>	
+		 </if>
+		 <if test="gradeCd != '' ">
+		 	AND GRADE_CD = #{gradeCd}
+		 </if>  
+		 <if test="custTypCd != '' ">
+		 	AND CUST_TYP_CD = #{custTypCd}
+		 </if>  
+		 <if test="recogTypCd != '' ">
+		 	AND RECOGNITION_TYP_CD = #{recogTypCd}
+		 </if>  
+    </select>
+    
+    <select id="selectCustomerOne" parameterType="com.coretree.defaultconfig.main.model.Customer"  resultMap="resultMap">
+		SELECT CUST_CD,
+			      (SELECT * FROM GET_CODE_NAME('1008',CUST_CD) p) as CUST_CDNM,
+			      CUST_NO,
+			      CUST_NM,
+			      TEL1_NO,
+			      TEL2_NO,
+			      TEL3_NO,
+			      FAX_NO,
+			      ADDR,
+			      EMAILID,
+			      CUST_NOTE,
+			      GRADE_CD,
+			      (SELECT * FROM GET_CODE_NAME('1013',GRADE_CD) p) as GRADE_NM,
+			      CUST_TYP_CD,
+			      (SELECT * FROM GET_CODE_NAME('1014',CUST_TYP_CD) p) as CUST_TYP_NM,
+			      RECOGNITION_TYP_CD, 
+			      (SELECT * FROM GET_CODE_NAME('1015',RECOGNITION_TYP_CD) p) as RECOGNITION_TYP_NM,
+			      SEX_CD, 
+			      (SELECT * FROM GET_CODE_NAME('1016',SEX_CD) p) as SEX_NM,
+			      ( SELECT * FROM GET_FORMAT_DATE(BIRTH_DATE) p ) as BIRTH_DATE, 
+			      ( SELECT * FROM GET_FORMAT_CO_REG_NO(CO_REG_NO) p ) as CO_REG_NO,
+			      ( SELECT * FROM GET_FORMAT_DATE(REG_DATE) p ) as REG_DATE,
+			      ( SELECT * FROM GET_FORMAT_DATE(LAST_COUN_DATE) p ) as LAST_COUN_DATE
+		 FROM TCUSTOMER
+		 where CUST_NO = #{custNo}
+    </select>
+    
+    <select id="selectCustomerCustNo" parameterType="com.coretree.defaultconfig.main.model.Customer" resultType="java.lang.String">
+		SELECT GEN_ID(SEQ_CUST_NO,0) FROM rdb$database
+    </select>
+    
+    <select id="selectExitCustomer" parameterType="com.coretree.defaultconfig.main.model.Customer" resultType="java.lang.String">
+		SELECT p.V_OUT_VALUE As existCode
+		FROM GET_TCUSTOMER_EXIST(#{custCd}, #{custNo}, #{custNm}, #{tel1No}, #{tel2No}, #{tel3No}) p
+    </select>
+    
+    <select id="selectExistCnt1001" parameterType="com.coretree.defaultconfig.main.model.Customer" resultType="com.coretree.defaultconfig.main.model.Customer">
+	     SELECT count(*) as existCnt
+	     FROM TCUSTOMER
+	     WHERE CUST_CD = '1001'
+	     AND	TEL1_NO = #{tel1No}
+	     AND CUST_NM = #{custNm}
+    </select>
+    
+    <select id="selectExistCnt1002" parameterType="com.coretree.defaultconfig.main.model.Customer" resultType="com.coretree.defaultconfig.main.model.Customer">
+	     SELECT count(*) as existCnt
+	     FROM TCUSTOMER
+	     WHERE CUST_NO = #{custNo}
+	     AND CUST_CD = '1002'
+    </select>
+    
+    <insert id="insertCustomer" parameterType="com.coretree.defaultconfig.main.model.Customer" >
+	    INSERT INTO TCUSTOMER
+		(CUST_CD, 
+		 CUST_NO, 
+		 CUST_NM, 
+		 TEL1_NO, 
+		 TEL2_NO, 
+		 TEL3_NO, 
+		 EMAILID, 
+		 FAX_NO, 
+		 ADDR, 
+		 CUST_NOTE,
+		 REG_DATE,
+		 GRADE_CD, 
+		 CUST_TYP_CD, 
+		 RECOGNITION_TYP_CD, 
+		 SEX_CD, 
+		 BIRTH_DATE, 
+		 CO_REG_NO) 
+		VALUES 
+		(#{custCd}, 
+		 GEN_ID(SEQ_CUST_NO,1) ,
+		 #{custNm}, 
+		 #{tel1No}, 
+		 #{tel2No}, 
+		 #{tel3No}, 
+		 #{emailId}, 
+		 #{faxNo}, 
+		 #{addr}, 
+		 #{custNote},
+		 (SELECT p.RET_VALUE FROM GET_CHAR_DATE(0) p),
+		 #{gradeCd}, 
+		 #{custTypCd}, 
+		 #{recogTypCd}, 
+		 #{sexCd}, 
+		 #{birthDate}, 
+		 #{coRegNo}, 
+		 )
+	</insert>
+    
+    <insert id="insertCustomer2" parameterType="com.coretree.defaultconfig.main.model.Customer" >
+	    INSERT INTO TCUSTOMER
+		(CUST_CD, CUST_NO, CUST_NM, TEL1_NO, TEL2_NO, TEL3_NO, EMAILID, FAX_NO, ADDR, CUST_NOTE, REG_DATE) 
+		VALUES 
+		(#{custCd},#{custNo}, #{custNm}, #{tel1No}, #{tel2No}, #{tel3No}, #{emailId}, #{faxNo}, #{addr}, #{custNote},(SELECT p.RET_VALUE FROM GET_CHAR_DATE(0) p))
+	</insert>
+	
+     <update  id="updateCustomer" parameterType="com.coretree.defaultconfig.main.model.Customer">
+    	UPDATE TCUSTOMER
+    	SET ADDR = #{addr},
+    		  TEL2_NO = #{tel2No},
+    		  TEL3_NO = #{tel3No},
+    		  EMAILID = #{emailId},
+    		  CUST_NOTE = #{custNote},
+    		  CUST_NM = #{custNm},
+			 GRADE_CD = #{gradeCd}, 
+			 CUST_TYP_CD = #{custTypCd}, 
+			 RECOGNITION_TYP_CD = #{recogTypCd}, 
+			 SEX_CD = #{sexCd}, 
+			 BIRTH_DATE = #{birthDate}, 
+			 CO_REG_NO = #{coRegNo}
+        WHERE CUST_NO = #{custNo}
+    </update>
+    
+	<delete  id="deleteCustomer" parameterType="com.coretree.defaultconfig.main.model.Customer" >
+		DELETE FROM TCUSTOMER
+		WHERE CUST_NO in
+		<foreach collection="custNos" item="custNo" open="(" separator="," close=")">
+			 #{custNo}
+		</foreach>
+	</delete>
+	
+     <delete  id="deleteCustomerOne" parameterType="com.coretree.defaultconfig.main.model.Customer">
+    	DELETE FROM TCUSTOMER
+        WHERE CUST_NO = #{custNo}
+    </delete>
+	
+	<!-- 고객정보선택(POPUP) - 송은미 -->
+    <select id="selectCustomer" parameterType="com.coretree.defaultconfig.main.model.Customer"  resultMap="resultMap">
+		SELECT FIRST 2000 CUST_CD,
+		      (SELECT * FROM GET_CODE_NAME('1008',CUST_CD) p) as CUST_CDNM,
+		      CUST_NO,
+		      CUST_NM,
+		      TEL1_NO,
+		      TEL2_NO,
+		      TEL3_NO,
+		      FAX_NO,
+		      ADDR,
+		      EMAILID,
+		      CUST_NOTE
+		 FROM TCUSTOMER
+		 where 1=1
+    </select>
+    
+    <select id="excelData" resultType="java.lang.String">
+    	SELECT p.V_OUT_VALUE as outValue
+    	FROM GET_TCUSTOMER_EXIST(#{custCd},#{custNo}, #{custNm},#{tel1No}, #{tel2No},#{tel3No}) p
+    </select>
+    
+     <insert id="insertCustomer3" parameterType="Map" >
+	    INSERT INTO TCUSTOMER
+		(CUST_CD, CUST_NO, CUST_NM, TEL1_NO, TEL2_NO, TEL3_NO, EMAILID, FAX_NO, ADDR, CUST_NOTE, REG_DATE) 
+		VALUES 
+		(#{custCd}, GEN_ID(SEQ_CUST_NO,1) , #{custNm}, #{tel1No}, #{tel2No}, #{tel3No}, #{emailId}, #{faxNo}, #{addr}, #{custNote},(SELECT p.RET_VALUE FROM GET_CHAR_DATE(0) p))
+	</insert>
+    
+    <insert id="insertCustomer4"  parameterType="Map">
+	    INSERT INTO TCUSTOMER
+		(CUST_CD, CUST_NO, CUST_NM, TEL1_NO, TEL2_NO, TEL3_NO, EMAILID, FAX_NO, ADDR, CUST_NOTE, REG_DATE) 
+		VALUES 
+		(#{custCd},#{custNo}, #{custNm}, #{tel1No}, #{tel2No}, #{tel3No}, #{emailId}, #{faxNo}, #{addr}, #{custNote},(SELECT p.RET_VALUE FROM GET_CHAR_DATE(0) p))
+	</insert>
+	
+	 <select id="selectCustomerCustNo2" resultType="java.lang.String">
+		SELECT GEN_ID(SEQ_CUST_NO,0) FROM rdb$database
+    </select>
+	
+</mapper>

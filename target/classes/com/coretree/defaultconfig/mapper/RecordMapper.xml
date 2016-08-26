@@ -1,0 +1,49 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.RecordMapper">
+
+    <resultMap id="recordMap" type="com.coretree.defaultconfig.mapper.Record">
+        <id     property="idx"    		column="idx" />
+        <result property="ext"			column="ext" />
+        <result property="extension"   	column="extension" />
+        <result property="peernum"     	column="peernum" />
+        <result property="filename"     column="filename" />
+        <result property="regdate"      column="regdate" />
+    </resultMap>
+    
+    <select id="count" resultType="java.lang.Long">
+    	select count(idx) from recinfo where regdate=current_timestamp
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="recordMap">
+    	select first #{rowsperpage} skip ((#{curpage} - 1) * #{rowsperpage})
+			idx, ext, extension, peernum, filename, regdate
+			from recinfo
+			where cast(regdate as date)=cast(current_timestamp as date)
+			order by regdate desc
+    </select>
+    
+    <select id="selectByIdx" resultMap="recordMap">
+    	select idx, ext, extension, peernum, filename, regdate
+			from recinfo
+			where idx=#{idx}
+			order by regdate desc
+    </select>
+    
+    <select id="selectByTxt" resultMap="recordMap">
+    	select first idx, ext, extension, peernum, filename, regdate
+			from recinfo
+			where ext like #{txt} or peernum like #{txt} or filename like #{txt}
+			order by regdate desc
+    </select>
+    
+    <select id="del">
+		delete from recinfo where idx=#{idx}
+    </select>
+
+    <select id="delAll" parameterType="java.util.List">
+		delete from recinfo where
+		<foreach collection="list" item="item" separator=",">
+			 idx=#{item.idx}
+		</foreach>
+    </select>    
+</mapper>

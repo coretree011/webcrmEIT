@@ -1,0 +1,56 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.setting.mapper.SmsCategoryMapper">
+
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.setting.model.SmsCategory">
+        <result property="cateCd"		column="CATE_CD" />
+        <result property="cateNm"		column="CATE_NM" />
+        <result property="cateComment"		column="CATE_COMMENT" />
+    </resultMap>
+	
+    <select id="selectSmsList" resultMap="resultMap">
+		SELECT 
+		  CATE_CD,
+		  CATE_NM,
+		  CATE_COMMENT
+		FROM 
+		  TSMS_CATEGORY
+		ORDER BY CATE_CD
+    </select>
+    
+    <select id="maxSms" resultMap="resultMap">
+		SELECT MAX(CATE_CD) as CATE_CD FROM TSMS_CATEGORY
+    </select>
+    
+   <select id="selectSmsOne" parameterType="com.coretree.defaultconfig.setting.model.SmsCategory" resultMap="resultMap">
+		SELECT 
+		  CATE_CD,
+		  CATE_NM,
+		  replace (CATE_COMMENT,  '{}', #{customName}) AS CATE_COMMENT
+		FROM 
+		  TSMS_CATEGORY
+		 WHERE CATE_CD = #{cateCd}
+    </select>
+    
+    <insert id="insertSms">
+    	INSERT INTO TSMS_CATEGORY(CATE_CD, CATE_NM, CATE_COMMENT) 
+		VALUES (#{cateCd}, #{cateNm}, #{cateComment})
+    </insert>
+    
+    <delete id="deleteSms">
+        delete from TSMS_CATEGORY 
+      	WHERE CATE_CD in
+		<foreach collection="cateCds" item="cateCd" open="(" separator="," close=")">
+			#{cateCd}
+		</foreach>
+    </delete>
+    
+    <update id="updateSms" parameterType="com.coretree.defaultconfig.setting.model.SmsCategory" >
+	UPDATE 
+	  TSMS_CATEGORY  
+	SET 
+	  CATE_NM = #{cateNm},
+	  CATE_COMMENT = #{cateComment}
+	WHERE 
+		CATE_CD = #{cateCd}
+    </update>
+</mapper>

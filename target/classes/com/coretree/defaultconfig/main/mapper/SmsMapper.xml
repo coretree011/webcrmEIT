@@ -1,0 +1,94 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.main.mapper.SmsMapper">
+	
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.main.model.Sms">
+        <result property="smsSendSeq"		column="SMS_SEND_SEQ" />
+        <result property="custNo"			column="CUST_NO" />
+        <result property="custNm"			column="CUST_NM" />
+        <result property="sendTelNo"			column="SEND_TEL_NO" />
+        <result property="sendTypCd"			column="SEND_TYPE_CD" />
+        <result property="sendTypCdNm"			column="SEND_TYPE_CDNM" />
+        <result property="cateCd"			column="CATE_CD" />
+        <result property="cateCdNm"			column="CATE_CDNM" />
+        <result property="sendResDate"			column="SEND_RES_DATE" />
+        <result property="sendResHms"			column="SEND_RES_HMS" />
+        <result property="sendDate"			column="SEND_DATE" />
+        <result property="sendHms"			column="SEND_HMS" />
+        <result property="sendCd"		column="SEND_CD" />
+        <result property="sendCdNm"		column="SEND_CDNM" />
+        <result property="empNo"		column="EMP_NO" />
+        <result property="empNm"		column="EMP_NM" />
+        <result property="sendComment"		column="SEND_COMMENT" />
+    </resultMap>
+	
+    <select id="selectSms" parameterType="com.coretree.defaultconfig.main.model.Sms"  resultMap="resultMap">
+    	SELECT
+				  SMS_SEND_SEQ	
+				 , CUST_NO		
+				 , CUST_NM		
+				 , SEND_TEL_NO	
+				 , SEND_TYPE_CD	
+				 , ( SELECT * FROM GET_CODE_NAME('1004', SEND_TYPE_CD) p ) as  SEND_TYPE_CDNM	
+				 , CATE_CD		
+				 , ( SELECT * FROM GET_CODE_NAME('1003', CATE_CD) p ) as  CATE_CDNM		
+				 , ( SELECT * FROM GET_FORMAT_DATE(RESERVE_DATE) p )	as SEND_RES_DATE	
+				 , ( SELECT * FROM GET_FORMAT_HM(RESERVE_HMS) p )	as SEND_RES_HMS	
+				 , ( SELECT * FROM GET_FORMAT_DATE(SEND_DATE) p )	as SEND_DATE		
+				 , ( SELECT * FROM GET_FORMAT_HM(SEND_HMS) p )	as SEND_HMS		
+				 , SEND_CD		
+				 , ( SELECT * FROM GET_CODE_NAME('1003', SEND_CD) p ) as  SEND_CDNM		
+				 , EMP_NO		
+				 , EMP_NM		
+				 , SEND_COMMENT	
+		FROM TSMS_SENDING
+		WHERE 1=1
+		 <if test="sendDate != ''">
+    	<![CDATA[
+		 	AND RESERVE_DATE  between #{sendDate} and #{sendDate2}
+		]]>
+ 		 </if>
+		 <if test="sendTypCd != ''">
+		 	AND SEND_TYPE_CD = #{sendTypCd}
+ 		 </if>
+		 <if test="empNo != ''">
+		 	AND EMP_NO = #{empNo}
+ 		 </if>
+		 <if test="custNo != ''">
+		 	AND CUST_NO = #{custNo}
+ 		 </if>
+		 <if test="custNo == ''">
+		 	AND CUST_NO = '9999999'
+ 		 </if>
+ 		 ORDER BY SEND_RES_DATE DESC, SEND_RES_HMS DESC
+    </select>
+    
+    <insert  id="insertSms" parameterType="com.coretree.defaultconfig.main.model.Sms">
+    	insert into TSMS_SENDING 
+	    	( SMS_SEND_SEQ,
+	    	  CUST_NO,
+	    	  CUST_NM,
+	    	  SEND_TEL_NO,
+	    	  SEND_TYPE_CD,
+	    	  CATE_CD,
+	    	  RESERVE_DATE,
+	          RESERVE_HMS, 
+	          SEND_CD, 
+	          EMP_NO, 
+	          EMP_NM, 
+	          SEND_COMMENT) 
+		 values( GEN_ID(SEQ_SMS_SEND,1)  ,
+		 			#{custNo},
+		 			#{custNm},
+		 			#{sendTelNo},
+		 			#{cateCd},
+		 			#{sendTypCd},
+		 			#{sendResDate},
+		 			#{sendResHms},
+		 			#{sendCd},
+		 			#{empNo},
+		 			#{empNm},
+		 			#{sendComment});
+    	
+    </insert>
+
+</mapper>

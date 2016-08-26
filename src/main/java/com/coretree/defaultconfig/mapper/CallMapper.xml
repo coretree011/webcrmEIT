@@ -1,0 +1,101 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.CallMapper">
+
+    <resultMap id="callMap" type="com.coretree.defaultconfig.mapper.Call">
+        <id     property="idx"    		column="idx" />
+        <result property="custs_idx" 	column="custs_idx" />
+        <result property="cust_tel"     column="cust_tel" />
+        <result property="startdate"    column="startdate" />
+        <result property="enddate"    	column="enddate" />
+        <result property="memo"      	column="memo" />
+        <result property="status"      	column="status" />
+        <result property="statustxt"    column="statustxt" />
+        <result property="direct"      	column="direct" />
+        <result property="username"     column="username" />
+    </resultMap>
+    
+    <select id="count" resultType="java.lang.Long">
+    	select count(a.idx)
+			from calls a left join customers b
+				on a.custs_idx=b.idx
+			where 1=1 and a.username=#{username}
+			<if test="sdate != null and edate != null">
+				and cast(a.regdate as date) between cast(#{sdate} as date) and cast(#{edate} as date)
+			</if>
+			<if test="sdate == null or edate == null">
+				and cast(a.regdate as date)=current_date
+			</if>
+			<if test="txt != null">
+				and (b.uname like #{txt} or b.cellular like #{txt} or b.tel like #{txt})
+			</if>
+    </select>
+    
+    <select id="selectAll" resultMap="callMap">
+    	select first #{rowsperpage} skip ((#{curpage} - 1) * #{rowsperpage})
+			a.idx
+			, iif(b.uname is null, '-', b.uname) as cust_name
+			, a.custs_idx, a.direction, a.cust_tel, a.startdate, a.enddate, a.memo, a.regdate
+			, iif(datediff(second from a.startdate to a.enddate) is null, 0, datediff(second from a.startdate to a.enddate)) diff
+			, case when a.status=112 then '부재중' else '완료' end statustxt
+			from calls a left join customers b
+				on a.custs_idx=b.idx
+			where 1=1 and a.username=#{username}
+			<if test="sdate != null and edate != null">
+				and cast(a.regdate as date) between cast(#{sdate} as date) and cast(#{edate} as date)
+			</if>
+			<if test="sdate == null or edate == null">
+				and cast(a.regdate as date)=current_date
+			</if>
+			<if test="txt != null">
+				and (b.uname like #{txt} or b.cellular like #{txt} or b.tel like #{txt})
+			</if>
+			order by a.regdate desc
+    </select>
+    
+    <select id="selectByIdx" resultMap="callMap">
+    	select
+			idx
+			, (select uname from customers where idx=a.custs_idx) as cust_name
+			, custs_idx, direction, cust_tel, startdate, enddate, memo, regdate
+			, iif(datediff(second from startdate to enddate) is null, 0, datediff(second from startdate to enddate)) diff
+			, status
+			from calls
+			where idx=#{idx}
+			order by regdate desc
+    </select>
+    
+    <select id="selectByTxt" resultMap="callMap">
+    	select first a.idx, b.uname, a.direction, a.cust_tel, a.startdate, a.enddate, a.memo, a.regdate
+    		, iif(datediff(second from a.startdate to a.enddate) is null, 0, datediff(second from a.startdate to a.enddate)) diff
+    		, a.status 
+			from calls a join customers b
+				on a.idx=b.customers_idx
+			where a.title like #{txt} or b.uname like #{txt}
+			order by regdate desc
+    </select>
+    
+    <insert id="add" useGeneratedKeys="true" keyProperty="idx" keyColumn="idx">
+    	insert into calls
+    		(direction, cust_tel, status, username)
+    		values
+    		(#{direct}, #{cust_tel}, #{status}, #{username})
+    </insert>
+    
+    <update id="modiStatus">
+    	update calls set status=#{status}, startdate=#{startdate}, enddate=#{enddate}
+    	where idx=#{idx}
+    </update>
+    
+    <update id="modiEnd">
+    	update calls set enddate=#{enddate}
+    	where idx=#{idx}
+    </update>
+    
+    <delete id="del">
+		delete from calls where idx=#{idx}
+    </delete>
+    
+    <update id="memo">
+    	update calls set memo=#{memo} where idx=#{idx}
+    </update>
+</mapper>

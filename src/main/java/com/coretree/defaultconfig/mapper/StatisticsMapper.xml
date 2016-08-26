@@ -1,0 +1,31 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.StatisticsMapper">
+
+    <resultMap id="Map" type="com.coretree.defaultconfig.mapper.Cdr">
+        <id     property="idx"						column="idx" />
+        <result property="username"					column="username" />
+        <result property="office_name"   			column="office_name" />
+        <result property="startdate"     			column="startdate" />
+      	<result property="enddate"     				column="enddate" />
+        <result property="caller"      				column="caller" />
+        <result property="caller_type"      		column="caller_type" />
+        <result property="caller_ipn_number"      	column="caller_ipn_number" />
+        <result property="caller_group_code"      	column="caller_group_code" />
+        <result property="caller_group_name"      	column="caller_group_name" />
+        <result property="caller_human_name"      	column="caller_human_name" />
+        <result property="callee"      				column="callee" />
+        <result property="callee_type"      		column="callee_type" />
+        <result property="callee_ipn_number"      	column="callee_ipn_number" />
+        <result property="callee_group_code"      	column="callee_group_code" />
+        <result property="callee_group_name"      	column="callee_group_name" />
+        <result property="callee_human_name"      	column="callee_human_name" />
+        <result property="result"      				column="result" />
+        <result property="seq"      				column="seq" />
+        <result property="tsecs"      				column="tsecs" />
+    </resultMap>
+    
+    <select id="getAll" resultMap="Map" statementType="CALLABLE">
+    	{call GET_CDR_LIST_BY_DATE2(#{sdate, mode=IN, jdbcType=VARCHAR}, #{edate, mode=IN, jdbcType=VARCHAR}, #{username, mode=IN, jdbcType=VARCHAR})}
+    </select>
+    
+</mapper>

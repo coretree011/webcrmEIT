@@ -1,0 +1,56 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.main.mapper.IvrMapper">
+	
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.main.model.Ivr">
+        <result property="cb_seq"			column="cb_seq" />
+        <result property="res_tel_no"		column="res_tel_no" />
+        <result property="res_date"			column="res_date" />
+        <result property="res_hms"			column="res_hms" />
+        <result property="coun_date"		column="coun_date" />
+        <result property="coun_hms"			column="coun_hms" />
+        <result property="coun_cd"			column="coun_cd" />
+        <result property="extension_no"		column="extension_no" />
+        <result property="emp_no"			column="emp_no" />
+        <result property="emp_nm"			column="emp_nm" />
+        <result property="cust_no"			column="cust_no" />
+        <result property="gen_dir_no"		column="gen_dir_no" />
+    </resultMap>
+	
+    <select id="selectIvr" parameterType="com.coretree.defaultconfig.main.model.Ivr"  resultMap="resultMap">
+    	select * from tcallback
+    </select>
+    
+    <insert  id="insertIvr" parameterType="com.coretree.defaultconfig.main.model.Ivr">
+    	insert into (
+    		cb_seq
+    		, res_tel_no
+    		, res_date
+    		, res_hms
+    		, coun_date
+    		, coun_hms
+    		, coun_cd
+    		, extension_no
+    		, emp_no
+    		, emp_nm
+    		, cust_no
+    		, gen_dir_no
+    	) values (
+    		#{cb_seq}
+    		, #{res_tel_no}
+    		, #{res_date}
+    		, #{res_hms}
+    		, #{coun_date}
+    		, #{coun_hms}
+    		, #{coun_cd}
+    		, #{extension_no}
+    		, #{emp_no}
+    		, #{emp_nm}
+    		, #{cust_no}
+    		, #{gen_dir_no} 
+    	)
+    </insert>
+    
+    <delete id="delIvr">
+    	delete from tcallback where cb_seq=#{cb_seq}
+    </delete>
+</mapper>

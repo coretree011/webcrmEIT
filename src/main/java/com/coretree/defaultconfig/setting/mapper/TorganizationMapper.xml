@@ -1,0 +1,64 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.setting.mapper.TorganizationMapper">
+
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.setting.model.Torganization">
+        <result property="empNo"		column="emp_no" />
+        <result property="empNm"		column="emp_nm" />
+        <result property="grpCd"		column="grp_cd" />
+        <result property="enterDate"		column="enter_date" />
+        <result property="authCd"		column="auth_cd" />
+		<result property="mobilePhoneNo"		column="mobile_phoneno" />
+		<result property="emailId"		column="emailid" />
+		<result property="extensionNo"		column="extension_no" />
+		<result property="password"		column="password" />
+		<result property="note"		column="note" />
+    </resultMap>
+	
+    <select id="selectCouncellerList" parameterType="com.coretree.defaultconfig.setting.model.Torganization" resultMap="resultMap">
+    	select 
+	 		EMP_NO, EMP_NM, GRP_CD
+			,(SELECT * FROM GET_FORMAT_DATE(ENTER_DATE) p ) as ENTER_DATE
+			,AUTH_CD
+			,(SELECT * FROM GET_CODE_NAME('1001', AUTH_CD) p ) as  AUTH_CDNM
+			,MOBILE_PHONENO, EMAILID, EXTENSION_NO, PASSWORD, NOTE
+		from TORGANIZATION
+		where EMP_NO <![CDATA[<>]]> 'superadmin' 
+    </select>
+    
+    <delete id="deleteCounceller" parameterType="com.coretree.defaultconfig.setting.model.Torganization" >
+      	delete from TORGANIZATION 
+      	WHERE EMP_NO in
+		<foreach collection="empNos" item="empNo" open="(" separator="," close=")">
+			#{empNo}
+		</foreach>
+    </delete>
+    
+    <update id="updateCounceller" parameterType="com.coretree.defaultconfig.setting.model.Torganization" >
+    	update TORGANIZATION set PASSWORD <![CDATA[=]]> 'pwd12345' 
+    	WHERE EMP_NO in
+		<foreach collection="empNos" item="empNo" open="(" separator="," close=")">
+			#{empNo}
+		</foreach>
+    </update>
+    
+    <insert id="insertCounceller" >
+		INSERT INTO TORGANIZATION
+		(EMP_NO, EMP_NM, GRP_CD, ENTER_DATE, AUTH_CD, MOBILE_PHONENO, EMAILID,  EXTENSION_NO, "PASSWORD", NOTE) 
+		VALUES 
+		(#{empNo}, #{empNm}, '1001', #{enterDate}, #{authCd}, #{mobilePhoneNo}, #{emailId},  #{extensionNo}, 'pwd12345', #{note});
+    </insert>
+    
+    <update id="updateDataCounceller" parameterType="com.coretree.defaultconfig.setting.model.Torganization" >
+    UPDATE 
+	  TORGANIZATION  
+	SET 
+	  EMP_NM = #{empNm},
+	  EXTENSION_NO = #{extensionNo},
+	  AUTH_CD = #{authCd},
+	  MOBILE_PHONENO = #{mobilePhoneNo},
+	  EMAILID = #{emailId},
+	  NOTE = #{note}
+	WHERE 
+		EMP_NO = #{empNo}
+    </update>
+</mapper>

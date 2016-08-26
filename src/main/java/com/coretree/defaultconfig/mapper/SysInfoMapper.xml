@@ -1,0 +1,14 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.SysInfoMapper">
+
+    <resultMap id="sysinfoMap" type="com.coretree.defaultconfig.mapper.SysInfo">
+        <result property="diskspace"	column="diskspace" />
+        <result property="todaycall"	column="o_day" />
+        <result property="weekcall"		column="o_week" />
+        <result property="monthcall"	column="o_month" />
+    </resultMap>
+    
+    <select id="getCallInfo" resultMap="sysinfoMap" statementType="CALLABLE">
+    	{call GET_CALLS()}
+    </select>
+</mapper>

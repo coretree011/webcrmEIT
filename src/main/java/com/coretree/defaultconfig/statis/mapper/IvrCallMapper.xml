@@ -1,0 +1,32 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.statis.mapper.IvrCallMapper">
+
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.statis.model.IvrCall">
+        <result property="callId"		column="call_id" />
+        <result property="regDate"		column="reg_date" />
+        <result property="regHms"		column="reg_hms" />
+        <result property="genDirNo"		column="gen_dir_no" />
+        <result property="telNo"		column="tel_no" />
+		<result property="extensionNo"		column="extension_no" />
+		<result property="startDate"	column="startDate" />
+		<result property="endDate"		column="endDate" />
+    </resultMap>
+	
+    <select id="selectIvrList" parameterType="com.coretree.defaultconfig.statis.model.IvrCall" resultMap="resultMap">
+		SELECT 
+     		( SELECT * FROM GET_FORMAT_DATE(REG_DATE) p )	as REG_DATE
+    		, ( SELECT * FROM GET_FORMAT_HMS(REG_HMS) p )	as REG_HMS
+    		, GEN_DIR_NO       
+    		, TEL_NO            
+    		, EXTENSION_NO    
+		FROM TIVR_CALL
+		WHERE
+			1=1
+		<if test="startDate != '' and endDate != ''">
+			AND REG_DATE BETWEEN #{startDate} AND #{endDate}
+		 </if>
+		 <if test="telNo != ''">
+		 	AND TEL_NO = #{telNo}
+		 </if>
+    </select>
+</mapper>

@@ -1,0 +1,140 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.Customer2Mapper">
+
+    <resultMap id="resMap" type="com.coretree.defaultconfig.mapper.Customer2">
+        <id     property="cust_no"				column="cust_no" />
+        <result property="cust_nm"				column="cust_nm" />
+        <result property="cust_cd"				column="cust_cd" />
+        <result property="tel1_no"				column="tel1_no" />
+        <result property="tel2_no"				column="tel2_no" />
+        <result property="tel3_no"				column="tel3_no" />
+		<result property="fax_no"				column="fax_no" />
+		<result property="post_cd"				column="post_cd" />
+		<result property="addr"					column="addr" />
+		<result property="emailid"				column="emailid" />
+		<result property="reg_date"				column="reg_date" />
+		<result property="cust_note"			column="cust_note" />
+    </resultMap>
+    
+    <select id="count" resultType="java.lang.Long">
+    	<!-- {call GET_CUSTCOUNT ( #{group, mode=IN, jdbcType=VARCHAR}, #{username, mode=IN, jdbcType=VARCHAR} )} -->
+    	select count(idx) from customers where 1=1
+    	<if test="group0 == 1">
+			and substring(depthorder from 1 for 1)=#{group0}
+    	</if>
+    	<if test="group0 == 2">
+    		and substring(depthorder from 1 for 1)=#{group0} and username=#{username}
+    	</if>
+    	<if test="txt != null">
+    		and (tel like #{txt} or cellular like #{txt} or extension like #{txt})
+    	</if>
+    </select>
+    
+    <select id="findAll" resultMap="resMap">
+    	<!-- {call GET_CUSTLIST ( #{curpage, mode=IN, jdbcType=INTEGER}, #{rowsperpage, mode=IN, jdbcType=INTEGER}, #{maingroup, mode=IN, jdbcType=VARCHAR}, #{subgroup, mode=IN, jdbcType=VARCHAR}, #{username, mode=IN, jdbcType=VARCHAR} )} -->
+    	select first (#{rowsperpage}) skip ((#{curpage} - 1) * #{rowsperpage})
+   			idx
+   			, iif(depthorder is null, '00', substring(depthorder from 1 for 1)) maingroup
+   			, iif(depthorder is null, '00', substring(depthorder from 2 for 1)) subgroup
+   			, username
+   			, uname
+   			, firm
+   			, posi
+   			, tel
+   			, cellular
+   			, extension
+   			, email
+       	from customers
+   		where 1=1
+		<choose>
+			<when test="group0 == 1">
+				<choose>
+					<when test="group1 == 0">
+                    	and substring(depthorder from 1 for 1)=#{group0}
+					</when>
+					<otherwise>
+						and substring(depthorder from 1 for 1)=#{group0}
+						and substring(depthorder from 2 for 1)=#{group1}
+					</otherwise>
+				</choose>
+			</when>
+			<when test="group0 == 2">
+				<choose>
+					<when test="group1 == 0">
+                    	and substring(depthorder from 1 for 1)=#{group0}
+                    	and username=#{username}
+					</when>
+					<otherwise>
+                    	and substring(depthorder from 1 for 1)=#{group0}
+                    	and substring(depthorder from 2 for 1)=#{group1}
+                    	and username=#{username}
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+    	<if test="txt != null">
+    		and (tel like #{txt} or cellular like #{txt} or extension like #{txt})
+    	</if>
+		order by uname asc
+    </select>
+    
+    <select id="selectByIdx" resultMap="resMap">
+    	select a.username, a.uname, a.posi, a.tel, a.cellular, a.role, a.state, a.enabled, b.extension
+			from users a join users_exts b
+				on a.username=b.username
+			where a.username=#{username}
+    </select>
+    
+    <select id="findByTxt" resultMap="resMap">
+    	select idx, iif(depthorder is null, '00', substring(depthorder from 1 for 1)) maingroup, iif(depthorder is null, '00', substring(depthorder from 2 for 1)) subgroup, uname, firm, posi, tel, cellular, extension, email
+			from customers
+			where uname like #{searchtxt} 
+			or tel like #{searchtxt}
+			or cellular like #{searchtxt}
+			or extension like #{searchtxt}
+			or firm like #{searchtxt}
+    </select>
+    
+    <select id="findByIdx" resultMap="resMap">
+    	select idx, iif(depthorder is null, '00', substring(depthorder from 1 for 1)) maingroup, iif(depthorder is null, '00', substring(depthorder from 2 for 1)) subgroup, username, uname, firm, posi, tel, cellular, extension, email
+			from customers
+			where idx = #{idx}
+    </select>
+    
+    <select id="findByExt" resultMap="resMap">
+		select first 1 idx, uname, firm, posi, tel, cellular, extension, email
+			from customers
+			where 1=1
+			and tel like #{telnum}
+			or cellular like #{telnum}
+			or extension like #{telnum}
+    </select>
+    
+    <insert id="add">
+    	insert into customers
+    		(depthorder, username, firm, uname, posi, tel, cellular, extension, email)
+    		values
+   			(#{depthorder, mode=IN, jdbcType=VARCHAR}, #{username, mode=IN, jdbcType=VARCHAR}, #{firm}, #{uname, mode=IN, jdbcType=VARCHAR}, #{posi, mode=IN, jdbcType=VARCHAR}, #{tel, mode=IN, jdbcType=VARCHAR}, #{cellular, mode=IN, jdbcType=VARCHAR}, #{extension, mode=IN, jdbcType=VARCHAR}, #{email, mode=IN, jdbcType=VARCHAR})
+    </insert>
+
+    <select id="chkById" resultType="java.lang.Integer">
+    	select case when count(username) > 0 then 0 else 1 end from users where username=#{username}
+    </select>
+    
+    <delete id="del">
+    	delete from customers where idx=#{idx}
+    </delete>
+    
+    <update id="modi">
+		update customers set depthorder=#{depthorder}, username=#{username}, firm=#{firm}, uname=#{uname}, posi=#{posi}
+			, tel=#{tel}, cellular=#{cellular}, extension=#{extension}, email=#{email} where idx=#{idx}
+    </update>
+    
+    <select id="getGroup" resultType="com.coretree.defaultconfig.model.Group">
+    	select depthorder, txt from groups where char_length(depthorder)>1 order by depthorder asc
+    </select>
+    
+    <select id="getSubgroup" resultType="com.coretree.defaultconfig.model.Group">
+    	select depthorder, iif(depthorder is null, '00', substring(depthorder from 1 for 1)) maingroup, iif(depthorder is null, '00', substring(depthorder from 2 for 1)) subgroup, txt from groups where char_length(depthorder)>1 and substring(depthorder from 1 for 1)=#{maingroup} order by depthorder asc
+    </select>
+</mapper>

@@ -1,0 +1,79 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.mapper.SmsMapper_sample">
+
+    <resultMap id="smsMap" type="com.coretree.defaultconfig.mapper.Sms_sample">
+        <id     property="idx"    		column="idx" />
+        <result property="username"		column="username" />
+        <result property="ext"			column="ext" />
+        <result property="custs_tel"   	column="custs_tel" />
+        <result property="contents"     column="contents" />
+        <result property="result"     	column="result" />
+        <result property="resultTxt"     	column="resultTxt" />
+        <result property="regdate"      column="regdate" />
+        <result property="sdate"      column="sdate" />
+        <result property="edate"      column="edate" />
+    </resultMap>
+    
+    <select id="count" resultType="java.lang.Long">
+    	select count(idx) from sms where 1=1
+		<if test="sdate == null and edate == null">
+			and cast(regdate as date)=cast(current_timestamp as date)
+		</if>
+		<if test="sdate != null and edate != null">
+			and regdate between cast(#{sdate} as timestamp) and cast(#{edate} as timestamp)
+		</if>
+    </select>
+    
+    <select id="getAll" resultMap="smsMap">
+    	select first #{rowsperpage} skip ((#{curpage} - 1) * #{rowsperpage})
+			idx, username, custs_tel, contents
+			, case when result=0 then '성공' else '오류' end resultTxt
+			, regdate
+			from sms
+			where 1=1
+			<if test="username != null">
+				and username=#{username}
+			</if>
+			<if test="txt != null">
+				and position(#{txt} in custs_tel) > 0
+			</if>
+			<if test="sdate == null or edate == null">
+				and cast(regdate as date)=cast(current_timestamp as date)
+			</if>
+			<if test="sdate != null and edate != null">
+				and regdate between cast(#{sdate} as timestamp) and cast(#{edate} as timestamp)
+			</if>
+			order by regdate desc
+    </select>
+    
+    <select id="del">
+		delete from sms where idx=#{idx}
+    </select>
+<!-- 
+    <select id="delAll" parameterType="java.util.List">
+		delete from sms where
+		<foreach collection="list" item="item" separator=",">
+			 idx=#{item.idx}
+		</foreach>
+    </select>
+ -->
+<!--    
+     <insert id="add" useGeneratedKeys="true" keyProperty="idx" keyColumn="idx">
+		<selectKey keyProperty="username" resultType="String" order="BEFORE">
+			select username from users_exts where extension = #{ext}
+		</selectKey>
+		insert into sms (username, custs_tel, contents) values (#{username}, #{custs_tel}, #{contents})
+		<selectKey keyProperty="idx" resultType="java.lang.Long" order="AFTER">
+			select gen_id(GEN_SMS_IDX, 0) from rdb$database
+		</selectKey>
+    </insert>
+-->
+
+    <select id="add" statementType="CALLABLE" resultType="java.lang.Long">
+    	{call INS_SMS(#{custs_tel, mode=IN, jdbcType=VARCHAR}, #{contents, mode=IN, jdbcType=VARCHAR}, #{ext, mode=IN, jdbcType=VARCHAR})}
+    </select>
+    
+    <select id="setresult" resultType="java.lang.Void">
+    	{call UDT_SMS_RESULT(#{idx, mode=IN, jdbcType=INTEGER}, #{result, mode=IN, jdbcType=INTEGER})}
+    </select>
+</mapper>

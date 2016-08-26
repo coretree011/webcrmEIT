@@ -1,0 +1,51 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.statis.mapper.RecordMgtMapper">
+
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.statis.model.RecordMgt">
+        <result property="recSeq"		column="rec_seq" />
+        <result property="extensionNo"		column="extension_no" />
+        <result property="empNo"		column="emp_no" />
+        <result property="telNo"		column="tel_no" />
+        <result property="callTypCd"		column="call_typ_cd" />
+		<result property="recStartDate"		column="rec_start_date" />
+		<result property="recStartHms"		column="rec_start_hms" />
+		<result property="recEndDate"		column="rec_end_date" />
+		<result property="recEndHms"		column="rec_end_hms" />
+		<result property="fileSize"		column="file_size" />
+		<result property="fileName"		column="file_name" />
+		<result property="callId"		column="callid" />
+		<result property="startDate"	column="startDate" />
+		<result property="endDate"		column="endDate" />
+    </resultMap>
+	
+    <select id="selectRecordList" parameterType="com.coretree.defaultconfig.statis.model.RecordMgt" resultMap="resultMap">
+		SELECT	
+		 REC_SEQ
+		 ,EXTENSION_NO
+		 ,EMP_NO	
+		 ,TEL_NO
+		 ,( SELECT * FROM GET_CODE_NAME('1006', CALL_TYP_CD) p ) as  CALL_TYP_CD	
+		 ,( SELECT * FROM GET_FORMAT_DATE(REC_START_DATE) p )   as REC_START_DATE	
+		 ,( SELECT * FROM GET_FORMAT_HMS(REC_START_HMS) p )    as REC_START_HMS	
+		 ,( SELECT * FROM GET_FORMAT_DATE(REC_END_DATE) p )     as RESERVE_DATE	
+		 ,( SELECT * FROM GET_FORMAT_HMS(REC_END_HMS) p )      as REC_END_HMS	
+		 ,FILE_SIZE		
+		 ,FILE_NAME		
+		 ,CALLID	
+		FROM TRECORD_MGT
+		WHERE
+			1=1
+		 <if test="startDate != '' and endDate != ''">
+			AND REC_START_DATE BETWEEN #{startDate} AND #{endDate}
+		 </if>
+		 <if test="telNo != ''">
+		 	AND TEL_NO = #{telNo}
+		 </if>
+		 <if test="callTypCd != ''">
+		 	AND CALL_TYP_CD = #{callTypCd}
+		 </if> 
+		 <if test="extensionNo != ''">
+		 	AND EXTENSION_NO = #{extensionNo}
+		 </if>
+    </select>
+</mapper>
