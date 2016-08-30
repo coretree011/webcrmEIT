@@ -264,7 +264,7 @@ body {
 						if(tmp == chkTelArr[j]){
 							msgboxActive('SMS 단체전송', '중복된 핸드폰번호가 있습니다. \n 확인해주세요.');
 							return;
-						}
+						} 
 					}
 				}
 				$("input[name=pop_grpTransCustNo]").val(result);
