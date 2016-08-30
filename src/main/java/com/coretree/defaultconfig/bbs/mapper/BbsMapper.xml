@@ -1,0 +1,203 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.bbs.mapper.BbsMapper">
+
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.bbs.model.BbsMgt">
+        <result property="bbsSeq"		column="bbs_seq" />
+        <result property="bbsSbj"		column="bbs_sbj" />
+        <result property="regEmpNo"		column="reg_emp_no" />
+        <result property="regEmpNm"		column="reg_emp_nm" />
+        <result property="regDate"		column="reg_date" />
+        <result property="regHms"		column="reg_hms" />
+		<result property="bbsNote"		column="bbs_note" />
+		<result property="startDate"		column="startDate" />
+		<result property="endDate"		column="endDate" />		
+		<result property="search"		column="search" />
+		<result property="searchText"		column="searchText" />	
+		<result property="fileYN"		column="fileYN" />
+		<result property="commentYN"		column="commentYN" />	
+		<result property="newYN"		column="newYN" />	
+		
+		<result property="fileBbsSeq"		column="bbs_seq" />
+        <result property="fileSeq"	column="file_seq" />
+        <result property="fileName"		column="file_name" />	
+        <result property="readEmpNo"		column="read_emp_no" />		
+    </resultMap>
+	
+	<resultMap id="result" type="com.coretree.defaultconfig.bbs.model.BbsComment">
+        <result property="bbsSeq"		column="bbs_seq" />
+        <result property="commentSeq"	column="comment_seq" />
+        <result property="regDate"		column="reg_date" />
+        <result property="regHms"		column="reg_hms" />
+        <result property="regEmpNo"		column="reg_emp_no" />
+        <result property="regEmpNm"		column="reg_emp_nm" />
+        <result property="commentNote"	column="comment_note" />			
+    </resultMap>
+    
+    <select id="selectNoticeList" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" resultMap="resultMap">
+		SELECT 
+			BBS_SEQ
+			, case when char_length( BBS_SBJ ) >= 20 then substring( BBS_SBJ from 1 for 20) || '...' else BBS_SBJ end as BBS_SBJ
+			, REG_EMP_NO
+			, case when REG_EMP_NM is null then '' else REG_EMP_NM end as REG_EMP_NM
+			, (SELECT p.RET_VALUE FROM GET_FORMAT_DATE(REG_DATE) p ) as REG_DATE
+			, (SELECT p.RET_VALUE FROM GET_FORMAT_HM(REG_HMS) p ) as REG_HMS
+			,  case when char_length( BBS_NOTE ) >= 20 then substring( BBS_NOTE from 1 for 20) || '...' else BBS_NOTE end as BBS_NOTE
+			, (SELECT p.V_OUT_VALUE	FROM GET_TBBS_FILE_EXIST_YN(BBS_SEQ) p) as fileYN 
+			, (SELECT p.V_OUT_VALUE	FROM GET_TBBS_COMMENT_EXIST_YN(BBS_SEQ) p) as commentYN
+			, (SELECT p.V_OUT_VALUE FROM GET_TBBS_MGT_READ_YN(BBS_SEQ, #{regEmpNo}) p) as newYN
+		FROM TBBS_MGT
+		WHERE
+			1=1
+		<if test="startDate != ''">
+		<![CDATA[
+			AND REG_DATE between #{startDate} and #{endDate}
+		]]>	
+		 </if>
+	  	<!-- <if test="endDate != ''">
+			AND REG_DATE <![CDATA[<=]]> #{endDate}
+		 </if> -->
+ 		<if test='search.equals("1")'>
+	 		AND BBS_SBJ CONTAINING #{searchText}
+		 </if>
+		<if test='search.equals("2")'>
+	 		AND BBS_NOTE CONTAINING #{searchText}
+		 </if>
+		 <if test='search.equals("3")'>
+		 	 AND REG_EMP_NM CONTAINING #{searchText}
+		 </if>
+		 ORDER BY BBS_SEQ, REG_DATE, REG_HMS
+    </select>
+    
+     <select id="selectDetails" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" resultMap="resultMap">
+		SELECT 
+			BBS_SEQ
+			, BBS_SBJ
+			, REG_EMP_NO
+			, case when REG_EMP_NM is null then '' else REG_EMP_NM end as REG_EMP_NM
+			, (SELECT p.RET_VALUE FROM GET_FORMAT_DATE(REG_DATE) p ) as REG_DATE
+			, (SELECT p.RET_VALUE FROM GET_FORMAT_HMS(REG_HMS) p ) as REG_HMS
+			,  BBS_NOTE
+		FROM TBBS_MGT
+		WHERE
+			BBS_SEQ = #{bbsSeq}
+    </select>
+    
+    <select id="selectFileName" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" resultMap="resultMap">
+    	SELECT 
+    		BBS_SEQ
+			, FILE_SEQ
+			, FILE_NAME    		
+    	FROM TBBS_FILE
+    	WHERE 
+    		BBS_SEQ = #{bbsSeq}
+    </select>
+    
+    <delete id="deleteNotice" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" >
+    	delete from TBBS_MGT 
+    	WHERE BBS_SEQ in
+		<foreach collection="bbsSeqs" item="bbsSeq" open="(" separator="," close=")">
+			 #{bbsSeq}
+		</foreach>
+    </delete>
+    
+     <delete id="deleteNoticeComment" parameterType="com.coretree.defaultconfig.bbs.model.BbsComment" >
+    	delete from TBBS_COMMENT
+    	WHERE BBS_SEQ in
+		<foreach collection="bbsSeqs" item="bbsSeq" open="(" separator="," close=")">
+			 #{bbsSeq}
+		</foreach>
+    </delete>
+    
+    <insert id="insertNotice" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" >
+    	INSERT 
+		INTO TBBS_MGT 
+       	(BBS_SEQ, BBS_SBJ, REG_EMP_NO, REG_EMP_NM, REG_DATE, REG_HMS, BBS_NOTE)
+       	VALUES 
+       	( 
+       	NEXT VALUE FOR SEQ_BBS
+         ,#{bbsSbj}
+         ,#{regEmpNo}
+         ,#{regEmpNm}
+         ,#{regDate} 
+		 ,#{regHms}
+		 ,#{bbsNote}
+       	)   
+    </insert>
+    
+    <insert id="insertNoticeFile" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" >
+		INSERT INTO TBBS_FILE
+    	(BBS_SEQ, FILE_SEQ, FILE_NAME)
+    	VALUES
+    	(
+    	(SELECT MAX(BBS_SEQ) FROM TBBS_MGT),
+    	(SELECT MAX(BBS_SEQ) FROM TBBS_MGT),
+    	#{fileName}
+    	)
+    </insert>
+    
+    <insert id="updateNotice" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" >
+	<!--  INSERT INTO TBBS_MGT_READ
+		  (BBS_SEQ, READ_EMP_NO)
+		  VALUES
+		  (
+		  #{bbsSeq},#{readEmpNo}
+		  )   -->
+		  
+		  EXECUTE PROCEDURE SP_TBBS_MGT_READ_INSERT(#{bbsSeq},#{readEmpNo});
+    </insert>
+    
+    <select id="selectCommentList" parameterType="com.coretree.defaultconfig.bbs.model.BbsComment" resultMap="result">
+    SELECT 
+		BBS_SEQ
+		, COMMENT_SEQ
+		, (SELECT p.RET_VALUE FROM GET_FORMAT_DATE(REG_DATE) p ) as REG_DATE
+		, (SELECT p.RET_VALUE FROM GET_FORMAT_HMS(REG_HMS) p ) as REG_HMS
+		, REG_EMP_NO
+		, REG_EMP_NM
+		, COMMENT_NOTE   
+    FROM TBBS_COMMENT
+    WHERE BBS_SEQ = #{bbsSeq}
+    ORDER BY COMMENT_SEQ desc
+    </select>
+    
+    <insert id="insertReply" parameterType="com.coretree.defaultconfig.bbs.model.BbsComment" >
+    	INSERT INTO TBBS_COMMENT
+    	(BBS_SEQ, COMMENT_SEQ, REG_DATE, REG_HMS, REG_EMP_NO, REG_EMP_NM, COMMENT_NOTE)
+    	VALUES
+    	(
+    	#{bbsSeq},
+    	(SELECT case when MAX(COMMENT_SEQ) is null  then 0 else MAX(COMMENT_SEQ)+1 end as COMMENT_SEQ 
+			FROM TBBS_COMMENT WHERE BBS_SEQ = #{bbsSeq}),
+    	#{regDate},#{regHms},#{regEmpNo},#{regEmpNm},#{commentNote}
+    	)
+   </insert>
+   
+    <update id="selectNoticeModify" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" >
+	UPDATE 
+	  TBBS_MGT  
+	SET 
+	  BBS_SBJ = #{bbsSbj},
+	  REG_EMP_NO = #{regEmpNo},
+	  REG_EMP_NM = #{regEmpNm},
+	  REG_DATE = #{regDate},
+	  REG_HMS = #{regHms},
+	  BBS_NOTE = #{bbsNote}
+	WHERE 
+		BBS_SEQ = #{bbsSeq}
+    </update>
+    
+    <delete id="fileDelete">
+    	delete from TBBS_FILE where BBS_SEQ = #{bbsSeq}
+    </delete>
+    
+    <insert id="insertNoticeFile2" parameterType="com.coretree.defaultconfig.bbs.model.BbsMgt" >
+		INSERT INTO TBBS_FILE
+    	(BBS_SEQ, FILE_SEQ, FILE_NAME)
+    	VALUES
+    	(
+    	#{bbsSeq},
+    	#{bbsSeq},
+    	#{fileName}
+    	)
+    </insert>
+</mapper>

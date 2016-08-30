@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
+Implementation-Vendor: Pivotal Software, Inc.
 Implementation-Title: coretree-webcrm
 Implementation-Version: 2.2
-Built-By: coretree11
 Implementation-Vendor-Id: com.coretree.defaultconfig
-Build-Jdk: 1.8.0_60
+Build-Jdk: 1.7.0_79
+Built-By: Admin
 Created-By: Maven Integration for Eclipse
-Implementation-Vendor: Pivotal Software, Inc.
 

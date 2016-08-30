@@ -1,0 +1,40 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.main.mapper.UserLogMapper">
+	
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.main.model.UserLog">
+        <result property="agentStatCd"		column="AGENT_STAT_CD" />
+        <result property="empNo"			column="EMP_NO" />
+        <result property="empNm"			column="EMP_NM" />
+        <result property="startDate"		column="START_DATE" />
+        <result property="startHms"			column="START_HMS" />
+        <result property="endDate"			column="END_DATE" />
+        <result property="endHms"			column="END_HMS" />
+        <result property="agentStatSec"		column="AGENT_STAT_SEC" />
+    </resultMap>
+	
+    <select id="selectAllUserLogs" resultMap="resultMap">
+    	select * from tagent_stat
+    </select>
+    
+    <insert id="addUserLog" parameterType="com.coretree.defaultconfig.main.model.UserLog">
+    	insert into tagent_stat (
+    		AGENT_STAT_CD
+    		, EMP_NO
+    		, EMP_NM
+    		, START_DATE
+    		, START_HMS
+    		, END_DATE
+    		, END_HMS
+    		, AGENT_STAT_SEC
+    	) values (
+    		#{agentStatCd}
+    		, #{empNo}
+    		, #{empNm}
+    		, #{startDate}
+    		, #{startHms}
+    		, #{endDate}
+    		, #{endHms}
+    		, #{agentStatSec}
+    	)
+    </insert>
+</mapper>

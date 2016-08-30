@@ -1,0 +1,82 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coretree.defaultconfig.main.mapper.MonitoringMapper">
+	
+  	
+    <resultMap id="resultMap" type="com.coretree.defaultconfig.main.model.Monitoring">
+        <result property="totIbCnt"			column="tot_ib_count" />
+        <result property="totAgtConnCnt"		column="tot_agent_conn_count" />
+        <result property="totAbanCnt"			column="tot_aban_count" />
+        <result property="totAgtIbCnt"			column="tot_agent_ib_count" />
+        <result property="totAgtObCnt"			column="tot_agent_ob_count" />
+        <result property="agtIbCnt"			column="agent_ib_count" />
+        <result property="agtObCnt"			column="agent_ob_count" />
+        <result property="totCbCnt"			column="tot_cb_count" />
+        <result property="agtCbCnt"				column="agent_cb_count" />
+        <result property="totRevCnt"			column="tot_rev_count" />
+        <result property="agtRevCnt"		column="agent_rev_count" />
+        <result property="totBbsCnt"		column="TOT_BBS_COUNT" />
+    </resultMap>
+	
+    <select id="selectMonitoringList" parameterType="com.coretree.defaultconfig.main.model.Organization"  resultMap="resultMap">
+		select 
+			    tot_ib_count                
+			    , tot_agent_conn_count      
+			    , tot_aban_count            
+			    , tot_agent_ib_count        
+			    , tot_agent_ob_count        
+			    , agent_ib_count            
+			    , agent_ob_count            
+			    , tot_cb_count              
+			    , agent_cb_count            
+			    , tot_rev_count             
+			    , agent_rev_count           
+			    , TOT_BBS_COUNT             
+			 from 
+			(   select 
+			              tot_ib_count              
+			            , tot_agent_conn_count      
+			            , tot_ib_count - tot_agent_conn_count as tot_aban_count    
+			            , tot_agent_ib_count        
+			            , tot_agent_ob_count        
+			            , agent_ib_count            
+			            , agent_ob_count            
+			    from (
+			        select     
+			              COALESCE( sum( case when ( caller_type = 2 or caller_type = 3 ) then 1 else 0 end ), 0 ) as tot_ib_count   
+			            , COALESCE( sum( case when ((caller_type = 2 or caller_type = 3 ) and result = 0 <![CDATA[and callee <> '8888']]>) then 1   else 0 end ), 0) as tot_agent_conn_count   
+			            , COALESCE( sum( case when ( caller_type = 2 or caller_type = 3 ) then 1 else 0 end ), 0 ) as tot_agent_ib_count   
+			            , COALESCE( sum( case when ( callee_type = 2 ) then 1 else 0 end )                   , 0 ) as tot_agent_ob_count   
+			            , COALESCE( sum( case when ((caller_type = 2 or caller_type = 3 ) and USERNAME = #{empNm} ) then 1 else 0 end ), 0 ) as agent_ib_count  
+			            , COALESCE( sum( case when ( callee_type = 2  and USERNAME = #{empNm} ) then 1 else 0 end )                    , 0 ) as agent_ob_count  
+			        from cdr 
+			        where   startdate between cast( (SUBSTRING(CURRENT_DATE FROM 1 FOR 10) ) || ' ' || ( '00:00:00' ) as timestamp ) and current_timestamp
+			        )
+			) a,
+			(   select 
+			          tot_cb_count      
+			        , agent_cb_count    
+			        , tot_rev_count      
+			        , agent_rev_count    
+			    from (
+			        SELECT 
+			              count(*)    as tot_cb_count       
+			            , COALESCE( sum( case when ( EMP_NO = #{empNm} ) then 1 else 0 end ), 0) as agent_cb_count    
+			        FROM TCALLBACK
+			        where RES_DATE = replace( SUBSTRING(CURRENT_DATE FROM 1 FOR 10), '-', '' )
+			        ) a2,
+			        (    
+			        SELECT         
+			              count(*)    as tot_rev_count       
+			            , COALESCE( sum( case when ( EMP_NO = #{empNm} ) then 1 else 0 end ), 0) as agent_rev_count    
+			        FROM TRESERVATION
+			        where RES_DATE = replace( SUBSTRING(CURRENT_DATE FROM 1 FOR 10), '-', '' )
+			        ) b2
+			) b,
+			(   SELECT 
+			        count(*) as TOT_BBS_COUNT
+			    FROM TBBS_MGT 
+			    where REg_DATE = replace( SUBSTRING(CURRENT_DATE FROM 1 FOR 10), '-', '' )
+			) c
+    </select>
+    
+</mapper>
