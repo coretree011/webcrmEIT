@@ -106,7 +106,15 @@ body {
 			$("#sidr").toggle("right");
 			monitoringSearch();
 		});
-
+		
+		/* ENTER키 눌렀을 때 이벤트  */
+		$(document).keypress(function (e) {
+		    if (e.which == 13 || e.which == 32) {
+		    	$("#msgAlert_ok").click(); 
+		    	$("#tab01_cancel").click();
+		    }
+		});
+		
 		/* 상단 탭 컨트롤 */
 		/* $(".tab_up").ready(function() {
 			$(".tab_content").hide();
@@ -207,11 +215,18 @@ function fn_page(){
 
 function fn_msg(){
 	$('#msgAlert').css( "display", "none" );
+	$('#tab01_msgbox').css( "display", "none" );
 }
 function msgboxActive(pageName, note){
 	$('#msgBody1').html(pageName);
 	$('#msgBody2').html(note);
 	$('#msgAlert').css( "display", "block" );
+}
+function msgboxActive2(pageName, note){
+	var text = note.replaceAll("\n", "<BR>") 
+	$('#tab01_msgbody1').html(pageName);
+	$('#tab01_msgbody2').html(text);
+	$('#tab01_msgbox').css( "display", "block" );
 }
 </script>
 
@@ -241,10 +256,10 @@ function msgboxActive(pageName, note){
 							</ul>
 
 							<div id="tab_contents_1">
-								<div id="tab01"><%@ include file="./pages/tab01.jsp"%></div>
-								<div id="tab02"><%@ include file="./pages/tab02.jsp"%></div>
-								<div id="tab03"><%@ include file="./pages/tab03.jsp"%></div>
-								<div id="tab04"><%@ include file="./pages/tab04.jsp"%></div>
+								<div id="tab01"><jsp:include page= "./pages/tab01.jsp" /></div>
+								<div id="tab02"><jsp:include page= "./pages/tab02.jsp" /></div>
+								<div id="tab03"><jsp:include page= "./pages/tab03.jsp" /></div>
+								<div id="tab04"><jsp:include page= "./pages/tab04.jsp" /></div>
 							</div>
 						</td>
 					</tr>
@@ -260,33 +275,33 @@ function msgboxActive(pageName, note){
 
 	<!-- 우측 사이드바 -->
 	<div class="nav-right" id="sidr">
-		<%@ include file="./pages/right.jsp"%>
+		<jsp:include page= "./pages/right.jsp" />
 	</div>
 
 
 	<!-- 좌측 메뉴 팝업 -->
 	<div id="win_1" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/excel_store.jsp"%>
+		<jsp:include page= "./popup/excel_store.jsp" />
 	</div>
 
 	<div id="win_2" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/record_present.jsp"%>
+		<jsp:include page= "./popup/record_present.jsp" />
 	</div>
 
 	<div id="win_3" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/ivr_present.jsp"%>
+		<jsp:include page= "./popup/ivr_present.jsp" />
 	</div>
 
 	<div id="win_4" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/callcenter_all_present.jsp"%>
+		<jsp:include page= "./popup/callcenter_all_present.jsp" />
 	</div>
 
 	<div id="win_5" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/counceller_present.jsp"%>
+		<jsp:include page= "./popup/counceller_present.jsp" />
 	</div>
 
 	<div id="win_6" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/notice_ask.jsp"%>
+		<jsp:include page= "./popup/notice_ask.jsp" />
 	</div>
 
 	<%-- <div id="win_7" class="msgboxpop danger" style="display:none">
@@ -298,30 +313,35 @@ function msgboxActive(pageName, note){
 	</div> --%>
 
 	<div id="win_9" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/counceller_manager.jsp"%>
+		<jsp:include page= "./popup/counceller_manager.jsp" />
 	</div>
 
 	<div id="win_10" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/sms_transport.jsp"%>
+		<jsp:include page= "./popup/sms_transport.jsp" />
 	</div>
 
 	<div id="win_11" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/extension_manage.jsp"%>
+		<jsp:include page= "./popup/extension_manage.jsp" />
 	</div>
 
 	<div id="win_12_1" class="msgboxpop danger" style="display:none">
-		<%@ include file="./login/updatePassword.jsp"%>
+		<jsp:include page= "./login/updatePassword.jsp" />
 	</div>
 
 	<div id="win_13" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/callback_reserve.jsp"%>
+		<jsp:include page= "./popup/callback_reserve.jsp" />
 	</div>
 
 	<div id="win_14" class="msgboxpop danger" style="display:none">
-		<%@ include file="./popup/sms_transport_reg.jsp"%>
+		<jsp:include page= "./popup/sms_transport_reg.jsp" />
+	</div>
+
+	<div id="win_14_1" class="msgboxpop danger" style="display:none">
+		<jsp:include page= "./popup/sms_grpTransport_reg.jsp" />
 	</div>
 	
-	<div id="msgAlert" style="position: relative; height: 150px; display: none;">
+	
+	<div id="msgAlert" style="position: relative; height: 150px; display: none; z-index:9999;">
 		<div class="msgbox" style="left:550px; top:100%; width:300px;">
 			<div class="head" id="msgHead" style="height:20px; font-size:13px; padding-left:2px; border: 0px">
 					<img src="../resources/jui-master/img/theme/jennifer/popMsg.png"/>
@@ -331,10 +351,26 @@ function msgboxActive(pageName, note){
 				<p id="msgBody1" style="margin:0px; font-weight:bold; background-color:#525252; color:white; height: 20px; padding-left:10px; padding-top: 10px;">페이지이름</p> <br/>
 				<p id="msgBody2" style="margin:0px; padding-left: 10px;">메세지 내용</p><br/>
 				<div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
-					<a href="#" class="btn focus small" onclick="fn_msg()">확인</a>
+					<a href="#" class="btn focus small" onclick="fn_msg()" id="msgAlert_ok">확인</a>
 				</div>
 			</div>
-		</div> "" 
+		</div>
+	</div>
+	<div id="tab01_msgbox" style="position: relative; height: 150px; display: none; z-index:9999;">
+		<div class="msgbox" style="left:550px; top:100%; width:300px;">
+			<div class="head" id="msgHead" style="height:20px; font-size:13px; padding-left:2px; border: 0px">
+					<img src="../resources/jui-master/img/theme/jennifer/popMsg.png"/>
+					<span style="float:right; padding-right:115px; padding-top: 4px;">알림창</span>
+		    </div>
+			<div class="body" style="padding:0px;">
+				<p id="tab01_msgbody1" style="margin:0px; font-weight:bold; background-color:#525252; color:white; height: 20px; padding-left:10px; padding-top: 10px;">페이지이름</p> <br/>
+				<p id="tab01_msgbody2" style="margin:0px; padding-left: 10px;">메세지 내용</p><br/>
+				<div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+					<a href="#" class="btn focus small" id="tab01_msgok">확인</a>
+					<a href="#" class="btn focus small" onclick="fn_msg()" id="tab01_cancel">취소</a>
+				</div>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

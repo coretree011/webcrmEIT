@@ -13,10 +13,8 @@
 $(document).ready(function() {
 	jui.ready([ "ui.window" ], function(win) {
 		win_12 = win("#win_12", {
-			//width : 362,
-			//height : 125,
-			width : 500,
-			height : 300,
+			width : 362,
+			height : 125,
 			left : "8%",
 			top : 50,
 			resize : false,
@@ -75,24 +73,24 @@ var users = {
 <body class="jui">
 		<div id="win_12" class="msgboxpop danger">
 			<div class="head">
+
 				<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
 					<tr>
-						<td class="poptitle"style="background-image: url(../resources/jui-master/img/theme/jennifer/pop.png);">로그인</td>
+						<td class="poptitle"style="background-image: url(../resources/jui-master/img/theme/jennifer/pop.png);">login</td>
 					</tr>
 				</table>
 			</div>
 			<div class="body">
 			<div>
 				<form name="frm" method="post">
-					<table width="330" border="0" cellspacing="0" cellpadding="0"  align="center">
+					<table width="330" border="0" cellspacing="0" cellpadding="0">
 						<tr>
 							<td height="4"></td>
 						</tr>
 						<tr>
 							<td align="center">
-								<p style="margin-bottom:40px;font-size:15px;">KT ucloud biz에 오신 것을 환영합니다.</p>
-								<input type="text" name= "j_username" class="loginput mini" placeholder="아이디" style="width: 410px; height:40px !important; margin-bottom:10px; font-size:15px; text-align:left;" /><br> 
-								<input type="password" name= "j_password" class="loginput mini" placeholder="비밀번호" style="width: 410px; height:40px !important; margin-bottom:10px; font-size:15px; text-align:left;" 
+								<input type="text" name= "j_username" class="loginput mini" placeholder="아이디" style="width: 130px" /> 
+								<input type="password" name= "j_password" class="loginput mini" placeholder="비밀번호" style="width: 130px" 
 								onkeydown="javascript: if (event.keyCode == 13) {login();}"/>
 							</td>
 						</tr>
@@ -101,7 +99,8 @@ var users = {
 						</tr>
 						<tr>
 							<td align="center">
-								<a class="logbtn small focus" href="javascript:login()" style="width:410px; height:40px; padding-top: 6px; font-size:15px;">로그인</a>&nbsp;
+								<a class="logbtn small focus" href="javascript:login()">로그인</a>&nbsp;
+								<a class="logbtn small focus">취소</a>
 							</td>
 						</tr>
 					</table>
