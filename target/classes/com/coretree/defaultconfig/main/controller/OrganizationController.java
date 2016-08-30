@@ -115,7 +115,7 @@ public class OrganizationController {
 	@RequestMapping(path = "/main/usersState", method = RequestMethod.POST)
 	public List<Organization> usersState() throws Exception {
 		
-		List<Organization> emp = organizationMapper.usersState2();
+		List<Organization> emp = organizationMapper.usersState();
 		
 		return emp;
 	}

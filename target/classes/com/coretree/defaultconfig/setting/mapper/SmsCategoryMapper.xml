@@ -9,9 +9,9 @@
 	
     <select id="selectSmsList" resultMap="resultMap">
 		SELECT 
-		  CATE_CD,
-		  CATE_NM,
-		  CATE_COMMENT
+			case when CATE_CD is null then '' else CATE_CD end as CATE_CD
+			,case when CATE_NM is null then '' else CATE_NM end as CATE_NM
+			,case when CATE_COMMENT is null then '' else CATE_COMMENT end as CATE_COMMENT
 		FROM 
 		  TSMS_CATEGORY
 		ORDER BY CATE_CD
@@ -23,9 +23,9 @@
     
    <select id="selectSmsOne" parameterType="com.coretree.defaultconfig.setting.model.SmsCategory" resultMap="resultMap">
 		SELECT 
-		  CATE_CD,
-		  CATE_NM,
-		  replace (CATE_COMMENT,  '{}', #{customName}) AS CATE_COMMENT
+		  case when CATE_CD is null then '' else CATE_CD end as CATE_CD
+		  ,case when CATE_NM is null then '' else CATE_NM end as CATE_NM
+		  ,replace (CATE_COMMENT,  '{}', #{customName}) AS CATE_COMMENT
 		FROM 
 		  TSMS_CATEGORY
 		 WHERE CATE_CD = #{cateCd}

@@ -87,6 +87,22 @@ public class CustomerController{
 		
 		return new ModelAndView("CustmoerListReportDownload", "custmoerListReportMap", model);
 	}
+
+	@RequestMapping(path = "/main/customerListGrpSms", method = RequestMethod.POST)
+	public List<Customer> customerListGrpSms(@RequestBody Customer paramCustomer, ModelMap model, HttpSession session) {
+		String[] custNos = paramCustomer.getCustNo().split(",");
+		Customer customer = new Customer();
+		customer.setCustNos(custNos);
+
+		List<Customer> result = customerMapper.selectCustomerListGrpSms(customer);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("resultList", result);
+		
+		model.addAttribute("customerList", map.get("resultList"));
+		model.addAttribute("test", result.size());
+		return result;
+	}
 	
 	@RequestMapping(path = "/main/customerOne", method = RequestMethod.POST)
 	public  Customer customerOne(@RequestBody Customer searchVO,

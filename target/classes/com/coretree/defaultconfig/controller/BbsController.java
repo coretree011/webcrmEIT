@@ -44,8 +44,8 @@ public class BbsController {
 	@Autowired
 	CodeMapper codeMapper;
 	
-	//private final String NoticeUploadPath = "/opt/webcrm/file/";
-	private final String NoticeUploadPath = "D:\\";
+	private final String NoticeUploadPath = "/opt/webcrm/file/";
+	//private final String NoticeUploadPath = "D:\\";
 	
 	/**
 	 * 공지사항 조회(팝업)

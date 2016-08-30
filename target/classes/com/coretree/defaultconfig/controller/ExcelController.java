@@ -202,10 +202,10 @@ public class ExcelController {
 							cus.setCustCdNm(value);
 							break;
 						case 1:
-							cus.setCustNo(value);
+							cus.setCustNm(value);
 							break;
 						case 2:
-							cus.setCustNm(value);
+							cus.setCoRegNo(value);
 							break;
 						case 3:
 							cus.setTel1No(value);
@@ -226,6 +226,21 @@ public class ExcelController {
 							cus.setAddr(value);
 							break;
 						case 9:
+							cus.setSexCd(value);
+							break;
+						case 10:
+							cus.setBirthDate(value);
+							break;
+						case 11:
+							cus.setGradeCd(value);
+							break;
+						case 12:
+							cus.setCustTypCd(value);
+							break;
+						case 13:
+							cus.setRecogTypCd(value);
+							break;
+						case 14:
 							cus.setCustNote(value);
 							break;
 						}
