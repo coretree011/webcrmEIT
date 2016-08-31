@@ -25,7 +25,6 @@
     <resultMap id="resultMap3" type="com.coretree.defaultconfig.main.model.Organization">
         <result property="empNm"			column="USERNAME" />
         <result property="extensionNo"	column="EXTENSION" />
-        <result property="state"			column="STATE" />
     </resultMap>
     
     <resultMap id="resultMap4" type="com.coretree.models.Organization">
@@ -40,7 +39,6 @@
         <result property="extensionNo"		column="EXTENSION_NO" />
         <result property="note"				column="NOTE" />
         <result property="agentStatCd"		column="AGENT_STAT_CD" />
-        <result property="existCount"		column="EXIST_COUNT" />
     </resultMap>
     
     <select id="checkLogin" parameterType="com.coretree.defaultconfig.main.model.Organization"  resultMap="resultMap">

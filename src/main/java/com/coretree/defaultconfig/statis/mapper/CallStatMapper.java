@@ -13,4 +13,7 @@ public interface CallStatMapper {
 	public List<CallStat> selectCallStatListDay(CallStat callStat);
 	public List<CallStat> selectCallStatListMonth(CallStat callStat);
 	public List<CallStat> selectCallStatListYear(CallStat callStat);
+	public void insCallStat(CallStat callStat);
+	public void updateCallStatMid(CallStat callStat);
+	public void updateCallStatEnd(CallStat callStat);
 }

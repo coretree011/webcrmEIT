@@ -327,4 +327,34 @@
 	  ) b
 	on  a.REG_DATE = b.RES_DATE
     </select>
+    
+    <insert id="insCallStat" parameterType="com.coretree.defaultconfig.statis.model.CallStat">
+    	insert into TCALL_STAT (
+    		CALLID
+    		, REG_DATE
+    		, REG_HMS
+    		, GEN_DIR_NO
+    		, TEL_NO
+    		, CALL_TYP_CD
+    		, EMP_NO
+    		, EMP_NM
+    	) values (
+    		#{callId}
+    		, #{resDate}
+    		, #{resHms}
+    		, #{genDirNo}
+    		, #{telNo}
+    		, #{callTypCd}
+    		, #{empNo})
+    		, (select emp_nm from TORGANIZATION where emp_no=#{empNo})
+    	)
+    </insert>
+    
+    <update id="updateCallStatMid" parameterType="com.coretree.defaultconfig.statis.model.CallStat">
+    	update TCALL_STAT set AGENT_TRANS_YN=#{agentTransYn} where CALLID=#{callId}
+    </update>
+    
+    <update id="updateCallStatEnd" parameterType="com.coretree.defaultconfig.statis.model.CallStat">
+    	update TCALL_STAT set AGENT_TRANS_YN=#{agentTransYn}, CALL_STAT_SEC=#{callStatSec} where CALLID=#{callId}
+    </update>
 </mapper>

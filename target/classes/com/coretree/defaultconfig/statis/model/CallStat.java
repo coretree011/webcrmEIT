@@ -1,5 +1,7 @@
 package com.coretree.defaultconfig.statis.model;
 
+import java.util.Date;
+
 import com.coretree.defaultconfig.EitStringUtil;
 
 public class CallStat {
@@ -12,7 +14,10 @@ public class CallStat {
 	String agentTransYn;
 	String empNo;
 	String empNm;
-	String callStatSec;
+	int callStatSec;
+	Date sdate;
+	String extension;
+	byte status;
 	
 	int totIbCount; //총인입건수
 	int totIbAgTransCount; //상담원 연결건수
@@ -115,27 +120,19 @@ public class CallStat {
 		this.empNm = empNm;
 	}
 
-
-	public String getCalStatSec() {
-		return callStatSec;
-	}
-
-
-	public void setCalStatSec(String callStatSec) {
-		this.callStatSec = callStatSec;
-	}
-
-
+	public int getCallStatSec() { return callStatSec; }
+	public void setCallStatSec(int callStatSec) { this.callStatSec = callStatSec; }
 	
-
-	public String getCallStatSec() {
-		return callStatSec;
-	}
-
-
-	public void setCallStatSec(String callStatSec) {
-		this.callStatSec = callStatSec;
-	}
+	public Date getSdate() { return sdate; }
+	public void setSdate(Date sdate) { this.sdate = sdate; }
+	
+	public String getExtension() { return this.extension; }
+	public void setExtension(String extension) { this.extension = extension; }
+	
+	public byte getStatus() { return this.status; }
+	public void setStatus(byte status) { this.status = status; }
+	
+	
 
 
 	public int getTotIbCount() {

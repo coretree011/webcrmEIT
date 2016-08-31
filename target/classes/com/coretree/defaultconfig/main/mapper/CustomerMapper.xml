@@ -1,30 +1,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.coretree.defaultconfig.main.mapper.CustomerMapper">
     <resultMap id="resultMap" type="com.coretree.defaultconfig.main.model.Customer">
-        <result property="custCd"		column="CUST_CD" />
+        <result property="custCd"			column="CUST_CD" />
         <result property="custCdNm"			column="CUST_CDNM" />
-        <result property="custNo"		column="CUST_NO" />
-        <result property="custNm"		column="CUST_NM" />
-        <result property="tel1No"		column="TEL1_NO" />
-        <result property="tel2No"		column="TEL2_NO" />
-        <result property="tel3No"		column="TEL3_NO" />
-        <result property="faxNo"	column="FAX_NO" />
-        <result property="addr"		column="ADDR" />
-        <result property="emailId"		column="EMAILID" />
-        <result property="custNote"		column="CUST_NOTE" />
-        <result property="gradeCd"		column="GRADE_CD" />
-        <result property="gradeNm"		column="GRADE_NM" />
+        <result property="custNo"			column="CUST_NO" />
+        <result property="custNm"			column="CUST_NM" />
+        <result property="tel1No"			column="TEL1_NO" />
+        <result property="tel2No"			column="TEL2_NO" />
+        <result property="tel3No"			column="TEL3_NO" />
+        <result property="faxNo"			column="FAX_NO" />
+        <result property="addr"				column="ADDR" />
+        <result property="emailId"			column="EMAILID" />
+        <result property="custNote"			column="CUST_NOTE" />
+        <result property="gradeCd"			column="GRADE_CD" />
+        <result property="gradeNm"			column="GRADE_NM" />
         <result property="custTypCd"		column="CUST_TYP_CD" />
         <result property="custTypNm"		column="CUST_TYP_NM" />
         <result property="recogTypCd"		column="RECOGNITION_TYP_CD" />
         <result property="recogTypNm"		column="RECOGNITION_TYP_NM" />
-        <result property="sexCd"		column="SEX_CD" />
-        <result property="sexNm"		column="SEX_NM" />
+        <result property="sexCd"			column="SEX_CD" />
+        <result property="sexNm"			column="SEX_NM" />
         <result property="birthDate"		column="BIRTH_DATE" />
-        <result property="coRegNo"		column="CO_REG_NO" />
+        <result property="coRegNo"			column="CO_REG_NO" />
         <result property="lastCounDate"		column="LAST_COUN_DATE" />
-        <result property="regDate"		column="REG_DATE" />
-         <result property="outValue"		column="outValue" />
+        <result property="regDate"			column="REG_DATE" />
+		<result property="outValue"			column="outValue" />
     </resultMap>
 	
       <select id="selectCustomerList" parameterType="com.coretree.defaultconfig.main.model.Customer"  resultMap="resultMap">
@@ -64,7 +64,7 @@
 		 </if>  
 		 <if test="sexCd != '' ">
 		 	AND SEX_CD = #{sexCd}
-		 </if>  
+		 </if>
 		 <if test="regDate != ''">
 			<![CDATA[
 				AND REG_DATE between #{regDate} and #{regDate2}

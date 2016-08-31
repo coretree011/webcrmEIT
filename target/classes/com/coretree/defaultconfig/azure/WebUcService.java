@@ -40,6 +40,8 @@ import com.coretree.defaultconfig.mapper.Customer2;
 import com.coretree.defaultconfig.mapper.Customer2Mapper;
 import com.coretree.defaultconfig.mapper.SmsMapper_sample;
 import com.coretree.defaultconfig.mapper.Sms_sample;
+import com.coretree.defaultconfig.statis.mapper.CallStatMapper;
+import com.coretree.defaultconfig.statis.model.CallStat;
 import com.coretree.event.HaveGotUcMessageEventArgs;
 import com.coretree.event.IEventHandler;
 import com.coretree.event.IEventHandler2;
@@ -78,11 +80,13 @@ public class WebUcService implements
 //	@Autowired
 //	private MemberMapper memberMapper;
 	@Autowired
-	private OrganizationMapper organizationMapper;	
+	private OrganizationMapper organizationMapper;
 	@Autowired
 	private Customer2Mapper custMapper;
+//	@Autowired
+//	private CallMapper callMapper;
 	@Autowired
-	private CallMapper callMapper;
+	private CallStatMapper callstatMapper;
 	@Autowired
 	private SmsMapper_sample smsMapper;
 	@Autowired
@@ -94,7 +98,7 @@ public class WebUcService implements
 	//@Autowired
 	//private Principal pInfo;
 	
-	private List<Call> curcalls = new ArrayList<Call>();
+	private List<CallStat> curcalls = new ArrayList<CallStat>();
 	private static List<Organization> organizations;
 	private List<Sms_sample> smsrunning = new ArrayList<Sms_sample>();
 	
@@ -426,41 +430,42 @@ public class WebUcService implements
 				}
 				break;
 			case Const4pbx.UC_REPORT_EXT_STATE:
-				Call call = null;
+				CallStat callstat = null;
 
 				switch (data.getDirect()) {
 					case Const4pbx.UC_DIRECT_INCOMING:
 
 						r.lock();
 						try {
-							call = curcalls.stream().filter(x -> x.getExtension().equals(data.getCallee())
-									&& x.getCust_tel().equals(data.getCaller())).findFirst().get();
+							callstat = curcalls.stream().filter(x -> x.getCallId().equals(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec()))).findFirst().get();
 						} catch (NullPointerException | NoSuchElementException e) {
-							call = null;
+							callstat = null;
 						} finally {
 							r.unlock();
 						}
 
 						switch (data.getStatus()) {
 							case Const4pbx.UC_CALL_STATE_IDLE:
-								if (call != null) {
-									if (call.getStatus() == Const4pbx.UC_CALL_STATE_RINGING) {
-										callMapper.modiEnd(call);
-
+								if (callstat != null) {
+									if (callstat.getStatus() == Const4pbx.UC_CALL_STATE_RINGING) {
+										callstat.setAgentTransYn("N");
+										//callstatMapper.updateCallStatEnd(callstat);
+										
 										w.lock();
 										try {
-											curcalls.removeIf(x -> x.getCust_tel().equals(data.getCaller()) && x.getExtension().equals(data.getCallee()));
+											curcalls.removeIf(x -> x.getCallId().equals(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec())));
 										} finally {
 											w.unlock();
 										}
-									} else if (call.getStatus() == Const4pbx.UC_CALL_STATE_BUSY) {
-										call.setStatus(data.getStatus());
-										call.setEnddate(new Timestamp(System.currentTimeMillis()));
-										callMapper.modiStatus(call);
+									} else if (callstat.getStatus() == Const4pbx.UC_CALL_STATE_BUSY) {
+										callstat.setStatus(data.getStatus());
+										callstat.setAgentTransYn("Y");
+										callstat.setCallStatSec((int)((new Date().getTime() - callstat.getSdate().getTime()) / 1000));
+										//callstatMapper.updateCallStatEnd(callstat);
 
 										w.lock();
 										try {
-											curcalls.removeIf(x -> x.getCust_tel().equals(data.getCaller()) && x.getExtension().equals(data.getCallee()));
+											curcalls.removeIf(x -> x.getCallId().equals(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec())));
 										} finally {
 											w.unlock();
 										}
@@ -471,41 +476,50 @@ public class WebUcService implements
 								break;
 							case Const4pbx.UC_CALL_STATE_INVITING:
 							case Const4pbx.UC_CALL_STATE_RINGING:
-								if (call == null) {
-									call = new Call();
-									call.setExtension(data.getExtension());
-									call.setCust_tel(data.getCaller());
-									call.setStatus(data.getStatus());
-									call.setDirect(data.getDirect());
-									call.setUsername(organization.getEmpNo());
+								if (callstat == null) {
+									callstat = new CallStat();
+									callstat.setCallId(String.valueOf(data.getStartCallUSec()) + String.valueOf(data.getStartCallUSec()));
+									callstat.setExtension(data.getExtension());
+									callstat.setTelNo(data.getCaller());
+									callstat.setStatus(data.getStatus());
+									callstat.setCallTypCd(String.valueOf(data.getDirect()));
+									callstat.setEmpNo(organization.getEmpNo());
+									
+									LocalDateTime localdatetime = LocalDateTime.now();
+									DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
 
+									callstat.setRegDate(localdatetime.format(df));
+							
+									df = DateTimeFormatter.ofPattern("HHmmss");
+									callstat.setRegHms(localdatetime.format(df));
+									
 									w.lock();
 									try {
-										curcalls.add(call);
+										curcalls.add(callstat);
 									} finally {
 										w.unlock();
 									}
 
-									callMapper.add(call);
+									//callstatMapper.insCallStat(callstat);
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 									//System.err.println("RINGING curcalls.size(): " + curcalls.size());
 								}
 								break;
 							case Const4pbx.UC_CALL_STATE_BUSY:
-								if (call != null) {
-									call.setStartdate(new Timestamp(System.currentTimeMillis()));
-									call.setStatus(data.getStatus());
-									callMapper.modiStatus(call);
+								if (callstat != null) {
+									callstat.setStatus(data.getStatus());
+									callstat.setSdate(new Date());
+									callstat.setAgentTransYn("Y");
+									
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 									// System.err.println("BUSY curcalls.size(): " + curcalls.size());
 								}
 								break;
 						}
 
-						if (call != null) {
-							call.setStatus(data.getStatus());
+						if (callstat != null) {
+							callstat.setStatus(data.getStatus());
 
-							// Member member = memberMapper.selectByExt(data.getExtension());
 							if (organization != null) {
 								Customer2 cust = custMapper.findByExt(data.getCaller());
 
@@ -517,7 +531,7 @@ public class WebUcService implements
 									payload.calleename = organization.getEmpNo();
 								}
 
-								payload.call_idx = call.getIdx();
+								payload.call_idx = Long.valueOf(callstat.getCallId());
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", payload);
 							}
 						}
@@ -525,81 +539,88 @@ public class WebUcService implements
 					case Const4pbx.UC_DIRECT_OUTGOING:
 						r.lock();
 						try {
-							call = curcalls.stream().filter(x -> x.getExtension().equals(data.getExtension())
-									&& x.getCust_tel().equals(data.getCallee())).findFirst().get();
+							callstat = curcalls.stream().filter(x -> x.getCallId().equals(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec()))).findFirst().get();
 						} catch (NullPointerException | NoSuchElementException e) {
-							call = null;
+							callstat = null;
 						} finally {
 							r.unlock();
 						}
 
 						switch (data.getStatus()) {
 							case Const4pbx.UC_CALL_STATE_IDLE:
-								if (call != null) {
-									if (call.getStatus() == Const4pbx.UC_CALL_STATE_RINGING) {
-										callMapper.modiEnd(call);
+								if (callstat != null) {
+									if (callstat.getStatus() == Const4pbx.UC_CALL_STATE_RINGING) {
+										callstat.setAgentTransYn("N");
+										//callstatMapper.updateCallStatEnd(callstat);
 
 										w.lock();
 										try {
-											curcalls.removeIf(x -> x.getCust_tel().equals(data.getCaller()) && x.getExtension().equals(data.getCallee()));
+											curcalls.removeIf(x -> x.getTelNo().equals(data.getCaller()) && x.getExtension().equals(data.getCallee()));
 										} finally {
 											w.unlock();
 										}
-									} else if (call.getStatus() == Const4pbx.UC_CALL_STATE_BUSY) {
-										call.setStatus(data.getStatus());
-										call.setEnddate(new Timestamp(System.currentTimeMillis()));
-										callMapper.modiStatus(call);
+									} else if (callstat.getStatus() == Const4pbx.UC_CALL_STATE_BUSY) {
+										callstat.setStatus(data.getStatus());
+										callstat.setAgentTransYn("Y");
+										callstat.setCallStatSec((int)((new Date().getTime() - callstat.getSdate().getTime()) / 1000));
+										//callstatMapper.updateCallStatEnd(callstat);
 
 										w.lock();
 										try {
-											curcalls.removeIf(x -> x.getCust_tel().equals(data.getCallee()) && x.getExtension().equals(data.getExtension()));
+											curcalls.removeIf(x -> x.getCallId().equals(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec())));
 										} finally {
 											w.unlock();
 										}
 									}
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
-									System.err.println("IDLE curcalls.size(): " + curcalls.size());
+									// System.err.println("IDLE curcalls.size(): " + curcalls.size());
 								}
 								break;
 							case Const4pbx.UC_CALL_STATE_INVITING:
-								if (call == null) {
+								if (callstat == null) {
 									// Member member = memberMapper.selectByExt(data.getExtension());
 
-									call = new Call();
-									call.setExtension(data.getExtension());
-									call.setCust_tel(data.getCallee());
-									call.setStartdate(new Timestamp(System.currentTimeMillis()));
-									call.setStatus(data.getStatus());
-									call.setDirect(data.getDirect());
-									call.setUsername(organization.getEmpNo());
+									callstat = new CallStat();
+									callstat.setCallId(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec()));
+									callstat.setExtension(data.getExtension());
+									callstat.setTelNo(data.getCallee());
+									callstat.setStatus(data.getStatus());
+									callstat.setCallTypCd(String.valueOf(data.getDirect()));
+									callstat.setEmpNo(organization.getEmpNo());
+									LocalDateTime localdatetime = LocalDateTime.now();
+									
+									DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+									callstat.setRegDate(localdatetime.format(df));
+							
+									df = DateTimeFormatter.ofPattern("HHmmss");
+									callstat.setRegHms(localdatetime.format(df));
 
 									w.lock();
 									try {
-										curcalls.add(call);
+										curcalls.add(callstat);
 									} finally {
 										w.unlock();
 									}
 
-									callMapper.add(call);
+									//callstatMapper.insCallStat(callstat);
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 								}
 								break;
 							case Const4pbx.UC_CALL_STATE_BUSY:
-								if (call != null) {
-									call.setStartdate(new Timestamp(System.currentTimeMillis()));
-									call.setStatus(data.getStatus());
-									callMapper.modiStatus(call);
+								if (callstat != null) {
+									callstat.setSdate(new Date());
+									callstat.setStatus(data.getStatus());
+									
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 									System.err.println("BUSY curcalls.size(): " + curcalls.size());
 								}
 								break;
 						}
 
-						if (call != null) {
-							call.setStatus(data.getStatus());
+						if (callstat != null) {
+							callstat.setStatus(data.getStatus());
 
-							// Member member = memberMapper.selectByExt(data.getExtension());
-							
 							if (organization != null) {
 								Customer2 cust = custMapper.findByExt(data.getCallee());
 
@@ -611,7 +632,7 @@ public class WebUcService implements
 									payload.callername = organization.getEmpNo();
 								}
 
-								payload.call_idx = call.getIdx();
+								payload.call_idx = Long.valueOf(callstat.getCallId());
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", payload);
 							}
 						}
