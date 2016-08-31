@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.ByteOrder;
 import java.security.Principal;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,8 +33,6 @@ import com.coretree.defaultconfig.main.mapper.UserLogMapper;
 import com.coretree.defaultconfig.main.model.Callback;
 import com.coretree.defaultconfig.main.model.OrgStatatistics;
 import com.coretree.defaultconfig.main.model.UserLog;
-import com.coretree.defaultconfig.mapper.Call;
-import com.coretree.defaultconfig.mapper.CallMapper;
 import com.coretree.defaultconfig.mapper.Customer2;
 import com.coretree.defaultconfig.mapper.Customer2Mapper;
 import com.coretree.defaultconfig.mapper.SmsMapper_sample;
@@ -449,7 +446,7 @@ public class WebUcService implements
 								if (callstat != null) {
 									if (callstat.getStatus() == Const4pbx.UC_CALL_STATE_RINGING) {
 										callstat.setAgentTransYn("N");
-										//callstatMapper.updateCallStatEnd(callstat);
+										callstatMapper.updateCallStatEnd(callstat);
 										
 										w.lock();
 										try {
@@ -461,7 +458,7 @@ public class WebUcService implements
 										callstat.setStatus(data.getStatus());
 										callstat.setAgentTransYn("Y");
 										callstat.setCallStatSec((int)((new Date().getTime() - callstat.getSdate().getTime()) / 1000));
-										//callstatMapper.updateCallStatEnd(callstat);
+										callstatMapper.updateCallStatEnd(callstat);
 
 										w.lock();
 										try {
@@ -500,7 +497,7 @@ public class WebUcService implements
 										w.unlock();
 									}
 
-									//callstatMapper.insCallStat(callstat);
+									callstatMapper.insCallStat(callstat);
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 									//System.err.println("RINGING curcalls.size(): " + curcalls.size());
 								}
@@ -551,7 +548,7 @@ public class WebUcService implements
 								if (callstat != null) {
 									if (callstat.getStatus() == Const4pbx.UC_CALL_STATE_RINGING) {
 										callstat.setAgentTransYn("N");
-										//callstatMapper.updateCallStatEnd(callstat);
+										callstatMapper.updateCallStatEnd(callstat);
 
 										w.lock();
 										try {
@@ -563,7 +560,7 @@ public class WebUcService implements
 										callstat.setStatus(data.getStatus());
 										callstat.setAgentTransYn("Y");
 										callstat.setCallStatSec((int)((new Date().getTime() - callstat.getSdate().getTime()) / 1000));
-										//callstatMapper.updateCallStatEnd(callstat);
+										callstatMapper.updateCallStatEnd(callstat);
 
 										w.lock();
 										try {
@@ -603,7 +600,7 @@ public class WebUcService implements
 										w.unlock();
 									}
 
-									//callstatMapper.insCallStat(callstat);
+									callstatMapper.insCallStat(callstat);
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 								}
 								break;
