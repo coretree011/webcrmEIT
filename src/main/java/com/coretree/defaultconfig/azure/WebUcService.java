@@ -74,27 +74,24 @@ public class WebUcService implements
     @Autowired
     private WebUcServiceConfig configs;
 
-//	@Autowired
-//	private MemberMapper memberMapper;
-	@Autowired
+    @Autowired
 	private OrganizationMapper organizationMapper;
-	@Autowired
+
+    @Autowired
 	private Customer2Mapper custMapper;
-//	@Autowired
-//	private CallMapper callMapper;
-	@Autowired
+
+    @Autowired
 	private CallStatMapper callstatMapper;
-	@Autowired
+
+    @Autowired
 	private SmsMapper_sample smsMapper;
-	@Autowired
+
+    @Autowired
 	private CallbackMapper cbmapper;
-	@Autowired
+
+    @Autowired
 	private UserLogMapper userlogmapper;
-	
-	//
-	//@Autowired
-	//private Principal pInfo;
-	
+
 	private List<CallStat> curcalls = new ArrayList<CallStat>();
 	private static List<Organization> organizations;
 	private List<Sms_sample> smsrunning = new ArrayList<Sms_sample>();
@@ -475,7 +472,7 @@ public class WebUcService implements
 							case Const4pbx.UC_CALL_STATE_RINGING:
 								if (callstat == null) {
 									callstat = new CallStat();
-									callstat.setCallId(String.valueOf(data.getStartCallUSec()) + String.valueOf(data.getStartCallUSec()));
+									callstat.setCallId(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec()));
 									callstat.setExtension(data.getExtension());
 									callstat.setTelNo(data.getCaller());
 									callstat.setStatus(data.getStatus());
@@ -484,7 +481,6 @@ public class WebUcService implements
 									
 									LocalDateTime localdatetime = LocalDateTime.now();
 									DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
-
 									callstat.setRegDate(localdatetime.format(df));
 							
 									df = DateTimeFormatter.ofPattern("HHmmss");
@@ -497,9 +493,9 @@ public class WebUcService implements
 										w.unlock();
 									}
 
-									callstatMapper.insCallStat(callstat);
+									callstatMapper.insertCallStat(callstat);
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
-									//System.err.println("RINGING curcalls.size(): " + curcalls.size());
+									// System.err.println("INCOMMING Ringing curcalls.size(): " + curcalls.size());
 								}
 								break;
 							case Const4pbx.UC_CALL_STATE_BUSY:
@@ -528,7 +524,7 @@ public class WebUcService implements
 									payload.calleename = organization.getEmpNo();
 								}
 
-								payload.call_idx = Long.valueOf(callstat.getCallId());
+								payload.callid = callstat.getCallId();
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", payload);
 							}
 						}
@@ -575,7 +571,6 @@ public class WebUcService implements
 								break;
 							case Const4pbx.UC_CALL_STATE_INVITING:
 								if (callstat == null) {
-									// Member member = memberMapper.selectByExt(data.getExtension());
 
 									callstat = new CallStat();
 									callstat.setCallId(String.valueOf(data.getStartCallSec()) + String.valueOf(data.getStartCallUSec()));
@@ -584,12 +579,11 @@ public class WebUcService implements
 									callstat.setStatus(data.getStatus());
 									callstat.setCallTypCd(String.valueOf(data.getDirect()));
 									callstat.setEmpNo(organization.getEmpNo());
-									LocalDateTime localdatetime = LocalDateTime.now();
 									
+									LocalDateTime localdatetime = LocalDateTime.now();
 									DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
-
 									callstat.setRegDate(localdatetime.format(df));
-							
+									
 									df = DateTimeFormatter.ofPattern("HHmmss");
 									callstat.setRegHms(localdatetime.format(df));
 
@@ -600,7 +594,7 @@ public class WebUcService implements
 										w.unlock();
 									}
 
-									callstatMapper.insCallStat(callstat);
+									callstatMapper.insertCallStat(callstat);
 									this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 								}
 								break;
@@ -629,7 +623,7 @@ public class WebUcService implements
 									payload.callername = organization.getEmpNo();
 								}
 
-								payload.call_idx = Long.valueOf(callstat.getCallId());
+								payload.callid = callstat.getCallId();
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", payload);
 							}
 						}
