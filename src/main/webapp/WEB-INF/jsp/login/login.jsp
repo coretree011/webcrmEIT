@@ -24,7 +24,7 @@ $(document).ready(function() {
 			modal : true
 		});
  
-		win_12.show();
+		win_12.show();  
 		$("input[name=j_username]").focus();
 	});
 });
