@@ -16,14 +16,14 @@ $(document).ready(function() {
 			//width : 362,
 			//height : 125,
 			width : 500,
-			height : 300,
+			height : 300, 
 			left : "8%",
 			top : 50,
 			resize : false,
 			move : true,
 			modal : true
 		});
-
+ 
 		win_12.show();
 		$("input[name=j_username]").focus();
 	});
@@ -33,7 +33,7 @@ var users = {
 		username : "",
 		empNo : "",
 		password : "",
-		newPwd : "",
+		newPwd : "", 
 	};
 
 	function login() {
