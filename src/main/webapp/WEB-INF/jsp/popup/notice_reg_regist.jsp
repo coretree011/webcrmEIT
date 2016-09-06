@@ -84,11 +84,11 @@ jui.ready([ "grid.table"], function(table) {
 				data : JSON.stringify(paramNoticeInsert),
 				success : function(result) {
 					if(result == 1){
-						msgboxActive('공지사항 등록', '\"저장\"이 완료되었습니다.');
+						msgboxActive('공지사항 등록', '게시글 \"저장\"이 완료되었습니다.');
 						//alert("저장이 완료되었습니다");
 						$("#win_15").hide();
 					}else if(result == 0){
-						msgboxActive('공지사항 등록', '\"저장\"이 완료되지 않았습니다. 다시 시도해주세요.');
+						msgboxActive('공지사항 등록', '게시글 \"저장\"이 완료되지 않았습니다. 다시 시도해주세요.');
 						//alert("저장이 되지 않았습니다");
 					}	
 					$("#bt_noticeSelect").click();

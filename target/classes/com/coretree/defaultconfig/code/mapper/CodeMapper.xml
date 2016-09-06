@@ -9,6 +9,12 @@
         <result property="note"			column="NOTE" />
     </resultMap>
 	
+	<resultMap id="resultMap2" type="com.coretree.defaultconfig.code.model.CodeLarge">
+        <result property="lcd"		column="LCD" />
+        <result property="lcdNm"			column="LCD_NM" />
+        <result property="useYn"			column="USE_YN" />
+    </resultMap>
+    
     <select id="selectCode" parameterType="com.coretree.defaultconfig.code.model.Code"  resultMap="resultMap">
     	SELECT  * 
     	FROM TCODE_SMALL
@@ -45,4 +51,50 @@
 		 SCD = #{scd}
 		 AND LCD = '1007' 
  	</update>
+ 	
+ 	<select id="selectCodeLarge" parameterType="com.coretree.defaultconfig.code.model.CodeLarge"  resultMap="resultMap2">
+    	SELECT  * 
+    	FROM TCODE_LARGE
+    	WHERE 1=1
+    		AND USE_YN = 'Y'
+ 		ORDER BY LCD
+    </select>
+    
+    <select id="selectCodeSmall" parameterType="com.coretree.defaultconfig.code.model.Code"  resultMap="resultMap">
+    	SELECT  * 
+    	FROM TCODE_SMALL
+    	WHERE 1=1
+    		AND LCD = #{lcd}
+ 		ORDER BY SCD
+    </select>
+    
+    <select id="maxCode" parameterType="com.coretree.defaultconfig.code.model.Code"  resultMap="resultMap">
+    	SELECT MAX(SCD) as SCD 
+    	FROM TCODE_SMALL
+		WHERE LCD = #{lcd}
+    </select>
+    
+    <insert id="codeInsert" parameterType="com.coretree.defaultconfig.code.model.Code">
+   		INSERT 
+		INTO TCODE_SMALL 
+       	(LCD, SCD, SCD_NM, USE_YN)
+       	VALUES 
+       	( 
+         #{lcd}
+         ,#{scd}
+         ,#{scdNm}
+         ,#{useYn} 
+       	)   
+    </insert>
+    
+    <update id="codeModify" parameterType="com.coretree.defaultconfig.code.model.Code">
+	    UPDATE 
+		  TCODE_SMALL  
+		SET 
+		  SCD_NM = #{scdNm},
+		  USE_YN = #{useYn}
+		WHERE 
+			LCD = #{lcd}
+			AND SCD = #{scd}
+    </update>
 </mapper>

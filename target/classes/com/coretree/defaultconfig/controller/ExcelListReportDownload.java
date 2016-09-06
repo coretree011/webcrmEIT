@@ -295,12 +295,12 @@ public class ExcelListReportDownload extends AbstractExcelView {
 			cell = row.createCell(0);
 			row.setHeight((short) (32.35 * 25));
 
-			for (int c = 0; c <= 11; c++) {
+			for (int c = 0; c <= 16; c++) {
 				cell = row.createCell(c);
 				cell.setCellValue("고객리스트");
 				cell.setCellStyle(hStyle);
 			}
-			sheet.addMergedRegion(new Region((short) rownum, (short) 0, (short) rownum, (short) 11));
+			sheet.addMergedRegion(new Region((short) rownum, (short) 0, (short) rownum, (short) 16));
 
 			rownum = rownum + 1;
 			
@@ -353,11 +353,11 @@ public class ExcelListReportDownload extends AbstractExcelView {
 			cell.setCellStyle(Ti_T_C_T_style);
 
 			cell = row.createCell(3);
-			cell.setCellValue("고객번호");
+			cell.setCellValue("고객명");
 			cell.setCellStyle(Ti_T_C_T_style);
 
 			cell = row.createCell(4);
-			cell.setCellValue("고객명");
+			cell.setCellValue("사업자번호");
 			cell.setCellStyle(Ti_T_C_T_style);
 
 			cell = row.createCell(5);
@@ -385,6 +385,26 @@ public class ExcelListReportDownload extends AbstractExcelView {
 			cell.setCellStyle(Ti_T_C_T_style);
 			
 			cell = row.createCell(11);
+			cell.setCellValue("성별");
+			cell.setCellStyle(Ti_T_C_T_style);
+			
+			cell = row.createCell(12);
+			cell.setCellValue("생년월일");
+			cell.setCellStyle(Ti_T_C_T_style);
+			
+			cell = row.createCell(13);
+			cell.setCellValue("고객등급");
+			cell.setCellStyle(Ti_T_C_T_style);
+			
+			cell = row.createCell(14);
+			cell.setCellValue("고객유형");
+			cell.setCellStyle(Ti_T_C_T_style);
+			
+			cell = row.createCell(15);
+			cell.setCellValue("인지경로");
+			cell.setCellStyle(Ti_T_C_T_style);
+			
+			cell = row.createCell(16);
 			cell.setCellValue("비고");
 			cell.setCellStyle(Ti_T_C_T_style);
 
@@ -407,11 +427,11 @@ public class ExcelListReportDownload extends AbstractExcelView {
 			cell.setCellStyle(C_D_C_T_style);
 			
 			cell = row.createCell(3);
-			cell.setCellValue(excelList.getJSONObject(i).getString("custNo"));
+			cell.setCellValue(excelList.getJSONObject(i).getString("custNm"));
 			cell.setCellStyle(C_D_C_T_style);
 			
 			cell = row.createCell(4);
-			cell.setCellValue(excelList.getJSONObject(i).getString("custNm"));
+			cell.setCellValue(excelList.getJSONObject(i).getString("coRegNo"));
 			cell.setCellStyle(C_D_C_T_style);
 			
 			cell = row.createCell(5);
@@ -439,6 +459,26 @@ public class ExcelListReportDownload extends AbstractExcelView {
 			cell.setCellStyle(C_T_L_T_style);
 			
 			cell = row.createCell(11);
+			cell.setCellValue(excelList.getJSONObject(i).getString("sexCd"));
+			cell.setCellStyle(C_D_C_T_style);
+
+			cell = row.createCell(12);
+			cell.setCellValue(excelList.getJSONObject(i).getString("birthDate"));
+			cell.setCellStyle(C_D_C_T_style);
+
+			cell = row.createCell(13);
+			cell.setCellValue(excelList.getJSONObject(i).getString("gradeCd"));
+			cell.setCellStyle(C_D_C_T_style);
+
+			cell = row.createCell(14);
+			cell.setCellValue(excelList.getJSONObject(i).getString("custTypCd"));
+			cell.setCellStyle(C_D_C_T_style);
+
+			cell = row.createCell(15);
+			cell.setCellValue(excelList.getJSONObject(i).getString("recogTypCd"));
+			cell.setCellStyle(C_D_C_T_style);
+
+			cell = row.createCell(16);
 			cell.setCellValue(excelList.getJSONObject(i).getString("custNote"));
 			cell.setCellStyle(C_T_L_T_style);
 			

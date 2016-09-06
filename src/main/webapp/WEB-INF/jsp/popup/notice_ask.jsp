@@ -20,11 +20,11 @@ jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 	tab_noticeList = xtable("#tab_noticeList", {
 		resize : true,
 		scrollHeight: 400,
-		width : 1105,
-        scrollWidth: 1100, 
+		width : 1100,
+        scrollWidth: 1095, 
         buffer: "s-page",
         bufferCount: 100,
-		 event: {
+		event: {
 	 	    	click: function(row, e) {
 	 	    		var id = "#" + row.index + "_notice";
 	 	    		if($(id).hasClass("selected")) {
@@ -34,6 +34,18 @@ jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 						$(id).addClass("selected");
 						$(id).find('input:checkbox[name="notice_chk"]').prop('checked', true);
 	 	    		}
+	 	    	},
+	 	    	 dblclick: function(row, e){
+	 	    		var id2 = "#" + row.index + "_notice";
+	 	    		var bbsSeq = document.querySelectorAll(".bbsSeq")[row.index].innerHTML;
+	 	    		var bbsSbj = document.querySelectorAll(".bbsSbj")[row.index].innerHTML;
+	 	    		var bbsNote = document.querySelectorAll(".bbsNote")[row.index].innerHTML;
+
+	 	    		noticeComment(bbsSeq, bbsSbj, bbsNote);
+	 			    $(id2).addClass("selected");
+	 			    $(id2).find('input:checkbox[name="notice_chk"]').prop('checked', true);
+	 			    
+	 			   document.getElementById("noticeNewYN").value = id2;
 	 	    	}
 		 },
 	   tpl: {
@@ -122,11 +134,11 @@ jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 				data : JSON.stringify(paramNoticeDelete),
 				success : function(result) {
 					if(result>=1){
-						msgboxActive('공지사항', '\"삭제\"가 완료되었습니다.');
+						msgboxActive('공지사항', '게시글 \"삭제\"가 완료되었습니다.');
 						//alert("삭제가 완료되었습니다");
 						$("#bt_noticeSelect").click();
 					}else {
-						msgboxActive('공지사항', '\"삭제\"가 완료되지 않았습니다. 다시 시도해주세요.');
+						msgboxActive('공지사항', '게시글 \"삭제\"가 완료되지 않았습니다. 다시 시도해주세요.');
 						//alert("삭제가 완료되지 않았습니다. 다시 시도해주세요.");
 					}
 				}
@@ -251,7 +263,6 @@ function noticeComment(bbsSeq, bbsSbj, bbsNote){
 			note = replaceAll(note, "<br>", "\r\n");
 			note = replaceAll(replaceAll(note, "&quot;", "\""),"\`","\'");
 			
-			win_17.show();
 			document.getElementById("txt_noticeCommentSbj").value = sbj;
 			document.getElementById("txt_noticeCommentNote").value = note;
 			
@@ -267,6 +278,8 @@ function noticeComment(bbsSeq, bbsSbj, bbsNote){
 			document.getElementById("bt_noticeReply").value = bbsSeq;
 			document.getElementById("bt_noticeReply").click();  
 			document.getElementById("txt_noticeReply").value = "";
+			
+			win_17.show();
 		}
 	});
 	
@@ -304,25 +317,28 @@ $(document).ready(function() {
     $("#notice_checkall").click(function(){
         if($("#notice_checkall").prop("checked")){
             $("input[name=notice_chk]").prop("checked",true);
-            $(".tr03").addClass("selected");
+            $(".trNotice").addClass("selected");
         }else{
             $("input[name=notice_chk]").prop("checked",false);
-            $("tr.selected").removeClass("selected");
+            $(".trNotice.selected").removeClass("selected");
         }
     });
     
 });
+/* ondblClick="noticeComment('<!= bbsSeq !>','<!= bbsSbj !>','<!= bbsNote !>'); */
 </script>
 <script id="tpl_row_notice" type="text/template">
-	<tr id="<!= row.index !>_notice" class="tr03" ondblClick="noticeComment('<!= bbsSeq !>','<!= bbsSbj !>','<!= bbsNote !>');">
+	<tr id="<!= row.index !>_notice" class="trNotice">
 		<td><input type="checkbox" name="notice_chk" value="<!= bbsSeq !>"/></td>
 		<td align ="center"><!= num !></td>
-		<td align ="left"><!= bbsSbj !></td>
+		<td align ="left" class="bbsSbj"><!= bbsSbj !></td>
 		<td><!= regEmpNm !></td>
 		<td><!= regDate !> <!= regHms !></td>
 		<td><!= fileYN !></td>
 		<td><!= commentYN !></td>
 		<td><!= newYN !></td>
+		<td style="display:none;" class="bbsSeq"><!= bbsSeq !></td>
+		<td style="display:none;" class="bbsNote"><!= bbsNote !></td>
 	</tr>
 </script>
 <script id="tpl_none_notice" type="text/template">
@@ -335,8 +351,14 @@ $(document).ready(function() {
     <a href="#" class="page" onclick="fn_page();"><!= pages[i] !></a>
     <! } !>
 </script>
+<style>
+#notice_top_tr td {
+	padding-bottom: 5px;
+}
+</style>
 <div class="head">
 <input type="hidden" id="noticeNew" /> 
+<input type="hidden" id="noticeNewYN" />
 <input type="hidden" id="bt_noticeReply" />
 <input type="hidden" id="bt_roadFileName" />
 <input type="hidden" id="txt_noticeNo" value="<%= session.getAttribute("empNo") %>" />
@@ -355,7 +377,7 @@ $(document).ready(function() {
 <div class="body" id="notice">
 	<table width="100%" border="0" align="center" cellpadding="0"
 		cellspacing="0" style="margin-bottom: 2px;">
-		<tr>
+		<tr id="notice_top_tr">
 			<td class="td01">작성일자</td>
 			<td class="td02">
 				<input type="text" class="input mini" id="txt_noticeStartDate" style="width: 82px" />
@@ -363,7 +385,7 @@ $(document).ready(function() {
 			</td>
 			<td class="td01">검색입력</td>
 			<td width="250"><span class="td02">
-				<select id="select_noticeSearch">
+				<select id="select_noticeSearch" style="height:22px;">
 					<option value="0"></optin>
 					<option value="1">제목</optin>
 					<option value="2">내용</optin>
@@ -373,7 +395,7 @@ $(document).ready(function() {
 				<input type="hidden" id="selectSearchText"/>
 			</span></td>
 			<td width="25%"></td>
-			<td width="230" align="right" class="td01">
+			<td width="230" align="right" class="td01" style="padding-right:9px">
 				<a class="btn small focus" id="bt_noticeSelect">조 회</a> 
 				<a class="btn small focus" id="noticeSingUp" onclick="win_15.show()">등 록</a> 
 				<a class="btn small focus" id="bt_noticeModifyPopup">수 정</a> 
@@ -381,7 +403,7 @@ $(document).ready(function() {
 			</td>
 		</tr>
 	</table>
-	<table class="table classic hover" id="tab_noticeList" width="100%">
+	<table class="table classic hover" id="tab_noticeList" width="100%" style="padding-left:5px;">
 		<thead>
 			<tr>
 				<th style="width:61px;"><input type="checkbox" id="notice_checkall" /></th>
@@ -404,7 +426,7 @@ $(document).ready(function() {
 	    </div>
 	</div> -->
 	
-	<div id="paging_notice" class="paging" style="margin-top: 3px;">
+	<div id="paging_notice" class="paging" style="margin-top: 4px; margin-right: 4px; width:1092px;">
 	    <a href="#" class="prev" style="left:0" onclick="fn_page();">이전</a>
 	    <div class="list"></div>
 	    <a href="#" class="next" onclick="fn_page();">다음</a>

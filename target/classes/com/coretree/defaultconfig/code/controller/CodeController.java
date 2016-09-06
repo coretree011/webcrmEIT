@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.coretree.defaultconfig.bbs.model.BbsMgt;
 import com.coretree.defaultconfig.code.mapper.CodeMapper;
 import com.coretree.defaultconfig.code.model.Code;
-import com.coretree.defaultconfig.main.model.Customer;
-import com.coretree.defaultconfig.setting.model.Torganization;
+import com.coretree.defaultconfig.code.model.CodeLarge;
+import com.coretree.defaultconfig.setting.model.SmsCategory;
 
 /**
  * Test를 위한 컨트롤러 클래스
@@ -101,6 +102,73 @@ public class CodeController {
 		}
 		return result;
 	}
+	
+	
+	//=========================================================
+	//기타 코드관리 팝업페이지
+	//=========================================================
+	
+	/**
+	 * TCODE_LARGE LIST
+	 * 
+	 * @param condition
+	 * @return
+	 */
+	
+	@RequestMapping(path = "/popup/codeLargeList", method = RequestMethod.POST)
+	public List<CodeLarge> codeLargeList(@RequestBody CodeLarge param, HttpServletRequest request) throws Exception {
+		List<CodeLarge> code = codeMapper.selectCodeLarge(param);
+		return code;
+	}
+	
+	/**
+	 * TCODE_SMALL LIST
+	 * 
+	 * @param condition
+	 * @return
+	 */
+	
+	@RequestMapping(path = "/popup/codeSmallList", method = RequestMethod.POST)
+	public List<Code> codeSmallList(@RequestBody Code param, HttpServletRequest request) throws Exception {
+		List<Code> code = codeMapper.selectCodeSmall(param);
+		return code;
+	}
+	
+	//TCODE_SMALL 에서 코드 MAX값 가져오기
+	@RequestMapping(path="/popup/codeSmallMax", method = RequestMethod.POST)
+	public Code maxCode(@RequestBody Code searchVO, ModelMap model, HttpServletRequest request) throws Exception {
+		Code code = codeMapper.maxCode(searchVO);	
+		
+		return code;
+	}
+	
+	//TCODE_SMALL 저장
+	@RequestMapping(path="/popup/codeSmallInsert", method = RequestMethod.POST)
+	public long codeInsert(@RequestBody Code searchVO, HttpSession session) {
+		long result;
+		try{
+			result = codeMapper.codeInsert(searchVO);	
+		}catch(Exception e){
+			result = 0;
+		}
+		return result;
+	}
+	
+	//TCODE_SMALL 수정
+	@RequestMapping(path="/popup/codeSmallModify", method = RequestMethod.POST)
+	public long codeModify(@RequestBody Code searchVO, HttpSession session) {
+		long result;
+		try{
+			result = codeMapper.codeModify(searchVO);	
+		}catch(Exception e){
+			result = 0;
+		}
+		return result;
+	}
+	
+	
+	
+	
 	
 }
 

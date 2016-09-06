@@ -74,7 +74,9 @@ public class CustmoerListReportDownload extends AbstractExcelView {
 			
 			sheet.setColumnWidth((short) 9, (short) 40 * 300);
 			
-			for (int i = 10; i <= 13; i++) {
+			sheet.setColumnWidth((short) 10, (short) 12 * 300);
+			
+			for (int i = 11; i <= 13; i++) {
 				sheet.setColumnWidth((short) i, (short) 10 * 300);
 			}
 			
@@ -309,12 +311,12 @@ public class CustmoerListReportDownload extends AbstractExcelView {
 			cell = row.createCell(0);
 			row.setHeight((short) (32.35 * 25));
 
-			for (int c = 0; c <= 10; c++) {
+			for (int c = 0; c <= 18; c++) {
 				cell = row.createCell(c);
 				cell.setCellValue("고객리스트");
 				cell.setCellStyle(hStyle);
 			}
-			sheet.addMergedRegion(new Region((short) rownum, (short) 0, (short) rownum, (short) 10));
+			sheet.addMergedRegion(new Region((short) rownum, (short) 0, (short) rownum, (short) 18));
 
 			rownum = rownum + 1;
 			

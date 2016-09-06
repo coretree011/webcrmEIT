@@ -44,9 +44,9 @@ jui.ready([ "ui.window" ], function(win) {
 <body class="jui">
 	<table width="100%" border="0" cellspacing="0" cellpadding="0">
 		<tr>
-			<td height="70" align="center"><img
-				src="../resources/jui-master/img/theme/jennifer/logo.png"
-				width="136" height="26"></td>
+			<td height="70" align="center">
+				<img src="../resources/jui-master/img/theme/jennifer/logo.png" width="136" height="26">
+			</td>
 		</tr>
 	</table>
 	<table>
@@ -68,8 +68,6 @@ jui.ready([ "ui.window" ], function(win) {
 					<a>공지사항<i></i></a>
 					<ul class="submenu"  style="display:none">
 						<li id="bt_noticePopup"><a onclick="win_6.show(); fn_index('win_6');">공지사항 조회</a></li>
-						<!-- <li><a onclick="win_7.show()">공지사항 등록/수정</a></li> -->
-						<!-- <li><a onclick="win_8.show()">공지사항 댓글관리</a></li> -->
 					</ul>
 					<a>환경설정<i></i></a>
 					<ul class="submenu"  style="display:none">
@@ -77,6 +75,7 @@ jui.ready([ "ui.window" ], function(win) {
 						<li id="bt_councellerPopup"><a onclick="win_9.show(); fn_index('win_9');">상담원관리</a></li>
 						<li id="bt_smsPopup"><a onclick="win_10.show(); fn_index('win_10');">SMS 전송유형</a></li>
 						<li id="bt_extenstionPopup"><a onclick="win_11.show(); fn_index('win_11');">내선관리</a></li>
+						<li id="bt_codePopup"><a onclick="win_18.show(); fn_index('win_18');">기타 코드관리</a></li>
 					</ul>
 				</div>
 			</td>

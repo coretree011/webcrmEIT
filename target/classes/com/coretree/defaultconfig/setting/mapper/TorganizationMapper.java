@@ -12,5 +12,9 @@ public interface TorganizationMapper {
 	public long deleteCounceller(Torganization Torganization);
 	public long updateCounceller(Torganization Torganization);
 	public long insertCounceller(Torganization Torganization);
-	public long updateDataCounceller(Torganization Torganization);
+	public long updateDataCounceller(Torganization Torganization);  
+	public long councellerExtensionChk(Torganization Torganization);
+	public long councellerNameChk(Torganization Torganization);
+	
+	
 }

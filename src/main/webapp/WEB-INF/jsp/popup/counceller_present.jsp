@@ -18,9 +18,9 @@ var radioSelect;
 jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 	tab_councellerPresent = xtable("#tab_councellerPresent", {
 		resize : true,
-		scrollHeight: 390,
-		width : 1105,
-        scrollWidth: 1100,
+		scrollHeight: 375,
+		width : 1100,
+        scrollWidth: 1095,
         buffer: "s-page",
         bufferCount: 50,
         tpl: {
@@ -208,7 +208,7 @@ jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 	</tr>
 </script>
 <script id="tpl_none_counceller" type="text/template">
-    <tr height ="380">
+    <tr height ="375">
         <td colspan="13" class="none" align="center">데이터가 존재하지 않습니다.</td>
     </tr>
 </script>
@@ -243,6 +243,11 @@ $(document).ready(function() {
 	
 });
 </script>
+<style>
+#councellerPresent_top_tr td {
+	padding-bottom: 5px;
+}
+</style>
 <div class="head">
 	<a href="#" class="close"><i class="icon-exit"></i></a>
 	<table width="100%" border="0" align="center" cellpadding="0"
@@ -257,15 +262,15 @@ $(document).ready(function() {
 <div class="body"  style="overflow-y:hidden">
 	<table width="100%" border="0" align="center" cellpadding="0"
 		cellspacing="0" style="margin-bottom: 2px;">
-		<tr>
-			<td width="60" class="td01">인입일자</td>
+		<tr id="councellerPresent_top_tr">
+			<td width="60" class="td01" style="text-align: center; padding-left:0px !important">인입일자</td>
 			<td align="left" class="td02">
 				<input type="text" class="input mini" id="txt_leadStartDate"  style="width: 82px" />
 				<input type="text" class="input mini" id="txt_leadEndDate"  style="width: 82px" /> 
 			</td>
 			<td width="60" class="td01">상담원</td>
 			<td align="left" class="td02">
-				<select id="select_councellerPresentEmpNm"></select>
+				<select id="select_councellerPresentEmpNm" style="height:22px;"></select>
 			</td>
 			<td width="290">
 				<input type="radio" name="radio_counceller" value="1" id="radio_councellerNoagg" checked> 시간대별 
@@ -273,13 +278,13 @@ $(document).ready(function() {
 				<input type="radio" name="radio_counceller" value="3" id="radio_councellerMonth"> 월별
 				<input type="radio" name="radio_counceller" value="4" id="radio_councellerYear"> 연도별
 			</td>
-		    <td width="200" align="right" class="td01">
+		    <td width="200" align="right" class="td01" style="padding-right:9px;">
 			   	<a class="btn small focus" id="bt_councellerPresentSelect">조 회</a> 
 		      	<a class="btn small focus" id="bt_councellerPresentCSV">엑셀 다운로드</a>
 		    </td>
 		</tr>
 	</table>
-	<table class="table special hover" id="tab_councellerPresent" width="100%">
+	<table class="table special hover" id="tab_councellerPresent" width="100%" style="padding-left: 5px;">
 		<colgroup>
 			<col width="90px">
 			<col width="90px">
@@ -321,7 +326,7 @@ $(document).ready(function() {
 		<tbody>
 		</tbody>
 	</table> 
-	<div id="paging_councellerPresent" class="paging" style="margin-top: 3px;">
+	<div id="paging_councellerPresent" class="paging" style="margin-top: 4px; margin-right: 4px; width:1092px;">
 	    <a href="#" class="prev" style="left:0" onclick="fn_page();">이전</a>
 	    <div class="list"></div>
 	    <a href="#" class="next" onclick="fn_page();">다음</a>

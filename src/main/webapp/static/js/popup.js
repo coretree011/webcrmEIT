@@ -118,7 +118,7 @@ jui.ready([ "ui.window"], function(win) {
 	});
 
 	/*로그인*/
-	win_12 = win("#win_12", {
+/*	win_12 = win("#win_12", {
 		width : 337,
 		height : 288,
 		left : "8%",
@@ -126,7 +126,7 @@ jui.ready([ "ui.window"], function(win) {
 		resize : false,
 		move : true
 	});
-
+*/
 	/*고객정보선택*/
 	win_13 = win("#win_13", {
 		width : 1117,
@@ -140,7 +140,17 @@ jui.ready([ "ui.window"], function(win) {
 	/*SMS 전송 등록*/
 	win_14 = win("#win_14", {
 		width : 560,
-		height : 211,
+		height : 245,
+		left : "8%",
+		top : 50,
+		resize : false,
+		move : true
+	});
+	
+	/*SMS 전송 등록*/
+	win_14_1 = win("#win_14_1", {
+		width : 560,
+		height : 450,
 		left : "8%",
 		top : 50,
 		resize : false,
@@ -175,8 +185,7 @@ jui.ready([ "ui.window"], function(win) {
 		left : "8%",
 		top : 50,
 		resize : false,
-		move : true, 
-		modal : true
+		move : true
 	});
 	
 	/*비밀번호 변경*/
@@ -187,6 +196,16 @@ jui.ready([ "ui.window"], function(win) {
 		top : 140,
 		resize : false,
 		move : true
+	});
+	
+	/*기타코드*/
+	win_18 = win("#win_18", {
+		width : 950,
+		height : 548,
+		left : "15%",
+		top : 40,
+		resize : false,
+		move : true,
 	});
 
 });
@@ -203,4 +222,5 @@ jui.ready([ "ui.modal" ], function(modal) {
     	opacity: 0,
     	color: "black"
     });
+    
 });

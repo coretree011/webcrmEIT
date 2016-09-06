@@ -9,36 +9,40 @@
 	
     <select id="selectSmsList" resultMap="resultMap">
 		SELECT 
-		  CATE_CD,
-		  CATE_NM,
-		  CATE_COMMENT
+			case when SCD is null then '' else SCD end as CATE_CD
+			,case when SCD_NM is null then '' else SCD_NM end as CATE_NM
+			,case when NOTE is null then '' else NOTE end as CATE_COMMENT
 		FROM 
-		  TSMS_CATEGORY
-		ORDER BY CATE_CD
+		  TCODE_SMALL
+		WHERE LCD = '1003'
+		ORDER BY SCD
     </select>
     
     <select id="maxSms" resultMap="resultMap">
-		SELECT MAX(CATE_CD) as CATE_CD FROM TSMS_CATEGORY
+		SELECT MAX(SCD) as CATE_CD FROM TCODE_SMALL
+		WHERE LCD = '1003'
     </select>
     
    <select id="selectSmsOne" parameterType="com.coretree.defaultconfig.setting.model.SmsCategory" resultMap="resultMap">
 		SELECT 
-		  CATE_CD,
-		  CATE_NM,
-		  replace (CATE_COMMENT,  '{}', #{customName}) AS CATE_COMMENT
+		  case when SCD is null then '' else SCD end as CATE_CD
+		  ,case when SCD_NM is null then '' else SCD_NM end as CATE_NM
+		  ,replace (NOTE,  '{}', #{customName}) AS CATE_COMMENT
 		FROM 
-		  TSMS_CATEGORY
-		 WHERE CATE_CD = #{cateCd}
+		  TCODE_SMALL
+		 WHERE SCD = #{cateCd} AND LCD = '1003'
     </select>
     
     <insert id="insertSms">
-    	INSERT INTO TSMS_CATEGORY(CATE_CD, CATE_NM, CATE_COMMENT) 
-		VALUES (#{cateCd}, #{cateNm}, #{cateComment})
+    	INSERT INTO TCODE_SMALL(LCD, SCD, SCD_NM, NOTE) 
+		VALUES ('1003', #{cateCd}, #{cateNm}, #{cateComment})
     </insert>
     
     <delete id="deleteSms">
-        delete from TSMS_CATEGORY 
-      	WHERE CATE_CD in
+        delete from TCODE_SMALL 
+      	WHERE 
+      	LCD = '1003' 
+      	AND SCD in
 		<foreach collection="cateCds" item="cateCd" open="(" separator="," close=")">
 			#{cateCd}
 		</foreach>
@@ -46,11 +50,12 @@
     
     <update id="updateSms" parameterType="com.coretree.defaultconfig.setting.model.SmsCategory" >
 	UPDATE 
-	  TSMS_CATEGORY  
+	  TCODE_SMALL  
 	SET 
-	  CATE_NM = #{cateNm},
-	  CATE_COMMENT = #{cateComment}
-	WHERE 
-		CATE_CD = #{cateCd}
+	  SCD_NM = #{cateNm},
+	  NOTE = #{cateComment}
+	WHERE
+		LCD = '1003'  
+		AND SCD = #{cateCd}
     </update>
 </mapper>

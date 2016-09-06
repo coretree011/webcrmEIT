@@ -129,6 +129,7 @@ const WS_VALUE_EXTENSION_STATE_LEFT = 1003;				// 이석 (자리비움)
 const WS_VALUE_EXTENSION_STATE_REST = 1004;				// 휴식 (자리비움)
 const WS_VALUE_EXTENSION_STATE_EDU = 1005;				// 교육 (자리비움)
 const WS_VALUE_EXTENSION_STATE_BUSY = 1006;				// 통화중 ; 2016-08-23 추가
+const WS_VALUE_EXTENSION_STATE_LOGEDOUT = 1007;				// 통화중 ; 2016-08-23 추가
 
 // uc websocket message
 const WS_STATUS_ING_NOTFOUND = 210001;
@@ -151,6 +152,7 @@ const UC_EIT_CALL_RINGING = 990001;
 const UC_EIT_CALL_DIALING = 990002;
 const UC_EIT_CALL_IDLE = 990003;
 const UC_EIT_CALL_BUSY = 990004;
+const UC_EIT_CALL_DROP = 0;
 //dial 
 
 
@@ -164,4 +166,3 @@ const UC_EIT_CALL_STATE = 990015;
 //-----------ERROR------
 //cmd
 const UC_EIT_WEB_ERROR = -990001;
-

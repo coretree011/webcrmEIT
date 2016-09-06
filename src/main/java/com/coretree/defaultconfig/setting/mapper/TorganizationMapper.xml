@@ -16,11 +16,17 @@
 	
     <select id="selectCouncellerList" parameterType="com.coretree.defaultconfig.setting.model.Torganization" resultMap="resultMap">
     	select 
-	 		EMP_NO, EMP_NM, GRP_CD
-			,(SELECT * FROM GET_FORMAT_DATE(ENTER_DATE) p ) as ENTER_DATE
-			,AUTH_CD
-			,(SELECT * FROM GET_CODE_NAME('1001', AUTH_CD) p ) as  AUTH_CDNM
-			,MOBILE_PHONENO, EMAILID, EXTENSION_NO, PASSWORD, NOTE
+	 		EMP_NO
+	 		,case when EMP_NM is null then '' else EMP_NM end as EMP_NM
+	 		,case when GRP_CD is null then '' else GRP_CD end as GRP_CD
+			,case when (SELECT * FROM GET_FORMAT_DATE(ENTER_DATE) p ) is null then '' else (SELECT * FROM GET_FORMAT_DATE(ENTER_DATE) p ) end as ENTER_DATE
+			,case when AUTH_CD is null then '' else AUTH_CD end as AUTH_CD
+			,case when (SELECT * FROM GET_CODE_NAME('1001', AUTH_CD) p ) is null then '' else (SELECT * FROM GET_CODE_NAME('1001', AUTH_CD) p ) end as  AUTH_CDNM
+			,case when MOBILE_PHONENO is null then '' else MOBILE_PHONENO end as MOBILE_PHONENO
+			,case when EMAILID is null then '' else EMAILID end as EMAILID
+			,case when EXTENSION_NO is null then '' else EXTENSION_NO end as EXTENSION_NO 
+			,PASSWORD
+			,case when NOTE is null then '' else NOTE end as NOTE 
 		from TORGANIZATION
 		where EMP_NO <![CDATA[<>]]> 'superadmin' 
     </select>
@@ -61,4 +67,22 @@
 	WHERE 
 		EMP_NO = #{empNo}
     </update>
+    
+    <select id="councellerExtensionChk" parameterType="com.coretree.defaultconfig.setting.model.Torganization" resultType="java.lang.Long">
+    	select 
+			COUNT(case when EXTENSION_NO is null then '' else EXTENSION_NO end) as EXTENSION_NO 
+		from TORGANIZATION
+		where 
+			EMP_NO <![CDATA[<>]]> 'superadmin'
+			AND EXTENSION_NO = #{extensionNo} 
+    </select>
+    
+    <select id="councellerNameChk" parameterType="com.coretree.defaultconfig.setting.model.Torganization" resultType="java.lang.Long">
+    	select 
+			COUNT(case when EMP_NM is null then '' else EMP_NM end) as EMP_NM 
+		from TORGANIZATION
+		where 
+			EMP_NO <![CDATA[<>]]> 'superadmin'
+			AND EMP_NM = #{empNm} 
+    </select>
 </mapper>

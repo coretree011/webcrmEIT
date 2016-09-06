@@ -77,6 +77,7 @@ $(document).ready(function() {
 			    for ( var i = 0; i < result.length; i++) {
 						$('#tab4_counResult').append('<option value='+result[i].scd+'>' + result[i].scdNm + '</option>');
 			    } 
+			    $('#tab4_counResult').css("width","100px");
 			}
 		});
 
@@ -113,7 +114,12 @@ $(document).ready(function() {
 		        fields: [ "고객번호", "고객명", "예약번호", "예약일시", "처리일시", "처리결과", "처리자", "메모" ],
 		        sort : true,
 		        buffer: "s-page",
-		        bufferCount: 20,
+		        bufferCount: 500,
+		        event: {
+		 	    	dblclick: function(row, e) {
+		 	    		this.select(row.index);
+		 	    	}
+			 	},
 		        tpl: {
 		            row: $("#tpl_row_tab04").html(),
 		            none: $("#tpl_none_tab04").html()
@@ -143,7 +149,7 @@ $(document).ready(function() {
 			});
 
 			paging_4 = paging("#paging_4", {
-			      pageCount: 20,
+			      pageCount: 500,
 			      event: {
 			          page: function(pNo) {
 			        	  tab_reservationList.page(pNo);
@@ -227,20 +233,24 @@ function customer(telNo){
 		resvation.empNm = $("input[name=tab4_empNmS]").val();
 		resvation.counCd = $("input[name=tab4_counCd]").val();
 		
-		$.ajax({
-			url : "/main/reservationSave",
-			type : "post",
-			contentType : 'application/json; charset=utf-8',
-			data : JSON.stringify(resvation),
-			success : function(result) {
-				if(result == 1){
-					alert("저장되었습니다.");
-					$("#bt_reservation").click();
-				}else{
-					alert("실패했습니다.");
+		if(resvation.resSeq != ""){
+			$.ajax({
+				url : "/main/reservationSave",
+				type : "post",
+				contentType : 'application/json; charset=utf-8',
+				data : JSON.stringify(resvation),
+				success : function(result) {
+					if(result == 1){
+						msgboxActive('상담예약', '상담예약 \"저장\"이 완료되었습니다.');
+						$("#bt_reservation").click();
+					}else{
+						msgboxActive('상담예약', '상담예약 \"저장\"이 완료되지 않았습니다. 다시 시도해주세요.');
+					}
 				}
-			}
-		});
+			});
+		}else{
+			msgboxActive('상담예약', '저장 할 상담예약정보를 선택해주세요.');
+		}
  }
 </script>
 
@@ -288,7 +298,7 @@ function customer(telNo){
 									<td class="td02">
 										<select id="tab4_empNo"></select>
 									</td>
-									<td class="td01">상담결과</td>
+									<td class="td01">처리결과</td>
 									<td class="td02">
 										<select id="tab4_counResult"></select>
 									</td>

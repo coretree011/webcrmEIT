@@ -23,8 +23,6 @@ var currentCallInfo = {
 		//message: ''
 }
 
-var currentDirection = 0;
-
 //이전 콜정보 보관용 
 var previousCallInfo = {
 		//coretree
@@ -42,6 +40,17 @@ var previousCallInfo = {
 		//eit
 		//id: 0,
 		//message: ''
+}
+
+// 콜제어 보관용 
+var requestCallReservedInfo = {
+		cmd: 0,
+		direct: 0,
+		extension: '',
+		caller: '',
+//		callername: '',
+		callee: '',
+//		calleename: '',
 }
 
 /* 아래 2개는 AP 에서 정의해서 사용하세요. 
@@ -82,13 +91,14 @@ function stompConnect() {
 			stompClient.subscribe('/user/queue/groupware', function(receviedMessage){
 				coreTreeQueueHandler(JSON.parse(receviedMessage.body));
 			});
-
+			
 			stompClient.subscribe('/topic/orgstates', function(receviedMessage){
 				// 상담원 상태 정보 (각 내선의 상태정보가 업데이트 될 때 마다 들어옵니다.)
 				// coreTreeQueueHandler(JSON.parse(receviedMessage.body));
 				console.log("******UsersState******:"+ receviedMessage.body);
+				receiveCoreTreeUsersStateEvent(JSON.parse(receviedMessage.body));
 			});
-
+			
 			stompClient.subscribe('/user/queue/errors', function(receviedError){
 				webStompErrorHandler(receviedError);
 			});
@@ -108,7 +118,6 @@ function stompDisconnect() {
         stompClient.disconnect();
     }
     console.log("Disconnected");
-    alert("Disconnected");
 }
 
 
@@ -175,7 +184,7 @@ function getRequestCallInfo(extension, callFunctionName)
 		callee = extension;
 		caller = currentCallInfo.caller;
 
-		console.log("--->>>"+ callFunctionName + " direct:UC_DIRECT_INCOMING , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
+		console.log("evt--->>>"+ callFunctionName + " direct:UC_DIRECT_INCOMING , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
 	}
 	//거는 상태 기준임
 	else if (currentCallInfo.direct == UC_DIRECT_OUTGOING) {
@@ -183,14 +192,46 @@ function getRequestCallInfo(extension, callFunctionName)
 		callee = currentCallInfo.callee;
 		caller = extension;
 		
-		console.log("--->>>"+ callFunctionName + " direct:UC_DIRECT_OUTGOING , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
+		console.log("evt--->>>"+ callFunctionName + " direct:UC_DIRECT_OUTGOING , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
 	}
-	//? 알수없음은 이벤트 기준 ?
+	//? 이벤트가 안오면 Request 로 판단 ?
 	else {
-		callee = currentCallInfo.callee;
-		caller = currentCallInfo.caller;
 		
-		console.log("--->>> !!!~~~!!! "+ callFunctionName+ " Error==> direct:" + currentCallInfo.direct + " , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
+		if (requestCallReservedInfo.cmd == UC_ANWSER_CALL_REQ) {
+
+			callee = extension;
+			caller = requestCallReservedInfo.caller;
+			
+			console.log("req--->>>"+ callFunctionName + " direct:UC_DIRECT_INCOMING , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
+
+			// 초기화
+			requestCallReservedInfo.cmd = 0;
+			requestCallReservedInfo.extension = '';
+			requestCallReservedInfo.caller = '';
+			requestCallReservedInfo.callee = '';
+		}
+		else if  (requestCallReservedInfo.cmd == UC_MAKE_CALL_REQ ) {
+			
+			callee = requestCallReservedInfo.callee;
+			caller = extension;
+			
+			console.log("req--->>>"+ callFunctionName + " direct:UC_DIRECT_OUTGOING , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
+			
+			// 초기화
+			requestCallReservedInfo.cmd = 0;
+			requestCallReservedInfo.extension = '';
+			requestCallReservedInfo.caller = '';
+			requestCallReservedInfo.callee = '';
+		}
+		else {
+			
+			// 이 경우는 그냥 이벤트에서 받아옴 ; 현재는 에러로 간주 !!!!!
+			callee = currentCallInfo.callee;
+			caller = currentCallInfo.caller;
+
+			console.log("err--->>> !!!~~~!!! "+ callFunctionName+ " Error==> direct:" + currentCallInfo.direct + " , extension:"+ extension +",  caller:" + caller + ", callee:" + callee);
+		}
+		
 	}
 	
 	requestCallInfo.callee = callee;
@@ -286,7 +327,6 @@ function returnEventError(event, messsage, eitEventDefinedId) {
 
 function getEventCmd(event) {
 	var message = "";
-	var ctiMsg = "";
 	switch (event.cmd){
 		case UC_REGISTER_REQ:
 			message = event.cmd+ ":"+ "UC_REGISTER_REQ";
@@ -335,21 +375,18 @@ function getEventCmd(event) {
 			break;
 		case UC_MAKE_CALL_RES:
 			message = event.cmd+ ":"+ "UC_MAKE_CALL_RES";
-			ctiMsg = "연결중";
 			break;
 		case UC_DROP_CALL_REQ:
 			message = event.cmd+ ":"+ "UC_DROP_CALL_REQ";
 			break;
 		case UC_DROP_CALL_RES:
 			message = event.cmd+ ":"+ "UC_DROP_CALL_RES";
-			ctiMsg = "통화종료";
 			break;
 		case UC_ANWSER_CALL_REQ:
 			message = event.cmd+ ":"+ "UC_ANWSER_CALL_REQ";
 			break;
 		case UC_ANWSER_CALL_RES:
 			message = event.cmd+ ":"+ "UC_ANWSER_CALL_RES";
-			ctiMsg = "통화중";
 			break;
 		case UC_PICKUP_CALL_REQ:
 			message = event.cmd+ ":"+ "UC_PICKUP_CALL_REQ";
@@ -362,14 +399,12 @@ function getEventCmd(event) {
 			break;
 		case UC_HOLD_CALL_RES:
 			message = event.cmd+ ":"+ "UC_HOLD_CALL_RES";
-			ctiMsg = "보류중";
 			break;
 		case UC_ACTIVE_CALL_REQ:
 			message = event.cmd+ ":"+ "UC_ACTIVE_CALL_REQ";
 			break;
 		case UC_ACTIVE_CALL_RES:
 			message = event.cmd+ ":"+ "UC_ACTIVE_CALL_RES";
-			ctiMsg = "보류해제";
 			break;
 		case UC_TRANSFER_CALL_REQ:
 			message = event.cmd+ ":"+ "UC_TRANSFER_CALL_REQ";
@@ -422,23 +457,18 @@ function getEventCmd(event) {
 		//etc state ; 2016-08-18 고이사님 설계 반영
 		case WS_VALUE_EXTENSION_STATE_READY:
 			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_READY";
-			ctiMsg = "대기";
 			break;
 		case WS_VALUE_EXTENSION_STATE_AFTER:
 			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_AFTER";
-			ctiMsg = "후처리";
 			break;
 		case WS_VALUE_EXTENSION_STATE_LEFT:
 			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_LEFT";
-			ctiMsg = "이석";
 			break;
 		case WS_VALUE_EXTENSION_STATE_REST:
 			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_REST";
-			ctiMsg = "휴식";
 			break;
 		case WS_VALUE_EXTENSION_STATE_EDU:
 			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_EDU";
-			ctiMsg = "교육";
 			break;
 			
 //		case WS_VALUE_EXTENSION_STATE_DND:
@@ -453,7 +483,6 @@ function getEventCmd(event) {
 			message = event.cmd+ ":"+ "UC_UNDEFINED!!!"
 			break;
 	}
-	$("input[name=sp_state]").val(ctiMsg);
 	return message;
 }
 
@@ -463,10 +492,6 @@ function getEventId(event) {
 	switch (event.id){
 		case UC_EIT_CALL_RINGING:
 			message = event.id+ ":"+ "UC_EIT_CALL_RINGING";
-			$("input[name=sp_custNo]").val(event.caller);
-			$("input[name=sp_telNo]").val(event.caller);
-			$("input[name=sp_msg]").val("전화가 왔습니다!!!!!!");
-			ctiMsg = "인바운드";
 			customer_one(event.caller);
 			break;
 		case UC_EIT_CALL_DIALING:
@@ -491,7 +516,6 @@ function getEventId(event) {
 			message = getEventCmd(event);
 			break;
 	}
-	$("input[name=sp_state]").val(ctiMsg);
 	return message;
 }
 
@@ -557,27 +581,21 @@ function getEventStatus(event) {
 //etc state ; 2016-08-18 고이사님 설계 반영
 function getEventExtensionStatus(event) {
 	var message = "";
-	var ctiMsg = "";
 	switch (event.status){
 		case WS_VALUE_EXTENSION_STATE_READY:
 			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_READY";
-			ctiMsg = "대기";
 			break;
 		case WS_VALUE_EXTENSION_STATE_AFTER:
 			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_AFTER";
-			ctiMsg = "후처리";
 			break;
 		case WS_VALUE_EXTENSION_STATE_LEFT:
 			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_LEFT";
-			ctiMsg = "이석";
 			break;
 		case WS_VALUE_EXTENSION_STATE_REST:
 			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_REST";
-			ctiMsg = "휴식";
 			break;
 		case WS_VALUE_EXTENSION_STATE_EDU:
 			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_EDU";
-			ctiMsg = "교육";
 			break;			
 			
 //		case WS_VALUE_EXTENSION_STATE_DND:
@@ -592,20 +610,17 @@ function getEventExtensionStatus(event) {
 			message = event.status+ ":"+ "UC or WS _CALL_STATE_UNDEFINED!!!"; 
 			break;
 	}
-	$("input[name=sp_state]").val(ctiMsg);
 	return message;
 }
 
 function getEventDirect(event) {
 	var message = "";
-	var ctiMsg = "";
 	switch (event.direct){
 		case UC_DIRECT_NONE:
 			message = event.direct+ ":"+ "UC_DIRECT_NONE";
 			break;
 		case UC_DIRECT_OUTGOING:
 			message = event.direct+ ":"+ "UC_DIRECT_OUTGOING";
-			ctiMsg = "연결중";
 			break;
 		case UC_DIRECT_INCOMING:
 			message = event.direct+ ":"+ "UC_DIRECT_INCOMING";
@@ -614,7 +629,6 @@ function getEventDirect(event) {
 			message = event.direct+ ":"+ "UC_UNDEFINED!!!"
 			break;
 	}
-	$("input[name=sp_state]").val(ctiMsg);
 	return message;
 }
 
@@ -727,7 +741,7 @@ function coreTreeQueueHandler(event) {
 		case UC_DROP_CALL_RES:
 			console.log("전화끊기 응답.....");
 			(event.status != UC_STATUS_FAIL)?
-				returnEvent(event, "DROP_CALL_SUCCESS"):
+				returnEvent(event, "DROP_CALL_SUCCESS",UC_EIT_CALL_DROP):
 				returnEventError(event, "DROP_CALL_FAIL");
 			break;
 		
@@ -806,9 +820,6 @@ function coreTreeQueueHandler(event) {
 		// 102	
 		case UC_REPORT_EXT_STATE:
 			//호전환 보관용
-			$("input[name=sp_custNo]").val(event.caller);
-			$("input[name=sp_telNo]").val(event.caller);
-
 			var msg = "";
 			switch (event.direct) {
 				// 인바운드
@@ -820,6 +831,10 @@ function coreTreeQueueHandler(event) {
 						case UC_CALL_STATE_IDLE:
 							// 이전상태 비교
 							if (previousCallInfo.status == UC_CALL_STATE_RINGING || previousCallInfo.status == UC_CALL_STATE_BUSY) {
+								
+								//다시 초기화
+								previousCallInfo.status = 0;
+								
 								console.log("<<<______________UC_CALL_STATE_IDLE");
 								console.log("<<<______________온라인...");
 								
@@ -890,6 +905,10 @@ function coreTreeQueueHandler(event) {
 					// 111
 					case UC_CALL_STATE_IDLE:
 						if (previousCallInfo.status == UC_CALL_STATE_INVITING || previousCallInfo.status == UC_CALL_STATE_BUSY) {
+							
+							//다시 초기화
+							previousCallInfo.status = 0;
+
 							console.log(">>>______________UC_CALL_STATE_IDLE");
 							console.log(">>>______________온라인...");
 							
@@ -1252,6 +1271,12 @@ function requestCallDial(extension, caller, callee) {
 			unconditional: '',
 			status: -1
 	};
+	
+	//이벤트 문제시 예약용
+	requestCallReservedInfo.cmd = callreq.cmd;
+	requestCallReservedInfo.extension = extension;
+	requestCallReservedInfo.caller = caller;
+	requestCallReservedInfo.callee = callee;
 
 	stompSend(JSON.stringify(callreq));
 }
@@ -1310,6 +1335,12 @@ function requestCallAnswer(extension, caller, callee) {
           unconditional: '',
           status: 0
 		};
+	
+	//이벤트 문제시 예약용
+	requestCallReservedInfo.cmd = callreq.cmd;
+	requestCallReservedInfo.extension = extension;
+	requestCallReservedInfo.caller = caller;
+	requestCallReservedInfo.callee = callee;
 	
 	stompSend(JSON.stringify(callreq));
 }
@@ -1705,6 +1736,25 @@ function requestCallNotReady_Edu(extension) {
 			responseCode: 4
 	};
 
+	stompSend(JSON.stringify(callreq));
+}
+//{"cmd":103,"direct":10,"call_idx":0,"extension":"3012","cust_no":null,"caller":"","callername":null,"callee":"","calleename":null,"responseCode":0,"unconditional":"","status":"1005"}
+
+//WS_VALUE_EXTENSION_STATE_LOGEDOUT = 1007; 
+//
+//sample
+//{"cmd":1005,"extension":"3012","caller":"","callee":"","unconditional":"","status":-1,"responseCode":4}
+function requestCallLogout(extension) {
+	callreq = {
+			cmd: WS_VALUE_EXTENSION_STATE_LOGEDOUT,
+			extension: extension,
+			caller : '',
+			callee : '',
+			unconditional: '',
+			status: -1,
+			responseCode: 4
+	};
+	
 	stompSend(JSON.stringify(callreq));
 }
 //{"cmd":103,"direct":10,"call_idx":0,"extension":"3012","cust_no":null,"caller":"","callername":null,"callee":"","calleename":null,"responseCode":0,"unconditional":"","status":"1005"}

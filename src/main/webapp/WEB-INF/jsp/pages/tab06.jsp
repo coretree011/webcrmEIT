@@ -60,16 +60,16 @@
 	        prevText:'이전 달'
 		}); 
 
-		tab6_param.lcd ="1009";
+		tab6_param.lcd ="1003";
 		$.ajax({
 			url : "/code/selecCodeList",
 			type : "post",
 			data : JSON.stringify(tab6_param),
 			contentType : 'application/json; charset=utf-8',
 			success : function(result) {
-				$('#sendTypCd').append('<option value=' + '' + '></option>');
+				$('#cateCd').append('<option value=' + '' + '></option>');
 			    for ( var i = 0; i < result.length; i++) {
-						$('#sendTypCd').append('<option value='+result[i].scd+'>' + result[i].scdNm + '</option>');
+						$('#cateCd').append('<option value='+result[i].scd+'>' + result[i].scdNm + '</option>');
 			    } 
 			}
 		});
@@ -96,7 +96,7 @@
 			
 			tab_smsList = xtable("#tab_smsList", {
 				resize : true,
-				scrollHeight: 400,
+				scrollHeight: 130,
 				scrollWidth: 1095,
 				width:1099,
 		        buffer: "s-page",
@@ -111,14 +111,14 @@
 			var sms = {
 					sendDate : "",
 					sendDate2 : "",
-					sendTypCd : "",
+					cateCd : "",
 					empNo : "",
 					custNo : "",
 				};
 
 			sms.sendDate = $("input[name=tab6_sendDate]").val().replace(/-/gi, ""); 
 			sms.sendDate2 = $("input[name=tab6_sendDate2]").val().replace(/-/gi, ""); 
-			sms.sendTypCd = $("#sendTypCd option:selected").val();
+			sms.cateCd = $("#cateCd option:selected").val();
 			sms.empNo = $("#tab6_empNo option:selected").val();
 			sms.custNo = $("input[name=tab6_custNo]").val(); 
 
@@ -170,10 +170,10 @@
 			<td align ="center"><!= custNo !></td>
 			<td align ="center"><!= custNm !></td>
 			<td align ="center"><!= sendTelNo !></td>
-			<td align ="center"><!= sendCdNm !></td>
+			<td align ="center"><!= cateCdNm !></td>
 			<td align ="center"><!= sendResDate !> <!= sendResHms !></td>
 			<td align ="center"><!= sendDate !> <!= sendHms !></td>
-			<td align ="center"><!= sendTypCdNm !></td>
+			<td align ="center"><!= sendCdNm !></td>
 			<td align ="center"><!= empNm !></td>
 		</tr>
 </script>
@@ -210,7 +210,7 @@
 			          </td>
 				      <td class="td01">전송유형</td>
 				      <td class="td02">
-							<select id="sendTypCd"></select>
+							<select id="cateCd"></select>
                       </td>
 				      <td class="td01">상담원</td>
 				      <td class="td02">

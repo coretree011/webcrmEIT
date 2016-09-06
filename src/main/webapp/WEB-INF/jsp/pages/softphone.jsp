@@ -10,6 +10,12 @@
 <link rel="stylesheet" href="../resources/jui-master/dist/grid.css">
 <link rel="stylesheet" href="../resources/jui-master/dist/grid-jennifer.css" />	 -->
 <%@ include file = "../common/jui_common.jsp" %>
+<style type="text/css">
+#empInfo{
+	font-family: sans-serif;
+	font-size: 12px;
+  }
+</style>
 <script src="../resources/js/sockjs-0.3.4.js"></script>
 <script src="../resources/js/stomp.js"></script>
 <script src="../resources/js/MessageValues.js"></script>
@@ -29,6 +35,41 @@
 		    });
 		});   
 	   	buttonState("RESET");
+ 
+		/* 소프트폰 메뉴 slide 기능 */
+/*		$(".notReadyMenu>a").click(function() {
+			$(".notReadyMenu>a").removeClass("active");
+			$(this).addClass("active");
+			$(".notReadyMenu a i").removeClass("icon-arrow1");
+			$(this).find("i").addClass("icon-arrow1");
+
+			var submenu = $(this).next("ul");
+			$(".subNotReadyMenu").slideUp();
+			submenu.slideToggle();
+		});
+
+		$(".subNotReadyMenu>li").click(function() {
+			$(".subNotReadyMenu>li").removeClass("active");
+			$(this).addClass("active");
+
+		}); */
+		
+		jui.ready([ "ui.dropdown" ], function(dropdown) {
+		    subNotReady = dropdown("#subNotReady", {
+		        close: true,
+		        event: {
+		            change: function(data) {
+		            	if(data.value == "left"){
+		            		ctiNotReady_Left();
+		            	}else if(data.value == "rest"){
+		            		ctiNotReady_Rest();
+		            	}else if(data.value == "edu"){
+		            		ctiNotReady_Edu();
+		            	}
+		            }
+		        }
+		    });
+		});
 	});
 
 	function showReceiveFrame(message) {
@@ -36,8 +77,16 @@
 	}
 	
 	function disconnect(){
+		ctiAfterWork();
+		ctiLogout();
 		stompDisconnect();
 		location.href = "<c:url value='/logout'/>";
+	}
+
+	function ctiLogout() {
+		var extension = $("input[name=sp_extNo]").val();
+		console.log("ctiLogout extensionNumber==>" + extension);
+		requestCallLogout(extension);
 	}
 
 	function ctiReady() {
@@ -147,7 +196,8 @@
 	function receiveCoreTreeEvent(event) {
 		console.log("<<~~~~~receiveCoreTreeEvent: id=" + getEventId(event) + " , direct=" + getEventDirect(event) + " , status=" + getEventStatus(event));
 		showReceiveFrame("receiveCoreTreeEvent:" + event.toJson());
-
+		var ctiCallMsg = "";
+		var ctiMsg = "";
 		switch (event.id) {
 		case UC_MAKE_CALL_RES: //전화걸기 응답
 			//
@@ -193,29 +243,63 @@
 		//	break;
 			
 		//!!! 주요한 이벤트는 EIT 이벤트로 재정의했지만, 그외 이벤트도 체크 필요??
-		//case UC_REPORT_EXT_STATE:	//콜응답 관련 상태
-		//	break;
+		case UC_REPORT_EXT_STATE:	//콜응답 관련 상태
+			if(event.direct == 11){
+				ctiCallMsg = "전화 연결중";
+			}
+			break;
 		
 			
 		//EIT
 		case UC_EIT_CALL_RINGING:
 			//
+			ctiMsg = event.caller +" 전화가 왔습니다!!!!!!";
+			tab1_customer_one2("telNo",event.caller);
 			break;
 			
 		case UC_EIT_CALL_DIALING:
 			//
+			ctiCallMsg = "전화 연결중";
 			break;
 			
 		case UC_EIT_CALL_IDLE:
 			//
+				//ctiCallMsg = "전화 연결중";
+			if(event.direct == 11 || event.direct == 12){
+				ctiAfterWork();	
+			}else{
+				ctiCallMsg = "온라인";
+			}
 			break;
 			
 		case UC_EIT_CALL_BUSY:	
 			//
+			ctiCallMsg = "통화중";
+			$("input[name=sp_msg]").val("");
+			break;
+			
+		case UC_EIT_CALL_DROP:	
+			//
+			ctiAfterWork();
 			break;
 			
 		case UC_EIT_CALL_STATE: //콜 etc 상태변경시 
 			//
+			console.log("@@@@@UC_EIT_CALL_STATE==>" + event.extension + "::::::::::::::"+ event.status);
+			if(event.extension != ""){
+				$("#ext_"+event.extension+"_state").text(eventExtensionStateMsg(event.status));
+			}
+			if(Number($("input[name=sp_extNo]").val()) == event.extension){
+				ctiCallMsg= eventExtensionStateMsg(event.status);
+			}
+			break;
+			
+		case UC_REPORT_WAITING_COUNT: //콜 etc 상태변경시 
+			//
+			console.log("@@@@@UC_REPORT_WAITING_COUNT==>" + event.responseCode + "::::::::::::::"+ event.direct);
+			if(event.responseCode != ""){
+				$("input[name=waitCnt]").val(event.responseCode);
+			}
 			break;
 			
 		case UC_EIT_WEB_ERROR:
@@ -225,8 +309,53 @@
 		default:
 			break;
 		}
+		$("input[name=sp_state]").val(ctiCallMsg);
+		$("input[name=sp_msg]").val(ctiMsg);
 	}
-	
+	function eventExtensionStateMsg(status){
+		var stateMsg = "";
+		switch(status){
+		case 111 :
+			stateMsg = "대기";
+				break;
+		case 114 :
+			stateMsg = "통화중";
+				break;
+		case 1001 :
+			stateMsg = "온라인";
+				break;
+		case 1002 :
+			stateMsg = "후처리";
+				break;
+		case 1003 :
+			stateMsg = "이석";
+				break;
+		case 1004 :
+			stateMsg = "휴식";
+				break;
+		case 1005 :
+			stateMsg = "교육";
+				break;
+		case 1006 :
+			stateMsg = "통화중";
+				break;
+		case 1007 :
+			stateMsg = "로그아웃";
+				break;
+		}
+
+		return stateMsg;
+	}
+	// 성공 이벤트
+	function receiveCoreTreeUsersStateEvent(event) {
+		console.log("<<~~~~~receiveCoreTreeUsersStateEvent");
+		$("input[name=totEmp]").val(event.total);
+		$("input[name=totLogin]").val(event.logedin);
+		$("input[name=totLogout]").val(event.logedout);
+		$("input[name=totReady]").val(event.ready);
+		$("input[name=totNotready]").val(event.after + event.left + event.rest + event.edu);
+		$("input[name=totEstablish]").val(event.busy);
+	}
 	// 에러 이벤트
 	function receiveCoreTreeEventError(event) {
 		console.log("<<~~~~~receiveCoreTreeEventError!! : id=" + getEventId(event) + " , direct=" + getEventDirect(event) + " , status=" + getEventStatus(event));
@@ -294,36 +423,56 @@
 <body class="jui">
 	<table border="0"cellpadding="0" cellspacing="0">
 	  <tr>
-	    <td >
+	    <td>
 	    	<a id="ready" class="softbtn small focus" href="javascript:ctiReady();">대기</a>&nbsp;
 	    	<a id="notReady" class="softbtn small focus" href="javascript:ctiAfterWork();">후처리</a>&nbsp;
-	    	<a id="notReady" class="softbtn small focus" href="javascript:ctiNotReady_Left();">이석</a>&nbsp;
-	    	<a id="notReady" class="softbtn small focus" href="javascript:ctiNotReady_Rest();">휴식</a>&nbsp;
-	    	<a id="notReady" class="softbtn small focus" href="javascript:ctiNotReady_Edu();">교육</a>&nbsp;
-		    <td width="165" align="center" >
-		    	<input type="text" name="sp_telNo" class="softinput mini" value="" style="width:155px" />
-		    	<input type="hidden" name="sp_extNo" class="softinput mini" value="<%=session.getAttribute("extensionNo") %>" style="width:155px" />
-		    	<input type="hidden" name="sp_custNo" class="softinput mini" value="" style="width:155px" />
-		    </td>
-		    <td >
-		    	<a id="dial" class="softbtn small focus" href="javascript:ctiDial();">걸기</a>&nbsp;
-		    	<a id="answer" class="softbtn small focus" href="javascript:ctiAnswer();">받기</a>&nbsp;
-		    	<a id="pickUp" class="softbtn normal focus" href="javascript:ctiPickUp();">당겨받기</a>&nbsp;
-		    	<a id="drop" class="softbtn small focus" href="javascript:ctiDrop();">끊기</a>&nbsp;
-		    	<a id="hold" class="softbtn small focus" href="javascript:ctiHold();">보류</a>&nbsp;
-		    	<a id="unhold" class="softbtn normal focus" href="javascript:ctiUnhold();">보류해제</a>&nbsp;
-		    	<a id="transfer" class="softbtn small focus" href="javascript:ctiTransfer();">호전환</a>&nbsp;
-	    		<a class="softbtn small focus" href="javascript:test();">초기화</a>&nbsp;
-		    	<!-- <a id="" class="softbtn normal focus" href="javascript:disconnect();">로그아웃</a> -->
-		    </td>
+    	</td>
+    	<td>
+    		<a class="softbtn small focus" href="javascript:subNotReady.show();">이석<i class="icon-arrow1"></i></a>
+	    	<div id="subNotReady" class="dropdown large">
+			    <div class="anchor"></div>
+			    <ul style="width: 120px;">
+			        <li value="left">이석</li>
+					<li value="rest">휴식</li>
+					<li value="edu">교육</li>
+			    </ul>
+			</div>
+    	</td>
+<!--     	<div class="notReadyMenu" style="float: left;">
+		    	<a class="softbtn small focus" >이석<i class="icon-arrow1"></i></a>
+		    	<ul class="subNotReadyMenu" style="display: none;"> 
+					<li><a id="notReady_left" class="softbtn small focus" href="javascript:ctiNotReady_Left();">이석</a>&nbsp;</li>
+					<li><a id="notReady_rest" class="softbtn small focus" href="javascript:ctiNotReady_Rest();">휴식</a>&nbsp;</li>
+					<li><a id="notReady_edu" class="softbtn small focus" href="javascript:ctiNotReady_Edu();">교육</a>&nbsp;</li>
+				</ul>
+			</div> -->
+	    <td width="165">
+	    	<input type="text" name="sp_telNo" class="softinput mini" value="" style="width:155px" />
+	    	<input type="hidden" name="sp_extNo" class="softinput mini" value="<%=session.getAttribute("extensionNo") %>" style="width:155px" />
+	    	<input type="hidden" name="sp_custNo" class="softinput mini" value="" style="width:155px" />
+	    </td>
+	    <td>
+	    	<a id="dial" class="softbtn small focus" href="javascript:ctiDial();">걸기</a>&nbsp;
+	    	<a id="answer" class="softbtn small focus" href="javascript:ctiAnswer();">받기</a>&nbsp;
+	    	<a id="pickUp" class="softbtn normal focus" href="javascript:ctiPickUp();">당겨받기</a>&nbsp;
+	    	<a id="drop" class="softbtn small focus" href="javascript:ctiDrop();">끊기</a>&nbsp;
+	    	<a id="hold" class="softbtn small focus" href="javascript:ctiHold();">보류</a>&nbsp;
+	    	<a id="unhold" class="softbtn normal focus" href="javascript:ctiUnhold();">보류해제</a>&nbsp;
+	    	<a id="transfer" class="softbtn small focus" href="javascript:ctiTransfer();">호전환</a>&nbsp;
+    		<a class="softbtn small focus" href="javascript:test();">초기화</a>&nbsp; 
+	    </td>
+	    <td align="right" width="200px;"> 
+    		<label id="empInfo"> [<%= session.getAttribute("empNm") %>, <%= session.getAttribute("empNo") %>]</label>
+	    	<a id="" class="softbtn normal focus" href="javascript:disconnect();">로그아웃</a>
+	    </td>
       </tr>
 	  <tr>
-	    <td height="3" colspan="3" align="center" ></td>
+	    <td height="3" align="center" ></td>
       </tr>
       <tr>
-        <td><input type="text" class="darkinput mini" name="sp_state" value="" style="width:336px" /></td>
+        <td colspan="2"><input type="text" class="darkinput mini" name="sp_state" value="" style="width: 197px;"/></td>
         <td align="center"></td>
-        <td><input type="text" class="darkinput mini" name="sp_msg" value="" style="width:575px" /></td>
+        <td><input type="text" class="darkinput mini" name="sp_msg" value="" style="width: 563px;"/></td>
       </tr>     
 </table>
 </body>

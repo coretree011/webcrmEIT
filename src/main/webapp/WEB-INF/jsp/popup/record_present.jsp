@@ -17,8 +17,8 @@ jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 		scrollHeight: 400,
         buffer: "s-page",
         bufferCount: 100,
-		width : 1105,
-        scrollWidth: 1100,
+		width : 1100,
+        scrollWidth: 1095,
         tpl: {
             row: $("#tpl_row_record").html(),
             none: $("#tpl_none_record").html()
@@ -174,6 +174,11 @@ $(document).ready(function() {
 	});
 });
 </script>
+<style>
+#record_top_tr td {
+	padding-bottom: 5px;
+}
+</style>
 <div class="head">
 	<a href="#" class="close"><i class="icon-exit"></i></a>
 	<table width="100%" border="0" align="center" cellpadding="0"
@@ -189,31 +194,31 @@ $(document).ready(function() {
 <div class="body">
 	<table width="100%" border="0" align="center" cellpadding="0"
 		cellspacing="0" style="margin-bottom: 2px;">
-		<tr>
-			<td class="td01">통화일자</td>
-			<td class="td02">
+		<tr id="record_top_tr">
+			<td class="td01" style="text-align: center; padding-left:0px !important">통화일자</td>
+			<td class="td02" style="text-align: left;">
 				<input type="text" class="input mini" id="txt_recordStartDate" style="width: 82px" /> 
 				<input type="text" class="input mini" id="txt_recordEndDate"  style="width: 82px" />
 			</td>
 			<td class="td01">콜구분</td>
 			<td class="td02">
-				<select id="select_recordCallTyp"></select>
+				<select id="select_recordCallTyp" style="height:22px;"></select>
 			</td>
 			<td class="td01">내선번호</td>
 			<td class="td02">
-				<select id="select_recordExtension"></select>
+				<select id="select_recordExtension" style="height:22px;"></select>
 			</td>
 			<td class="td01">전화번호</td>
 			<td class="td02">
 				<input type="text" class="input mini" id="txt_recordTel" maxLength="14" style="width: 120px; float:left" onfocus="OnCheckPhone(this)" onKeyup="OnCheckPhone(this)"/>
 			</td>
-			<td width="150" align="right" class="td01">
+			<td width="150" align="right" class="td01" style="padding-right:9px;">
 				<a class="btn small focus" id="bt_recordSelect">조 회</a>
 				<a class="btn small focus" id="bt_recordExcel">엑셀 다운로드</a>
 			</td>
 		</tr>
 	</table>
-	<table class="table classic hover" id="tab_record" width="100%">
+	<table class="table classic hover" id="tab_record" width="100%" style="padding-left: 5px;">
 		<thead>
 			<tr>
 				<th style="width:146px">내선번호</th>
@@ -229,7 +234,7 @@ $(document).ready(function() {
 		</tbody>
 	</table>
 	<iframe id="ifraRecord" name="ifraRecord" style="display:none;"></iframe>
-	<div id="paging_record" class="paging" style="margin-top: 3px;">
+	<div id="paging_record" class="paging" style="margin-top: 4px; margin-right: 4px; width:1092px;">
 	    <a href="#" class="prev" style="left:0" onclick="fn_page();">이전</a>
 	    <div class="list"></div>
 	    <a href="#" class="next" onclick="fn_page();">다음</a>

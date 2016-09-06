@@ -47,6 +47,13 @@ jui.ready([ "grid.xtable"], function(xtable) {
 					alert("새글 업데이트를 실패하였습니다");
 				}	*/	
 				$("#bt_noticeSelect").click();
+				
+				setTimeout(function (){
+					var id = $("#noticeNewYN").val();
+					$(id).addClass("selected");
+					$(id).find('input:checkbox[name="notice_chk"]').prop('checked', true);
+				},500);
+				
 			}
 		
 		});
@@ -122,7 +129,7 @@ jui.ready([ "grid.xtable"], function(xtable) {
 		var blank_pattern = /^\s+|\s+$/g;
 		
 		if (txt_noticeReply.value == '' || txt_noticeReply.value == null || txt_noticeReply.value.replace( blank_pattern, '' ) == ""){
-			msgboxActive('공지사항 의견달기', '\"댓글\"을 입력해주세요.');
+			msgboxActive('공지사항 의견달기', '위 게시글에 대한 \"댓글\"을 입력해주세요.');
 			//alert("댓글을 입력해주세요.");
 		}else {
 			var date = new Date();
@@ -162,12 +169,12 @@ jui.ready([ "grid.xtable"], function(xtable) {
 				data : JSON.stringify(paramReplyInsert),
 				success : function(result) {
 					if(result == 1){
-						msgboxActive('공지사항 의견달기', '\"저장\"이 완료되었습니다.');
+						msgboxActive('공지사항 의견달기', '게시글에 대한 댓글 \"저장\"이 완료되었습니다.');
 						//alert("저장이 완료되었습니다");
 						$("#txt_noticeReply").val("");
 						$("#bt_noticeReply").click();
 					}else if(result == 0){
-						msgboxActive('공지사항 의견달기', '\"저장\"이 되지 않았습니다.');
+						msgboxActive('공지사항 의견달기', '게시글에 대한 댓글 \"저장\"이 완료되지 않았습니다. 다시 시도해주세요.');
 						//alert("저장이 되지 않았습니다");
 					}	
 				}
@@ -231,7 +238,7 @@ function fn_comment(row){
 
 </script>
 <div class="head">
-	<a href="#" class="close"><i class="icon-exit"></i></a>
+	<a href="#" class="close" id="noticeCommentClose"><i class="icon-exit"></i></a>
 	<table width="100%" border="0" align="center" cellpadding="0"
 		cellspacing="0">
 		<tr>

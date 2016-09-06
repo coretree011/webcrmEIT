@@ -41,17 +41,48 @@ jui.ready([ "grid.xtable"], function(xtable) {
 	var result_data;
 	
 	var tableTr = "";
-	
+	var dataChk = '';
 	tab_excelList = xtable("#tab_excelList", {
-		//fields: [ "", "번호" ,"저장여부","저장확인","유형","고객번호","고객명","핸드폰","직장","자택","eMail","FAX","주소","비고"],
 		resize : true,
 		scrollHeight: 480,
-		width : 1700,
+		width : 2200,
         scrollWidth: 1325,
         buffer: "s-page",
         bufferCount: 2000,
+		/*
+		event: {
+ 	    	click: function(row, e) {
+ 	    		var id = "#" + row.index + "_excel";
+ 	    		if($(id).hasClass("selected")) {
+ 	    			$(id).removeClass("selected");
+ 	    			$(id).find('input:checkbox[name="excel_chk"]').prop('checked', false);
+ 	    		}else{
+				 	var bcheckbox = $(id).find("input:checkbox[name='excel_chk']").is(":disabled");
+					if(bcheckbox == true){
+					}else{
+						$(id).addClass("selected");
+						$(id).find('input:checkbox[name="excel_chk"]').prop('checked', true);
+					} 
+ 	    		}
+ 	    	}
+	 } */
 	});
 	
+    /* 체크박스 전체선택/전체해제 */
+    $("#excel_checkall").click(function(){
+        if($("#excel_checkall").prop("checked")){
+            $("input[name=excel_chk]").not(":disabled").prop("checked",true);
+          
+            /*$("input:checkbox[name='excel_chk']:checked").each(function(idx, row) {
+				var record = $(row).parents("tr");
+				$(record[0]).addClass("selected");
+				//alert(record[0].innerText);
+			});*/
+        }else{
+            $("input[name=excel_chk]").prop("checked",false);
+        }
+        
+    }); 
     
 	/*
 	 * 엑셀로 고객정보 저장
@@ -101,9 +132,12 @@ jui.ready([ "grid.xtable"], function(xtable) {
 							tab_excelList.update(result);
 							tab_excelList.resize(); 
 							tableTr = tab_excelList.size();
-							$("#bt_insertExcel").attr('disabled',true);
-							$('#bt_insertExcel').click(function(){return false;});
 							$("#bt_file").val('');
+							
+							alert(result[0].faxNo);
+							
+							//replaceAll(result[0].faxNo, " ", ".");
+							
 					 	}else{
 							tab_excelList.resize(); 
 						} 
@@ -129,8 +163,8 @@ jui.ready([ "grid.xtable"], function(xtable) {
 	$("#bt_excelData").click(function() {
 		document.getElementById('loadingData').innerHTML = "데이터를 검증 중입니다.";
 		document.getElementById("wrap-loading").classList.remove("display-none");
-		$('[name=insertOX]').html('');
-		var dataChk = '';
+		//$('[name=insertOX]').html('');
+		
 		var trExcel = $('.trExcel');
 		for(var i = 0; i < trExcel.length; i++){
 			obj = new Object();
@@ -140,12 +174,10 @@ jui.ready([ "grid.xtable"], function(xtable) {
 			obj.tel1No = document.querySelectorAll(".tel1_no")[i].innerHTML;
 			obj.tel2No = document.querySelectorAll(".tel2_no")[i].innerHTML;
 			obj.tel3No = document.querySelectorAll(".tel3_no")[i].innerHTML;
-			//alert(paramdata.custCd + "," + paramdata.custNo + "," + paramdata.custNm + "," + paramdata.tel1No);
 
-			var t = document.querySelectorAll(".cust_no")[i].innerHTML;
 			if(obj.custCd == "개인"){
 				obj.custCd = '1001';
-				t = "";
+				//t = "";
 			}else if(obj.custCd == "사업자"){
 				obj.custCd = '1002';
 			}
@@ -160,49 +192,24 @@ jui.ready([ "grid.xtable"], function(xtable) {
 			success : function(result) {
 				for(var i=0; i<result.length; i++){
 					dataChk = result[i];
-					//document.querySelectorAll(".excelData")[i].innerHTML = dataChk;
-					if(dataChk == '1000'){
+					 if(dataChk == '1001'){
 						document.querySelectorAll(".insertChk")[i].innerHTML = "가능";
 						document.querySelectorAll(".insertChk")[i].style.color = "black";
 						document.querySelectorAll(".insertChk")[i].style.fontWeight = "normal";
-						document.querySelectorAll(".cust_no")[i].innerHTML = "";
-					}else if(dataChk == '1100'){
-						document.querySelectorAll(".insertChk")[i].innerHTML = "선택필요(중복)";
-						document.querySelectorAll(".insertChk")[i].style.color = "blue";
-						document.querySelectorAll(".insertChk")[i].style.fontWeight = "bold";
-						document.querySelectorAll(".cust_no")[i].innerHTML = "";
-					}else if(dataChk == '2000'){
-						document.querySelectorAll(".insertChk")[i].innerHTML = "가능";
-						document.querySelectorAll(".insertChk")[i].style.color = "black";
-						document.querySelectorAll(".insertChk")[i].style.fontWeight = "normal";
-					}else if(dataChk == '2100'){
-						document.querySelectorAll(".insertChk")[i].innerHTML = "불가(중복)";
-						document.querySelectorAll(".insertChk")[i].style.color = "red";
-						document.querySelectorAll(".insertChk")[i].style.fontWeight = "bold";
-						document.querySelectorAll(".excel_chk")[i].disabled = true;
-					}else if(dataChk == '1001'){
-						document.querySelectorAll(".insertChk")[i].innerHTML = "가능";
-						document.querySelectorAll(".insertChk")[i].style.color = "black";
-						document.querySelectorAll(".insertChk")[i].style.fontWeight = "normal";
-						document.querySelectorAll(".cust_no")[i].innerHTML = "";
 					}else if(dataChk == '1101'){
 						document.querySelectorAll(".insertChk")[i].innerHTML = "선택필요(중복)";
 						document.querySelectorAll(".insertChk")[i].style.color = "blue";
 						document.querySelectorAll(".insertChk")[i].style.fontWeight = "bold";
-						document.querySelectorAll(".cust_no")[i].innerHTML = "";
-					}else if(dataChk == '4000'){
-						document.querySelectorAll(".insertChk")[i].innerHTML = "불가(사업자번호)";
-						document.querySelectorAll(".excel_chk")[i].disabled = true;
-						document.querySelectorAll(".insertChk")[i].style.color = "red";
-						document.querySelectorAll(".insertChk")[i].style.fontWeight = "bold"; 
-					}else if(dataChk == '4100'){
-						document.querySelectorAll(".insertChk")[i].innerHTML = "불가(사업자번호오류)";
-						document.querySelectorAll(".excel_chk")[i].disabled = true;
-						document.querySelectorAll(".insertChk")[i].style.color = "red";
+					}else if(dataChk == '1000'){
+						document.querySelectorAll(".insertChk")[i].innerHTML = "가능";
+						document.querySelectorAll(".insertChk")[i].style.color = "black";
+						document.querySelectorAll(".insertChk")[i].style.fontWeight = "normal";
+					}else if(dataChk == '1100'){
+						document.querySelectorAll(".insertChk")[i].innerHTML = "선택필요(중복)";
+						document.querySelectorAll(".insertChk")[i].style.color = "blue";
 						document.querySelectorAll(".insertChk")[i].style.fontWeight = "bold";
 					}
 				}
-				$("#bt_insertExcel").attr('disabled',false);
 				arr = [];
 				document.getElementById("wrap-loading").classList.add("display-none");
 			}
@@ -245,14 +252,19 @@ jui.ready([ "grid.xtable"], function(xtable) {
 					if(chkindex[i] == num){
 						obj3 = new Object();
 						obj3.custCd = document.querySelectorAll(".cust_cdNm")[index].innerHTML;
-						obj3.custNo = document.querySelectorAll(".cust_no")[index].innerHTML;
 						obj3.custNm = document.querySelectorAll(".cust_nm")[index].innerHTML;
+						obj3.coRegNo = document.querySelectorAll(".co_reg_no")[index].innerHTML;
 						obj3.tel1No = document.querySelectorAll(".tel1_no")[index].innerHTML;
 						obj3.tel2No = document.querySelectorAll(".tel2_no")[index].innerHTML;
 						obj3.tel3No = document.querySelectorAll(".tel3_no")[index].innerHTML;
 						obj3.emailId = document.querySelectorAll(".emailid")[index].innerHTML;
 						obj3.faxNo = document.querySelectorAll(".fax_no")[index].innerHTML;
 						obj3.addr = document.querySelectorAll(".addr")[index].innerHTML;
+						obj3.sexCd = document.querySelectorAll(".sex_Cd")[index].innerHTML;
+						obj3.birthDate = document.querySelectorAll(".birth_Date")[index].innerHTML;
+						obj3.gradeCd = document.querySelectorAll(".grade_Cd")[index].innerHTML;
+						obj3.custTypCd = document.querySelectorAll(".cust_Typ_Cd")[index].innerHTML;
+						obj3.recogTypCd = document.querySelectorAll(".recog_Typ_Cd")[index].innerHTML;
 						obj3.custNote = document.querySelectorAll(".cust_note")[index].innerHTML;
 						
 						if(obj3.custCd == "개인"){
@@ -285,6 +297,8 @@ jui.ready([ "grid.xtable"], function(xtable) {
 								if(result[i].length > 0) {
 									$('[name=custNo]').eq(num).html(result[i]);
 									$('[name=insertOX]').eq(index).html('O');
+									$("input[name=excel_chk]").eq(index).attr('disabled',true);
+									$(".trExcel").eq(index).attr('disabled',true);
 								}else if(result[i] == "0"){
 									$('[name=insertOX]').eq(index).html('X');
 								}
@@ -297,7 +311,7 @@ jui.ready([ "grid.xtable"], function(xtable) {
 					
 					$("#excel_checkall").prop("checked",false);
 					$("input[name=excel_chk]").prop("checked",false);
-					$("#bt_insertExcel").attr('disabled',true);
+					
 				},
 				error: function () {
 					$('.trExcel').each(function(index){
@@ -317,14 +331,6 @@ jui.ready([ "grid.xtable"], function(xtable) {
 });
     
 $(document).ready(function(){
-    $("#excel_checkall").click(function(){
-        if($("#excel_checkall").prop("checked")){
-            $("input[name=excel_chk]").not(":disabled").prop("checked",true);
-        }else{
-            $("input[name=excel_chk]").prop("checked",false);
-        }
-    }); 
-    
     $("#bt_excelPopup").click(function(){
     	tab_excelList.update();
     });
@@ -335,14 +341,22 @@ $(document).ready(function(){
 			obj2 = new Object();
 			obj2.custCdNm = document.querySelectorAll(".cust_cdNm")[i].innerHTML;
 			obj2.insertChk = document.querySelectorAll(".insertChk")[i].innerHTML;
-			obj2.custNo = document.querySelectorAll(".cust_no")[i].innerHTML;
+			//obj2.custNo = document.querySelectorAll(".cust_no")[i].innerHTML;
 			obj2.custNm = document.querySelectorAll(".cust_nm")[i].innerHTML;
+			obj2.coRegNo = document.querySelectorAll(".co_reg_no")[i].innerHTML;
 			obj2.tel1No = document.querySelectorAll(".tel1_no")[i].innerHTML;
 			obj2.tel2No = document.querySelectorAll(".tel2_no")[i].innerHTML;
 			obj2.tel3No = document.querySelectorAll(".tel3_no")[i].innerHTML;
 			obj2.emailId = document.querySelectorAll(".emailid")[i].innerHTML;
 			obj2.faxNo = document.querySelectorAll(".fax_no")[i].innerHTML;
 			obj2.addr = document.querySelectorAll(".addr")[i].innerHTML;
+			
+			obj2.sexCd = document.querySelectorAll(".sex_Cd")[i].innerHTML;
+			obj2.birthDate = document.querySelectorAll(".birth_Date")[i].innerHTML;
+			obj2.gradeCd = document.querySelectorAll(".grade_Cd")[i].innerHTML;
+			obj2.custTypCd = document.querySelectorAll(".cust_Typ_Cd")[i].innerHTML;
+			obj2.recogTypCd = document.querySelectorAll(".recog_Typ_Cd")[i].innerHTML;
+			
 			obj2.custNote = document.querySelectorAll(".cust_note")[i].innerHTML;
 			
 			arr2.push(obj2);
@@ -352,6 +366,7 @@ $(document).ready(function(){
 
 		$("#ifraPopup").attr("src","/popup/excelListExport?jsonEncode=" + jsonEncode + "&empNm=" + empNm);
 	});
+    
     
 });
 /* 취소버튼 click Event */
@@ -364,6 +379,10 @@ String.prototype.replaceAll = function(org, dest) {
     return this.split(org).join(dest);
 }
 
+function a(){
+	alert($('.fax_no').text());
+}
+
 </script>
 <script data-jui="#tab_excelList" data-tpl="row" type="text/template">
 	<tr id="<!= row.index !>_excel" class="trExcel">
@@ -373,20 +392,26 @@ String.prototype.replaceAll = function(org, dest) {
 		<td class="insertChk"></td>
 		<td class="insertOX" name="insertOX" id="insertOX"></td>
 		<td id="cust_cdNm" class="cust_cdNm" align ="center"><!= custCdNm !></td>
-		<td id="cust_no" class="cust_no" align ="center" name="custNo"><!= custNo !></td>
+		<td id="cust_no" class="cust_no" align ="center" name="custNo"></td>
 		<td id="cust_nm" class="cust_nm"><!= custNm !></td>
+		<td class="co_reg_no"><!= coRegNo !></td>
 		<td id="tel1_no" class="tel1_no"><!= tel1No !></td>
 		<td id="tel2_no" class="tel2_no"><!= tel2No !></td>
 		<td id="tel3_no" class="tel3_no"><!= tel3No !></td>
 		<td id="emailid" class="emailid"><!= emailId !></td>
-		<td id="fax_no" class="fax_no"><!= faxNo !></td>
+		<td id="fax_no" class="fax_no" onclick="a()"><!= faxNo !></td>
 		<td id="addr" class="addr"><!= addr !></td>
+		<td class="sex_Cd"><!= sexCd !></td>
+		<td class="birth_Date"><!= birthDate !></td>
+		<td class="grade_Cd"><!= gradeCd !></td>
+		<td class="cust_Typ_Cd"><!= custTypCd !></td>
+		<td class="recog_Typ_Cd" ><!= recogTypCd !></td>
 		<td id="cust_note" class="cust_note"><!= custNote !></td>
 	</tr>
 </script>
 <script data-jui="#tab_excelList" data-tpl="none" type="text/template" >
     <tr height ="480">
-        <td colspan="15" class="none" align="center">데이터가 존재하지 않습니다.</td>
+        <td colspan="20" class="none" align="center">데이터가 존재하지 않습니다.</td>
     </tr>
 </script>
 <style>
@@ -424,7 +449,7 @@ String.prototype.replaceAll = function(org, dest) {
 	 <form id="upload_file_frm" enctype="multipart/form-data">
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 2px;">
 			<tr>
-				<td width="100%" align="right" class="td01">
+				<td width="100%" align="right" class="td01" style="padding-bottom: 5px;">
 				<input type="file" id="bt_file" name="uploadFile" style="display:none;"/>
 				<a class="btn small focus" id="bt_selectExcel">엑셀선택</a>
 				<a class="btn small focus" id="bt_excelData">데이터검증</a>
@@ -441,17 +466,23 @@ String.prototype.replaceAll = function(org, dest) {
 				<th style="width:25px;"><input type="checkbox" id="excel_checkall"/></th>
 				<th style="width:36px;">번호</th>
 				<!-- <th style="width:54px;">검증</th>  -->
-				<th style="width:108px;">저장여부</th>
-				<th style="width:82px;">저장확인</th>
+				<th style="width:108px;">검증결과</th>
+				<th style="width:82px;">저장결과</th>
 				<th style="width:68px;">유형</th>
 				<th style="width:90px;">고객번호</th>
 				<th style="width:70px;">고객명</th>
+				<th style="width:90px;">사업자번호</th>
 				<th style="width:100px;">핸드폰</th>
 				<th style="width:100px;">직장</th>
 				<th style="width:100px;">자택</th>
 				<th style="width:141px;">eMail</th>
 				<th style="width:110px;">FAX</th>
 				<th style="width:272px;">주소</th>
+				<th style="width:40px;">성별</th>
+				<th style="width:80px;">생년월일</th>
+				<th style="width:80px;">고객등급</th>
+				<th style="width:80px;">고객유형</th>
+				<th style="width:80px;">인지경로</th>
 				<th style="width:auto;">비고</th> 
 			</tr>
 		</thead>

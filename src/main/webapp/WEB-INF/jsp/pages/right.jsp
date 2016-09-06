@@ -103,17 +103,21 @@
 			}
 		});	
 	}
+	
+	function goTelnum(extNo){
+		$("input[name=sp_telNo]").val(extNo);
+	}
 	</script>
 <script data-jui="#empState" data-tpl="row" type="text/template">
-	<tr>
+	<tr ondblclick="javascript:goTelnum('<!= extensionNo !>');">
 		<td align ="center"><!= extensionNo !></td>
 		<td align ="center"><!= empNm !></td>
-		<td align ="center"><!= state !></td>
+		<td align ="center" id="ext_<!= extensionNo !>_state"></td>
 	</tr>
 </script>
 <script data-jui="#empState" data-tpl="none" type="text/template">
     <tr>
-        <td colspan="3" class="none" align="center">Data does not exist.</td>
+        <td colspan="3" class="none" align="center">데이터가 존재하지 않습니다.</td>
     </tr>
 </script>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -179,19 +183,19 @@
                 <table width="96%" border="0" align="center" cellpadding="0" cellspacing="0">
                   <tr>
                     <td class="right_txt" >전체</td>
-                    <td class="right_td01"><input type="text" name="totEmp" class="rightinput mini" value="100" size="1" disabled="disabled" /></td>
+                    <td class="right_td01"><input type="text" name="totEmp" class="rightinput mini" value="0" size="1" disabled="disabled" /></td>
                     <td class="right_txt">로그인</td>
-                    <td class="right_td01"><input type="text" name="totLogin" class="rightinput mini" value="100" size="1" disabled="disabled" /></td>
+                    <td class="right_td01"><input type="text" name="totLogin" class="rightinput mini" value="0" size="1" disabled="disabled" /></td>
                     <td class="right_txt">로그아웃</td>
-                    <td class="right_td01"><input type="text" name="totLogout" class="rightinput mini" value="100" size="1" disabled="disabled" /></td>
+                    <td class="right_td01"><input type="text" name="totLogout" class="rightinput mini" value="0" size="1" disabled="disabled" /></td>
                   </tr>
                   <tr>
                     <td class="right_txt">대기</td>
-                    <td class="right_td01"><input type="text" name="totReady" class="rightinput mini" value="100" size="1" disabled="disabled" /></td>
-                    <td class="right_txt">후처리</td>
-                    <td class="right_td01"><input type="text" name="totNotready" class="rightinput mini" value="100" size="1" disabled="disabled" /></td>
+                    <td class="right_td01"><input type="text" name="totReady" class="rightinput mini" value="0" size="1" disabled="disabled" /></td>
+                    <td class="right_txt">이석</td>
+                    <td class="right_td01"><input type="text" name="totNotready" class="rightinput mini" value="0" size="1" disabled="disabled" /></td>
                     <td class="right_txt">통화중</td>
-                    <td class="right_td01"><input type="text" name="totEstablish" class="rightinput mini" value="100" size="1" disabled="disabled" /></td>
+                    <td class="right_td01"><input type="text" name="totEstablish" class="rightinput mini" value="0" size="1" disabled="disabled" /></td>
                   </tr>
                   <tr>
                   <tr>

@@ -51,7 +51,32 @@ body {
 			scrollWidth: 1095,
 			width:1950,
 	        buffer: "s-page",
-	        bufferCount: 20,
+	        bufferCount: 500,
+	        event: {
+	 	    	click: function(row, e) {
+	 	    		var id = "#" + row.index;
+	 	    		if($(id).hasClass("selected")) {
+	 	    			$(id).removeClass("selected");
+	 	    			$(id).find('input:checkbox[name="tab2_chk"]').prop('checked', false);
+	 	    		}else{
+						$(id).addClass("selected");
+						$(id).find('input:checkbox[name="tab2_chk"]').prop('checked', true);
+	 	    		}
+	 	    	},
+	 	    	dblclick: function(row, e){
+	 	    		var id2 = "#" + row.index;
+	 	    		var cnt = $('input:checkbox[name="tab2_chk"]:checked').length;
+	 	    		var cust = document.querySelectorAll(".custNo")[row.index].innerHTML;
+				    if(cnt >= 2){
+				    	//$(id).removeAttr("ondblclick");
+				    }else if(cnt == 1 || cnt == 0){
+				    	customer_one(cust);
+				    	$(id2).addClass("selected");
+				    	$(id2).find('input:checkbox[name="tab2_chk"]').prop('checked', true);
+				    } 
+	 	    		
+	 	    	}
+		 	},
 	        tpl: {
 	            row: $("#tpl_row_tab02").html(),
 	            none: $("#tpl_none_tab02").html()
@@ -87,7 +112,7 @@ body {
 		});
 
 		paging_2 = paging("#paging_2", {
-		      pageCount: 20,
+		      pageCount: 500,
 		      event: {
 		          page: function(pNo) {
 		        	  tab_customerList.page(pNo);
@@ -187,15 +212,15 @@ body {
 				data : JSON.stringify(tab2_param),
 				success : function(result) {
 					if(result>0){
-						alert("삭제되었습니다.");
+						msgboxActive('고객리스트', '선택하신 고객 \"삭제\"가 완료되었습니다.');
 						$("#bt_customer").click();
 					}else{
-						alert("실패했습니다.");
+						msgboxActive('고객리스트', '고객 \"삭제\"가 완료되지 않았습니다. 다시 시도해주세요.');
 					}
 				}
 			}); 
 		});
-		
+
 		$("#bt_customerExcel").click(function() {
 			var empNm = $("input[name=empNm]").val();
 			tab2_param.telNo = $("input[name=tab2_telNo]").val();
@@ -216,6 +241,47 @@ body {
 								+"&recogTypCd="+tab2_param.recogTypCd);
 		});
 
+		$("#bt_smsGrpSend").click(function() {
+			var allLength = 0;
+			var result = "";
+			var chkTelNum = "";
+			var chkTelArr = new Array();
+			allLength = tab_customerList.size();
+			for(var i = 0; i< allLength; i++){
+				if($("#"+i+" input[name=tab2_chk]:checked").is(":checked")){
+					if(result == ""){
+						result = $("#"+i+" input[name=tab2_chk]").val();
+						chkTelNum = $("#"+i+"_tab2_tel1No").text();
+					}else{
+						result += ","+$("#"+i+" input[name=tab2_chk]").val();
+						chkTelNum += ","+$("#"+i+"_tab2_tel1No").text();
+					}
+				}
+			}
+			if(result != ""){
+				chkTelArr = chkTelNum.split(',');
+				for(var i = 0; i <chkTelArr.length; i++){
+					var tmp = chkTelArr[i];
+					for(var j = i+1; j <chkTelArr.length; j++){
+						if(tmp == chkTelArr[j]){
+							msgboxActive('SMS 단체전송', '중복된 핸드폰번호가 있습니다. \n 확인해주세요.');
+							return;
+						} 
+					}
+				}
+				if($("input[name=pop_grpTransCustNo]").val()==""){
+					$("input[name=pop_grpTransCustNo]").val(result);
+					$("#bt_smsGrpList").click();
+					win_14_1.show(); 
+				}else{
+					result = $("input[name=pop_grpTransCustNo]").val() +"," +result;
+					$("input[name=pop_grpTransCustNo]").val(result);
+					$("#bt_smsGrpList").click();
+				}
+			}else{
+				msgboxActive('SMS 단체전송', '고객을 선택해주세요.');
+			}
+		});
 		tab2_codeParam.lcd = "1013";
 		$.ajax({
 			url : "/code/selecCodeList",
@@ -290,6 +356,7 @@ body {
 					$("input[name=addr]").val(result.addr);
 					$("input[name=tel1No]").val(result.tel1No);
 					$("input[name=tab1_resTelNo]").val(result.tel1No);
+					$("input[name=pop_sendTelNo]").val(result.tel1No);
 					$("input[name=tel2No]").val(result.tel2No);
 					$("input[name=tel3No]").val(result.tel3No);
 					$("input[name=faxNo]").val(result.faxNo);
@@ -327,20 +394,22 @@ body {
 	function tab2_chkAll(){
         if($("#tab2_chkAll").prop("checked")){
             $("input[name=tab2_chk]").prop("checked",true);
+            $(".tab02_tr").addClass("selected");
         }else{
             $("input[name=tab2_chk]").prop("checked",false);
+            $(".tab02_tr.selected").removeClass("selected");
         }
 	}
 </script>
 
 <script id="tpl_row_tab02" type="text/template">
-	<tr id="<!= num !>" ondblclick="javascript:customer_one(<!= custNo !>);">
+	<tr class="tab02_tr" id="<!= row.index !>" >
 		<td align ="center"><input type="checkbox" name="tab2_chk" value="<!= custNo !>"/></td>
 		<td align ="center"><!= num !></td>
 		<td align ="center"><!= custCdNm !></td>
-		<td align ="center"><!= custNo !></td>
+		<td align ="center" class="custNo"><!= custNo !></td>
 		<td><!= custNm !></td>
-		<td><!= tel1No !></td>
+		<td id="<!= row.index !>_tab2_tel1No"><!= tel1No !></td>
 		<td><!= tel2No !></td>
 		<td><!= tel3No !></td>
 		<td><!= emailId !></td>
@@ -385,7 +454,7 @@ body {
 									</td>
 									<td class="td01" width="45"><span class="td01">고객명</span></td>
 									<td class="td02">
-										<input type="text" name="tab2_custNm" class="input mini" style="width: 98px" />
+										<input type="text" name="tab2_custNm" class="input mini" style="width: 98px"  onkeydown="javascript: if (event.keyCode == 13) { $('#bt_customer').click();}"/>
 									</td>
 									<td class="td01" width="65"><span class="td01">사업자번호</span></td>
 									<td class="td02">
@@ -402,6 +471,7 @@ body {
 									<td colspan="4" align="right" class="td01">
 										<a class="btn small focus" id="bt_customer">조 회</a>
 										<a class="btn small focus" id="bt_customerdel">삭제</a>
+										<a class="btn small focus" id="bt_smsGrpSend">SMS 단체전송</a>
 										<a class="btn small focus" id="bt_customerExcel">엑셀저장</a>
 									</td>
 								</tr>
@@ -439,24 +509,24 @@ body {
 							<thead>
 								<tr>
 									<th style="width: 15px;"><input type="checkbox" id="tab2_chkAll" onclick="javascript:tab2_chkAll();"/></th>
-									<th style="width: 25px;">SEQ</th>
+									<th style="width: 30px;">SEQ</th>
 									<th style="width: 32px;">유형</th>
-									<th style="width: 90px;">고객번호</th>
-									<th style="width: 50px;">고객명</th>
-									<th style="width: 95px;">핸드폰</th>
-									<th style="width: 95px;">직장</th>
-									<th style="width: 95px;">자택</th>
-									<th style="width: 130px;">eMail</th>
-									<th style="width: 95px;">FAX</th>
-									<th style="width: 150px;">주소</th>
+									<th style="width: 70px;">고객번호</th>
+									<th style="width: 85px;">고객명</th>
+									<th style="width: 88px;">핸드폰</th>
+									<th style="width: 88px;">직장</th>
+									<th style="width: 88px;">자택</th>
+									<th style="width: 120px;">eMail</th>
+									<th style="width: 88px;">FAX</th>
+									<th style="width: 190px;">주소</th>
 									<th style="width: 80px;">사업자번호</th>
-									<th style="width: 95px;">최종상담일</th>
+									<th style="width: 75px;">최종상담일</th>
 									<th style="width: 80px;">고객등급</th>
 									<th style="width: 80px;">고객유형</th>
 									<th style="width: 80px;">인지경로</th>
 									<th style="width: 25px;">성별</th>
-									<th style="width: 80px;">생년월일</th>
-									<th style="width: 80px;">등록일</th>
+									<th style="width: 75px;">생년월일</th>
+									<th style="width: 75px;">등록일</th>
 									<th style="width: auto;">비고</th>
 								</tr>
 							</thead>

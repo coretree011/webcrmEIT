@@ -16,9 +16,9 @@ var radioSelect;
 jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 	tab_callcenterList = xtable("#tab_callcenterList", {
 		resize : true,
-		scrollHeight: 390,
-		width : 1105,
-        scrollWidth: 1100,
+		scrollHeight: 375,
+		width : 1100,
+        scrollWidth: 1095,
         buffer: "s-page",
         bufferCount: 100,
         tpl: {
@@ -209,7 +209,7 @@ $(document).ready(function() {
 	</tr>
 </script>
 <script id="tpl_none_callcenter" type="text/template">
-    <tr height ="380">
+    <tr height ="375">
         <td colspan="10" class="none" align="center">데이터가 존재하지 않습니다.</td>
     </tr>
 </script>
@@ -218,6 +218,11 @@ $(document).ready(function() {
     <a href="#" class="page" onclick="fn_page();"><!= pages[i] !></a>
     <! } !>
 </script>
+<style>
+#callcenter_top_tr td {
+	padding-bottom: 5px;
+}
+</style>
 <div class="head">
 	<a href="#" class="close"><i class="icon-exit"></i></a>
 	<table width="100%" border="0" align="center" cellpadding="0"
@@ -231,10 +236,9 @@ $(document).ready(function() {
 	</table>
 </div>
 <div class="body" style="overflow-y:hidden">
-	<table width="100%" border="0" align="center" cellpadding="0"
-		cellspacing="0" style="margin-bottom: 2px;">
-		<tr>
-			<td width="60" class="td01">인입일자</td>
+	<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" style="margin-bottom: 2px;">
+		<tr id="callcenter_top_tr">
+			<td width="60" class="td01" style="text-align: center; padding-left:0px !important">인입일자</td>
 			<td align="left" class="td02">
 				<input type="text" class="input mini" id="bt_startDate"  style="width: 82px" /> 
 				<input type="text" class="input mini" id="bt_endDate"  style="width: 82px" />
@@ -246,13 +250,13 @@ $(document).ready(function() {
 				<input type="radio" name="radio_callcenter" value = "4" id="radio_callcenterYear"> 연도별
 			</td>
          <td width="20%"></td>
-        <td width="200" align="right" class="td01">
+        <td width="200" align="right" class="td01" style="padding-right:9px;">
         	<a class="btn small focus" id="bt_callcenterList">조 회</a> 
         	<a class="btn small focus" id="bt_callcenterCSV">엑셀 다운로드</a>
         </td>
 		</tr>
 	</table>
-	<table class="table special hover" id="tab_callcenterList" width="100%">
+	<table class="table special hover" id="tab_callcenterList" width="100%" style="padding-left: 5px;">
 		<colgroup>
 			<col width="110px">
 			<col width="110px">
@@ -286,7 +290,7 @@ $(document).ready(function() {
 		<tbody>
 		</tbody>
 	</table>
-	<div id="paging_callCenter" class="paging" style="margin-top: 3px;">
+	<div id="paging_callCenter" class="paging" style="margin-top: 4px; margin-right: 4px; width:1092px;">
 	    <a href="#" class="prev" style="left:0" onclick="fn_page();">이전</a>
 	    <div class="list"></div>
 	    <a href="#" class="next" onclick="fn_page();">다음</a>

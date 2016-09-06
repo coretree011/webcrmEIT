@@ -11,6 +11,7 @@ import com.coretree.defaultconfig.main.model.Customer;
 public interface CustomerMapper {
 	public List<Customer> selectCustomerList(Customer customer);
 	public List<Customer> selectCustomerListExcel(Customer customer);
+	public List<Customer> selectCustomerListGrpSms(Customer customer);
 	public long insertCustomer(Customer customer);
 	public long insertCustomer2(Customer customer);
 	public long updateCustomer(Customer customer);

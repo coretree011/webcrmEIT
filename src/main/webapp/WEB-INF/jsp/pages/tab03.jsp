@@ -46,7 +46,12 @@ body {
 		 	scrollWidth: 1095,
 			width:1099, 
 	        buffer: "s-page",
-	        bufferCount: 20,
+	        bufferCount: 500,
+	        event: {
+	 	    	dblclick: function(row, e) {
+	 	    		this.select(row.index);
+	 	    	}
+		 	},
 	        tpl: {
 	            row: $("#tpl_row_tab03").html(),
 	            none: $("#tpl_none_tab03").html()
@@ -78,7 +83,7 @@ body {
 		});
 
 		paging_3 = paging("#paging_3", {
-		      pageCount: 20,
+		      pageCount: 500,
 		      event: {
 		          page: function(pNo) {
 		        	  tab_callbackList.page(pNo);
@@ -140,6 +145,7 @@ body {
 			    for ( var i = 0; i < result.length; i++) {
 						$('#tab3_counResult').append('<option value='+result[i].scd+'>' + result[i].scdNm + '</option>');
 			    } 
+			    $('#tab3_counResult').css("width","100px");
 			}
 		});
 
@@ -207,6 +213,7 @@ function customer_one2(telNo){
 				if(result.length == 1){
 					$("input[name=tab5_custNo]").val(result[0].custNo);
 					$("input[name=tab6_custNo]").val(result[0].custNo);
+					$("input[name=pop_sendTelNo]").val(result[0].tel1No);
 					//$("input[name=tab5_cStartDate]").val(date.getFullYear()-1 +'-'+ month +'-'+ day);
 					//$("input[name=tab5_cEndDate]").val("");
 					$("#counSearch").click();
@@ -259,28 +266,32 @@ function customer_one2(telNo){
 		callback.empNm = $("input[name=tab3_empNmS]").val();
 		callback.counCd = $("input[name=tab3_counCd]").val();
 		
-		$.ajax({
-			url : "/main/callbackSave",
-			type : "post",
-			contentType : 'application/json; charset=utf-8',
-			data : JSON.stringify(callback),
-			success : function(result) {
-				if(result == 1){
-					alert("저장되었습니다.");
-					$("#tab3_counResult").val("");
-					$("#tab3_empNo").val("");
-					$("#bt_callback").click();
-				}else{
-					alert("실패했습니다.");
+		if(callback.cbSeq != ""){
+			$.ajax({
+				url : "/main/callbackSave",
+				type : "post",
+				contentType : 'application/json; charset=utf-8',
+				data : JSON.stringify(callback),
+				success : function(result) {
+					if(result == 1){
+						msgboxActive('콜백', '콜백 \"저장\"이 완료되었습니다.');
+						$("#tab3_counResult").val("");
+						$("#tab3_empNo").val("");
+						$("#bt_callback").click();
+					}else{
+						msgboxActive('콜백', '콜백 \"저장\"이 완료되지 않았습니다. 다시 시도해주세요.');
+					}
 				}
-			}
-		});
+			});
+		}else{
+			msgboxActive('콜백', '저장 할 콜백정보를 선택해주세요.');
+		}
 	 
  }
 </script>
 
 <script id="tpl_row_tab03" type="text/template">
-	<tr id="tab3_<!= num !>">
+	<tr id="tab3_<!= row.index !>">
 		<td align ="center"><!= num !></td>
 		<td align ="center"><!= cbSeq !></td>
 		<td align ="center" ondblclick="javascript:customer_one2('<!= resTelNo !>');"><!= resTelNo !></td>
@@ -326,7 +337,7 @@ function customer_one2(telNo){
 									<td class="td02">
 										<select id="tab3_empNo"></select>
 									</td>
-									<td class="td01">상담결과</td>
+									<td class="td01">처리결과</td>
 									<td class="td02">
 										<select id="tab3_counResult"></select>
 									</td>

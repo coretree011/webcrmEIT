@@ -276,9 +276,9 @@ $(document).ready(function() {
 				alert("고객번호를 입력해주세요.");
 			}else  */
 			if(mainCustomer.custNm == ""){
-				alert("고객명을 입력해주세요.");
+				msgboxActive('고객상세', '\"고객명\"을 입력해주세요.');
 			}else if(mainCustomer.tel1No == ""){
-				alert("핸드폰번호를 입력해주세요.");
+				msgboxActive('고객상세', '\"핸드폰번호\"를 입력해주세요.');
 			}else{
 				if(regularCheck()){
 					$.ajax({
@@ -288,13 +288,13 @@ $(document).ready(function() {
 						data : JSON.stringify(mainCustomer),
 						success : function(result) {
 							if(result == "2000"){
-								alert("등록되었습니다.");
+								msgboxActive('고객상세', '고객정보 \"등록\"이 완료되었습니다.');
 								tab1_customer_one(mainCustomer.custNo);
 							}else if(result == "2100"){
-								alert("정보가 수정되었습니다.");
+								msgboxActive('고객상세', '고객정보 \"수정\"이 완료되었습니다.');
 								tab1_customer_one(mainCustomer.custNo);
 							}else if(result == "4100"){
-								alert("고객번호(사업자번호)를 확인하세요.");
+								msgboxActive('고객상세', '\"고객번호(사업자번호)\"를 확인해주세요.');
 							}
 						}
 					});
@@ -302,9 +302,9 @@ $(document).ready(function() {
 			}
 		}else{
 			if(mainCustomer.custNm == ""){
-				alert("고객명을 입력해주세요.");
+				msgboxActive('고객상세', '\"고객명\"을 입력해주세요.');
 			}else if(mainCustomer.tel1No == ""){
-				alert("핸드폰번호를 입력해주세요.");
+				msgboxActive('고객상세', '\"핸드폰번호\"를 입력해주세요.');
 			}else{
 				if(regularCheck()){
 					$.ajax({
@@ -314,10 +314,13 @@ $(document).ready(function() {
 						data : JSON.stringify(mainCustomer),
 						success : function(result) {
 							if(result == "1000"){
-								alert("정보가 수정되었습니다.");
+								msgboxActive('고객상세', '고객정보 \"수정\"이 완료되었습니다.');
 								tab1_customer_one(mainCustomer.custNo);
 							}else if(result == "1100"){
-								if(confirm("기존에 고객명, 핸드폰번호가 존재합니다. \n수정하시겠습니까?")){
+								msgboxActive2('고객상세',"기존에 고객명, 핸드폰번호가 존재합니다. \n수정하시겠습니까?");
+								//if(confirm("기존에 고객명, 핸드폰번호가 존재합니다. \n수정하시겠습니까?")){
+								$('#tab01_msgok').click(function() {
+									$('#tab01_msgbox').css( "display", "none" );
 									$.ajax({
 										url : "/main/updateCustomer",
 										type : "post",
@@ -325,12 +328,12 @@ $(document).ready(function() {
 										data : JSON.stringify(mainCustomer),
 										success : function(result) {
 											if(result == 1){
-												alert("수정되었습니다.");
+												msgboxActive('고객상세', '고객정보 \"수정\"이 완료되었습니다.');
 												tab1_customer_one(mainCustomer.custNo);
 											}
 										}
 									});
-								}
+								});
 							}else if(result == "1001"){
 								$.ajax({
 									url : "/main/insertCustomer",
@@ -339,15 +342,17 @@ $(document).ready(function() {
 									data : JSON.stringify(mainCustomer),
 									success : function(result) {
 										if(result != "0"){
-											alert("등록되었습니다.");
+											msgboxActive('고객상세', '고객정보 \"등록\"이 완료되었습니다.');
 											tab1_customer_one(result);
 										}else{
-											alert("실패했습니다.");
-											}
+											msgboxActive('고객상세', '고객정보 \"등록\"이 완료되지 않았습니다. 다시 시도해주세요.');
+										}
 									}
 								});
 							}else if(result == "1101"){
-								if(confirm("기존에 고객명, 핸드폰번호가 존재합니다. \n입력하시겠습니까?")){
+								msgboxActive2('고객상세',"기존에 고객명, 핸드폰번호가 존재합니다. \n입력하시겠습니까?");
+								$('#tab01_msgok').click(function() {
+									$('#tab01_msgbox').css( "display", "none" );
 									$.ajax({
 										url : "/main/insertCustomer",
 										type : "post",
@@ -355,14 +360,14 @@ $(document).ready(function() {
 										data : JSON.stringify(mainCustomer),
 										success : function(result) {
 											if(result != "0"){
-												alert("등록되었습니다.");
+												msgboxActive('고객상세', '고객정보 \"등록\"이 완료되었습니다.');
 												tab1_customer_one(result);
 											}else{
-												alert("실패했습니다.");
-												}
+												msgboxActive('고객상세', '고객정보 \"등록\"이 완료되지 않았습니다. 다시 시도해주세요.');
+											}
 										}
 									});
-								}
+								});
 							}
 						}
 					});
@@ -381,15 +386,16 @@ $(document).ready(function() {
 					data : JSON.stringify(mainCustomer),
 					success : function(result) {
 						if(result == 1){
+							msgboxActive('고객상세', '고객정보 \"삭제\"가 완료되었습니다.');
 							alert("삭제되었습니다.");
 							location.reload();
 						}else{
-							alert("실패했습니다.");
+							msgboxActive('고객상세', '고객정보 \"삭제\"가 완료되지 않았습니다. 다시 시도해주세요.');
 						}
 					}
 				});
 		}else{
-			alert("삭제할 고객 번호를 입력해주세요.");
+			msgboxActive('고객상세', '\"삭제\"할 고객 번호를 입력해주세요.');
 		}
 });
 	
@@ -410,9 +416,9 @@ $(document).ready(function() {
 
 		if(mainCoun != null){
 			if(mainCoun.custNo == ""){
-				alert("고객번호를 입력해주세요.");
+				msgboxActive('상담이력 등록', '\"고객번호\"를 입력해주세요.');
 			}else if(mainCoun.counCd == ""){
-				alert("통화결과를 선택해주세요.");
+				msgboxActive('상담이력 등록', '\"상담결과\"를 선택해주세요.');
 			}else{
 				if(mainCoun.counSeq == ""){
 					$.ajax({
@@ -422,11 +428,11 @@ $(document).ready(function() {
 						data : JSON.stringify(mainCoun),
 						success : function(result) {
 							if(result > 0){
-								alert("저장되었습니다.");
+								msgboxActive('상담이력 등록', '상담이력 \"저장\"이 완료되었습니다.');
 								counReset();
 								$("#counSearch").click();
 							}else{
-								alert("실패했습니다.");
+								msgboxActive('상담이력 등록', '상담이력 \"저장\"이 완료되지 않았습니다. 다시 시도해주세요.');
 							}
 						}
 					});
@@ -438,11 +444,11 @@ $(document).ready(function() {
 						data : JSON.stringify(mainCoun),
 						success : function(result) {
 							if(result == 1){
-								alert("수정되었습니다.");
+								msgboxActive('상담이력 등록', '상담이력 \"수정\"이 완료되었습니다.');
 								counReset();
 								$("#counSearch").click();
 							}else{
-								alert("실패했습니다.");
+								msgboxActive('상담이력 등록', '상담이력 \"수정\"이 완료되지 않았습니다. 다시 시도해주세요.');
 							}
 						}
 					});
@@ -463,11 +469,11 @@ $(document).ready(function() {
 		mainRes.resNote = $("input[name=tab1_resNote]").val();
 		if(mainRes != null){
 			if(mainRes.custNo == ""){
-				alert("고객번호를 입력해주세요.");
+				msgboxActive('상담예약 등록', '\"고객번호\"를 입력해주세요.');
 			}else if(mainRes.resDate == ""){
-				alert("예약일시를 입력해주세요.");
+				msgboxActive('상담예약 등록', '\"예약일시\"를 입력해주세요.');
 			}else if(mainRes.resTelNo == ""){
-				alert("예약전화번호를 입력해주세요.");
+				msgboxActive('상담예약 등록', '\"예약전화번호\"를 입력해주세요.');
 			}else{
 				if(regularCheck()){
 					$.ajax({
@@ -477,10 +483,10 @@ $(document).ready(function() {
 						data : JSON.stringify(mainRes),
 						success : function(result) {
 							if(result == 1){
-								alert("저장되었습니다.");
+								msgboxActive('상담예약 등록', '상담예약 \"저장\"이 완료되었습니다.');
 								reservReset();
 							}else{
-								alert("실패했습니다.");
+								msgboxActive('상담예약 등록', '상담예약 \"저장\"이 완료되지 않았습니다. 다시 시도해주세요.');
 							}
 						}
 					});
@@ -489,6 +495,7 @@ $(document).ready(function() {
 		}
 });
 });
+
 function counReset(){
 	$("#callResult").val("");
 	$("input[name=counNote]").val("");
@@ -570,39 +577,42 @@ function tab1_customer_one(custNo){
 }
 
 function regularCheck(){
-	if(!regularExpCheck($("input[name=tel1No]").val(),"phoneNum")){
-		alert("핸드폰번호가 올바른 형식이 아닙니다.");
+	if($("input[name=tel1No]").val().length > 0 && !regularExpCheck($("input[name=tel1No]").val(),"phoneNum")){
+		alert($("input[name=tel1No]").val().length);
+		msgboxActive('고객상세', '\"핸드폰번호\"가 올바른 형식이 아닙니다.');
 		return false;
-	}else if(!regularExpCheck($("input[name=tel2No]").val(),"phoneNum")){
-		alert("직장번호가 올바른 형식이 아닙니다.");
+	}else if($("input[name=tel2No]").val().length > 0 && !regularExpCheck($("input[name=tel2No]").val(),"phoneNum")){
+		msgboxActive('고객상세', '\"직장번호\"가 올바른 형식이 아닙니다.');
 		return false;
-	}else if(!regularExpCheck($("input[name=tel3No]").val(),"phoneNum")){
-		alert("자택번호가 올바른 형식이 아닙니다.");
+	}else if($("input[name=tel3No]").val().length > 0 && !regularExpCheck($("input[name=tel3No]").val(),"phoneNum")){
+		msgboxActive('고객상세', '\"자택번호\"가 올바른 형식이 아닙니다.');
 		return false;
-	}else if(!regularExpCheck($("input[name=faxNo]").val(),"phoneNum")){
-		alert("팩스번호가 올바른 형식이 아닙니다.");
+	}else if($("input[name=faxNo]").val().length > 0 && !regularExpCheck($("input[name=faxNo]").val(),"phoneNum")){
+		msgboxActive('고객상세', '\"팩스번호\"가 올바른 형식이 아닙니다.');
 		return false;
-	}else if(!regularExpCheck($("input[name=emailId]").val(),"email")){
-		alert("E-Mail이 올바른 형식이 아닙니다.");
+	}else if($("input[name=emailId]").val().length > 0 && !regularExpCheck($("input[name=emailId]").val(),"email")){
+		msgboxActive('고객상세', '\"E-Mail\"이 올바른 형식이 아닙니다.');
 		return false;
-	}else if(!regularExpCheck($("input[name=tab1_resTelNo]").val(),"phoneNum")){
-		alert("핸드폰번호가 올바른 형식이 아닙니다.");
+	}else if($("input[name=tab1_resTelNo]").val().length > 0 && !regularExpCheck($("input[name=tab1_resTelNo]").val(),"phoneNum")){
+		msgboxActive('상담예약 등록', '\"핸드폰번호\"가 올바른 형식이 아닙니다.');
 		return false;
-	}else if(!regularExpCheck($("input[name=tab1_resHms]").val(),"time")){ 
-		alert("시간이 올바른 형식이 아닙니다.");
+	}else if($("input[name=tab1_resHms]").val().length > 0 && !regularExpCheck($("input[name=tab1_resHms]").val(),"time")){ 
+		msgboxActive('상담예약 등록', '\"시간\"이 올바른 형식이 아닙니다.');
 		return false;
-	}else if(!regularExpCheck($("input[name=pop_sendResHms]").val(),"time")){
-		alert("시간이 올바른 형식이 아닙니다.");
+	}else if($("input[name=pop_sendResHms]").val().length > 0 && !regularExpCheck($("input[name=pop_sendResHms]").val(),"time")){
+		msgboxActive('SMS 전송 등록', '\"시간\"이 올바른 형식이 아닙니다.');
 		return false;
 	}else{
 		return true;	
 	}
 }
+
 function tab1_customer_one2(param,value){
 	var customer = {
 			telNo : "",
 			custNm : "",
-			custNo : ""
+			custNo : "",
+			regDate : ""
 		};
 	if(param == "custNm"){
 		customer.custNm = value;
@@ -669,7 +679,7 @@ function tab1_customer_one2(param,value){
 					$("input[name=tab2_custNm]").val("");
 				}
 			}else{
-				alert("일치하는 고객정보가 없습니다.");
+				msgboxActive('고객상세', '일치하는 고객정보가 없습니다.');
 				$("#click_tab1").click();
 				$("#bt_reset").click();
 				counReset();
@@ -687,21 +697,21 @@ function tab01_dial(param){
 			 $("input[name=sp_telNo]").val($("input[name=tel1No]").val());
 			 ctiDial();
 		}else{
-			alert("번호를 입력 후 눌러주세요.");
+			msgboxActive('고객상세', '번호를 입력 후 눌러주세요.');
 		}
 	}else if(param == "tel2No"){
 		if($("input[name=tel2No]").val() != ""){
 			 $("input[name=sp_telNo]").val($("input[name=tel2No]").val());
 			 ctiDial();
 		}else{
-			alert("번호를 입력 후 눌러주세요.");
+			msgboxActive('고객상세', '번호를 입력 후 눌러주세요.');
 		}
 	}else if(param == "tel3No"){
 		if($("input[name=tel3No]").val() != ""){
 			 $("input[name=sp_telNo]").val($("input[name=tel3No]").val());
 			 ctiDial();
 		}else{
-			alert("번호를 입력 후 눌러주세요.");
+			msgboxActive('고객상세', '번호를 입력 후 눌러주세요.');
 		}
 	}
 }
@@ -784,7 +794,7 @@ function tab01_dial(param){
 									<td class="td02">
 										<select id="tab1_recogTypCd"></select>
 									</td>
-									<td width="55" class="td01">최종통화일</td>
+									<td width="55" class="td01">최종상담일</td>
 									<td class="td02">
 										<input type="text" name= "lastCounDate" class="input mini" style="width: 110px" size="10" />
 									</td>
@@ -831,13 +841,13 @@ function tab01_dial(param){
 										</tr>
 										<tr>
 											<td width="10"></td>
-											<td width="52" class="td01">통화결과<sup style="color:red; font-weight: bold;">*</sup></td>
+											<td width="52" class="td01">상담결과<sup style="color:red; font-weight: bold;">*</sup></td>
 											<td>
-												<select id="callResult"></select>
+												<select id="callResult" style="width:120px;"></select>
 											</td>
-											<td width="25" class="td01">메모</td>
+											<td width="50" class="td01">메모</td>
 											<td>
-												<input type="text" name="counNote" class="input mini" value="" style="width: 820px" />
+												<input type="text" name="counNote" class="input mini" value="" style="width: 750px" />
 												<input type="hidden" name="counSeq" class="input mini" value=""/>
 											</td>
 											<td width="50" align="right" class="td01">

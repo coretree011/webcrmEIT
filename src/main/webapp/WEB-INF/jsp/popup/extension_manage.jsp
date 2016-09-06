@@ -18,7 +18,7 @@ jui.ready([ "grid.xtable"], function(xtable) {
 		resize : true,
 		scrollHeight: 400,
 		width : 945,
-        scrollWidth: 940,
+        scrollWidth: 930,
         buffer: "s-page",
         bufferCount: 2000,
         event: {
@@ -200,10 +200,10 @@ $(document).ready(function(){
     $("#extension_checkall").click(function(){
         if($("#extension_checkall").prop("checked")){
             $("input[name=chk_extension]").prop("checked",true);
-            $(".tr03").addClass("selected");
+            $(".trExtension").addClass("selected");
         }else{
             $("input[name=chk_extension]").prop("checked",false);
-            $("tr.selected").removeClass("selected");
+            $(".trExtension.selected").removeClass("selected");
         }
     });
 })
@@ -230,18 +230,22 @@ function regularCheck2(){
 } 
 </script>
 <script data-jui="#tab_extension" data-tpl="row" type="text/template">
-	<tr id="<!= row.index !>_extension" class="tr03" onclick = "javascript:extensionData('<!= scd !>','<!= scdNm !>')";>
+	<tr id="<!= row.index !>_extension" class="trExtension" onclick = "javascript:extensionData('<!= scd !>','<!= scdNm !>')";>
 		<td><input type="checkbox" name="chk_extension" value="<!= scd !>"/></td>
 		<td name="scd" align ="center"><!= scd !></td>
 		<td name="scdNm"><!= scdNm !></td>
 	</tr>
 </script>
-
 <script data-jui="#tab_extension" data-tpl="none" type="text/template">
     <tr height ="390">
         <td colspan="3" class="none" align="center">데이터가 존재하지 않습니다.</td>
     </tr>
 </script>
+<style>
+#extension_top_tr td {
+	padding-bottom: 5px;
+}
+</style>
 <div class="head">
 	<a href="#" class="close"><i class="icon-exit"></i></a>
 	<table width="100%" border="0" align="center" cellpadding="0"
@@ -255,9 +259,8 @@ function regularCheck2(){
 	</table>
 </div>
 <div class="body">
-	<table width="100%" border="0" align="center" cellpadding="0"
-		cellspacing="0" style="margin-bottom: 2px;">
-		<tr>
+	<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" style="margin-bottom: 2px;">
+		<tr id="extension_top_tr">
 			<td width="60" class="td01">내선번호<sup style="color:red; font-weight: bold;">*</sup></td>
 			<td align="left" class="td02">
 				<input type="text" class="input mini" id="txt_extensionNo"  maxLength="4" style="width: 80px" />
@@ -266,7 +269,7 @@ function regularCheck2(){
 			<td colspan="2" align="left" class="td02" width="230">
 				<input type="text" class="input mini" id="txt_extensionContents" style="width: 350px" />
 			</td>
-			<td width="260" align="right" class="td01">
+			<td width="260" align="right" class="td01" style="padding-right:9px;">
 				<a class="btn small focus" onclick="bt_initialization()">초기화</a> 
 				<a class="btn small focus" id="bt_extensionInsert">저 장</a> 
 				<a class="btn small focus" id="bt_extensionDelete">삭 제</a>
@@ -275,7 +278,7 @@ function regularCheck2(){
 			</td>
 		</tr>
 	</table>
-	<table class="table classic hover" id="tab_extension" width="100%">
+	<table class="table classic hover" id="tab_extension" width="100%" style="padding-left:5px;">
 		<thead>
 			<tr>
 				<th style="width:20px"><input type="checkbox" id="extension_checkall"/></th>

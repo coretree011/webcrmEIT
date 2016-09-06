@@ -160,10 +160,12 @@ jui.ready([ "grid.xtable"], function(xtable) {
 				data : JSON.stringify(paramCounceller),
 				success : function(result) {
 					if(result>=1){
+						//alert("비밀번호가 초기화되었습니다.");
 						msgboxActive('상담원 관리', '\"비밀번호 초기화\" 되었습니다.');
 						$("#bt_councellerSelect").click();
 					}else{
 						msgboxActive('상담원 관리', '\"비밀번호 초기화\"가 완료되지 않았습니다. 다시 시도해주세요.');
+						//alert("비밀번호가 초기화되지 않았습니다. 다시 시도해주세요.");
 					}
 				}
 			
@@ -193,110 +195,178 @@ jui.ready([ "grid.xtable"], function(xtable) {
 		paramCouncellerInsert.note = $("#txt_note").val();
 		
 		//같은 이름의 상담원이 존재할 경우 alert
-  		var tempName = 0;
-		var tempExtension = 0;
+/*  		var tempName = 0;
 		$('.trCounceller').each(function(index){	
 			var name = $('.trCounceller').find('#councellerNm').eq(index).html();
-			var extension = $('.trCounceller').find('#extensionNo').eq(index).html();
 			if(paramCouncellerInsert.empNm == name){
 				tempName = 1;
-			}else if(paramCouncellerInsert.extensionNo == extension){
-				tempExtension = 1;
+				return false;
+			}else{
+				tempName = 0;
 			}
+			
 		}); 
+		
 
+		if(tempName == 1){
+			msgboxActive3('상담원 관리', '\"같은 이름\"의 상담원이 존재합니다.');
+			//alert("같은 이름의 상담원이 존재합니다.");
+			tempName = 0;
+			
+			*/
+		
 		if(paramCouncellerInsert.empNo == ''){
+			//alert("사번을 입력해주세요.");
 			msgboxActive('상담원 관리', '\"사번\"을 입력해주세요.');
 		}else if(paramCouncellerInsert.empNm == ''){
+			//alert("이름을 입력해주세요.");
 			msgboxActive('상담원 관리', '\"이름\"을 입력해주세요.');
 		}else if(paramCouncellerInsert.authCd == ''){
+			//alert("권한유형을 선택해주세요.");
 			msgboxActive('상담원 관리', '\"권한 유형\"을 선택해주세요.');
 		}else if($("#councellerUpdate").val() == '1'){
-				$.ajax({
-					url : "/popup/councellerDataUpdate",
-					type : "post",
-					contentType : 'application/json; charset=utf-8',
-					data : JSON.stringify(paramCouncellerInsert),
-					success : function(result) {
-						if(result>=1){
-							msgboxActive('상담원 관리', '\"수정\"이 완료되었습니다.');
-							document.getElementById("txt_empNo").disabled = false;
-							$("#txt_empNo").val("");
-							$("#txt_empNm").val("");	
-							$("#txt_tel").val("");
-							$("#txt_email").val("");
-							$("#txt_note").val("");
-							$("#select_councellerExtension").val("");
-							$("#select_councellerAuthCd").val("");
-							$("#bt_councellerSelect").click(); 
-						}else{
-							msgboxActive('상담원 관리', '\"수정\"이 완료되지 않았습니다. 다시 시도해주세요.');
-						}
+			$.ajax({
+				url : "/popup/councellerNameChk",
+				type : "post",
+				contentType : 'application/json; charset=utf-8',
+				data : JSON.stringify(paramCouncellerInsert),
+				success : function(result) {
+					if(result>=1){
+						msgboxActive3('상담원 관리', '\"같은 이름\"의 상담원이 존재합니다.');
+						$('#counceller_msgok').click(function() {
+							$('#counceller_msgbox').css( "display", "none" );
+							$.ajax({
+								url : "/popup/councellerDataUpdate",
+								type : "post",
+								contentType : 'application/json; charset=utf-8',
+								data : JSON.stringify(paramCouncellerInsert),
+								success : function(result) {
+									if(result>=1){
+										msgboxActive('상담원 관리', '\"수정\"이 완료되었습니다.');
+										//alert("수정이 완료되었습니다");
+										document.getElementById("txt_empNo").disabled = false;
+										$("#txt_empNo").val("");
+										$("#txt_empNm").val("");	
+										$("#txt_tel").val("");
+										$("#txt_email").val("");
+										$("#txt_note").val("");
+										$("#select_councellerExtension").val("");
+										$("#select_councellerAuthCd").val("");
+										$("#bt_councellerSelect").click(); 
+									}else{
+										msgboxActive('상담원 관리', '\"수정\"이 완료되지 않았습니다. 다시 시도해주세요.');
+										//alert("수정이 완료되지 않았습니다.");
+									}
+								}
+							});
+						});
+					}else{
+						$.ajax({
+							url : "/popup/councellerDataUpdate",
+							type : "post",
+							contentType : 'application/json; charset=utf-8',
+							data : JSON.stringify(paramCouncellerInsert),
+							success : function(result) {
+								if(result>=1){
+									msgboxActive('상담원 관리', '\"수정\"이 완료되었습니다.');
+									//alert("수정이 완료되었습니다");
+									document.getElementById("txt_empNo").disabled = false;
+									$("#txt_empNo").val("");
+									$("#txt_empNm").val("");	
+									$("#txt_tel").val("");
+									$("#txt_email").val("");
+									$("#txt_note").val("");
+									$("#select_councellerExtension").val("");
+									$("#select_councellerAuthCd").val("");
+									$("#bt_councellerSelect").click(); 
+								}else{
+									msgboxActive('상담원 관리', '\"수정\"이 완료되지 않았습니다. 다시 시도해주세요.');
+									//alert("수정이 완료되지 않았습니다.");
+								}
+							}
+						});
 					}
-				});
+				}
+			});
 			$("#councellerUpdate").val('0');
 		}else{
-			if(tempName == 1 || tempExtension == 1){
-				if(tempName == 1 && tempExtension == 0){
-					msgboxActive3('상담원 관리', '\"같은 이름\"의 상담원이 존재합니다.');	
-				}else if(tempExtension == 1 && tempName == 0 ){
-					msgboxActive3('상담원 관리', '동일한 내선이 존재합니다. \n 저장하시겠습니까?');
-				}else if(tempExtension == 1 && tempName == 1 ){
-					msgboxActive3('상담원 관리', '같은 이름과 동일한 내선번호가 존재합니다. \n 저장하시겠습니까?');
-				}
-			
-			}else{
-				$.ajax({
-					url : "/popup/councellerInsert",
-					type : "post",
-					contentType : 'application/json; charset=utf-8',
-					data : JSON.stringify(paramCouncellerInsert),
-					success : function(result) {
-						if(result>=1){
-							msgboxActive('상담원 관리', '\"저장\"이 완료되었습니다.');
-							$("#txt_empNo").val("");
-							$("#txt_empNm").val("");	
-							$("#txt_tel").val("");
-							$("#txt_email").val("");
-							$("#txt_note").val("");
-							$("#select_councellerExtension").val("");
-							$("#select_councellerAuthCd").val("");
-							$("#bt_councellerSelect").click(); 
-						}else{
-							msgboxActive('상담원 관리', '일치하는 \"사번이 존재\"합니다. \n 사번을 다시 입력해주세요.');
-						}
+			$.ajax({
+				url : "/popup/councellerNameChk",
+				type : "post",
+				contentType : 'application/json; charset=utf-8',
+				data : JSON.stringify(paramCouncellerInsert),
+				success : function(result) {
+					if(result>=1){
+						msgboxActive3('상담원 관리', '\"같은 이름\"의 상담원이 존재합니다.');
+						$('#counceller_msgok').click(function() {
+							$('#counceller_msgbox').css( "display", "none" );
+							$.ajax({
+								url : "/popup/councellerExtensionChk",
+								type : "post",
+								contentType : 'application/json; charset=utf-8',
+								data : JSON.stringify(paramCouncellerInsert),
+								success : function(result) {
+									if(result >= 1){
+										msgboxActive3('상담원 관리', '동일한 내선이 존재합니다. \n 저장하시겠습니까?');
+										$('#counceller_msgok').click(function() {
+											$('#counceller_msgbox').css( "display", "none" );
+											$.ajax({
+												url : "/popup/councellerInsert",
+												type : "post",
+												contentType : 'application/json; charset=utf-8',
+												data : JSON.stringify(paramCouncellerInsert),
+												success : function(result) {
+													if(result>=1){
+														msgboxActive('상담원 관리', '\"저장\"이 완료되었습니다.');
+														//alert("저장이 완료되었습니다");
+														$("#txt_empNo").val("");
+														$("#txt_empNm").val("");	
+														$("#txt_tel").val("");
+														$("#txt_email").val("");
+														$("#txt_note").val("");
+														$("#select_councellerExtension").val("");
+														$("#select_councellerAuthCd").val("");
+														$("#bt_councellerSelect").click(); 
+													}else{
+														msgboxActive('상담원 관리', '일치하는 \"사번이 존재\"합니다. \n 사번을 다시 입력해주세요.');
+														//alert("일치하는 사번이 존재합니다. 사번을 다시 입력해주세요.");
+													}
+												}
+											});
+										});
+									}else{
+										$.ajax({
+											url : "/popup/councellerInsert",
+											type : "post",
+											contentType : 'application/json; charset=utf-8',
+											data : JSON.stringify(paramCouncellerInsert),
+											success : function(result) {
+												if(result>=1){
+													msgboxActive('상담원 관리', '\"저장\"이 완료되었습니다.');
+													//alert("저장이 완료되었습니다");
+													$("#txt_empNo").val("");
+													$("#txt_empNm").val("");	
+													$("#txt_tel").val("");
+													$("#txt_email").val("");
+													$("#txt_note").val("");
+													$("#select_councellerExtension").val("");
+													$("#select_councellerAuthCd").val("");
+													$("#bt_councellerSelect").click(); 
+												}else{
+													msgboxActive('상담원 관리', '일치하는 \"사번이 존재\"합니다. \n 사번을 다시 입력해주세요.');
+													//alert("일치하는 사번이 존재합니다. 사번을 다시 입력해주세요.");
+												}
+											}
+										});
+									}
+									$("#councellerUpdate").val('0');
+								}
+							});
+						});
 					}
-				});
-			}
-			$("#councellerUpdate").val('0');
-		}
-	});
-	
-	$('#counceller_msgok').click(function() {
-		$('#counceller_msgbox').css( "display", "none" );
-		tempName = 0; 
-		tempExtension = 0;
-		$.ajax({
-			url : "/popup/councellerInsert",
-			type : "post",
-			contentType : 'application/json; charset=utf-8',
-			data : JSON.stringify(paramCouncellerInsert),
-			success : function(result) {
-				if(result>=1){
-					msgboxActive('상담원 관리', '\"저장\"이 완료되었습니다.');
-					$("#txt_empNo").val("");
-					$("#txt_empNm").val("");	
-					$("#txt_tel").val("");
-					$("#txt_email").val("");
-					$("#txt_note").val("");
-					$("#select_councellerExtension").val("");
-					$("#select_councellerAuthCd").val("");
-					$("#bt_councellerSelect").click(); 
-				}else{
-					msgboxActive('상담원 관리', '일치하는 \"사번이 존재\"합니다. \n 사번을 다시 입력해주세요.');
 				}
-			}
-		});
+			});
+		}
 	});
 	
 	/*
@@ -379,7 +449,6 @@ function bt_initializationCounceller(){
 	document.getElementById("select_councellerExtension").value = "";
 	document.getElementById("select_councellerAuthCd").value = "";
 	document.getElementById("txt_empNo").disabled = false;
-	document.getElementById("councellerUpdate").value = "0";
 }
 function councellerData(empNo, empNm, extensionNo, authCd, mobilePhoneNo, emailId, note){
 	document.getElementById("txt_empNo").value = empNo;
@@ -398,7 +467,7 @@ function councellerData(empNo, empNm, extensionNo, authCd, mobilePhoneNo, emailI
 		<td><input type="checkbox" name="chk_counceller" id="councellerChk" value="<!= empNo !>"/></td>
 		<td name="empNo" align ="center"><!= empNo !></td>
 		<td name="empNm" align ="center" id="councellerNm"><!= empNm !></td>
-		<td name="extensionNo" id="extensionNo"><!= extensionNo !></td>
+		<td name="extensionNo"><!= extensionNo !></td>
 		<td name="mobilePhoneNo"><!= mobilePhoneNo !></td>
 		<td name="emailId"><!= emailId !></td>
 		<td name="note"><!= note !></td>

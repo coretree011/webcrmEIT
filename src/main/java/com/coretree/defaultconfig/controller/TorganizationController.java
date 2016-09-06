@@ -102,5 +102,42 @@ public class TorganizationController {
 			result = 0;
 		}		
 		return result;
+	}  
+	
+	/**
+	 * 상담원관리(팝업) - 내선번호 중복체크
+	 * @param workbook
+	 * @param fileName
+	 * @return
+	 */
+	@RequestMapping(path="/popup/councellerExtensionChk", method = RequestMethod.POST)
+	public long councellerExtensionChk(@RequestBody Torganization searchVO, HttpSession session) {
+		long result;
+		try{
+			result = torganizationMapper.councellerExtensionChk(searchVO);
+		}catch(Exception e){
+			result = 0;
+		}		
+		return result;
+	} 
+	
+	/**
+	 * 상담원관리(팝업) - 내선번호 중복체크
+	 * @param workbook
+	 * @param fileName
+	 * @return
+	 */
+	@RequestMapping(path="/popup/councellerNameChk", method = RequestMethod.POST)
+	public long councellerNameChk(@RequestBody Torganization searchVO, HttpSession session) {
+		long result;
+		try{
+			result = torganizationMapper.councellerNameChk(searchVO);
+		}catch(Exception e){
+			result = 0;
+		}		
+		return result;
 	}
+	
+	
+	
 }

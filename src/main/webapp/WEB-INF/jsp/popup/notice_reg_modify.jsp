@@ -119,12 +119,12 @@ $(document).ready(function() {
 				data : JSON.stringify(noticeModifyUpdate),
 				success : function(result) {
 					if(result == 1){
-						msgboxActive('공지사항 수정', '\"수정\"이 완료되었습니다.');
+						msgboxActive('공지사항 수정', '게시글 \"수정\"이 완료되었습니다.');
 						//alert("수정이 완료되었습니다."); 
 						$("#win_16").hide();
 						$("#bt_noticeSelect").click();
 					}else{
-						msgboxActive('공지사항 수정', '\"수정\"이 되지 않았습니다.');
+						msgboxActive('공지사항 수정', '게시글 \"수정\"이 완료되지 않았습니다. 다시 시도해주세요.');
 						//alert("수정 실패하였습니다.");
 					}
 				}
@@ -182,12 +182,12 @@ $(document).ready(function() {
 			data : JSON.stringify(paramNoticeDelete),
 			success : function(result) {
 				if(result>=1){
-					msgboxActive('공지사항 수정', '\"삭제\"가 완료되었습니다.');
+					msgboxActive('공지사항 수정', '게시글 \"삭제\"가 완료되었습니다.');
 					//alert("삭제가 완료되었습니다");
 					$("#win_16").hide();
 					$("#bt_noticeSelect").click();
 				}else {
-					msgboxActive('공지사항 수정', '\"삭제\"가 완료되지 않았습니다. 다시 시도해주세요.');
+					msgboxActive('공지사항 수정', '게시글 \"삭제\"가 완료되지 않았습니다. 다시 시도해주세요.');
 					//alert("삭제가 완료되지 않았습니다. 다시 시도해주세요.");
 				}
 			}

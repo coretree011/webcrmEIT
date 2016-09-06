@@ -111,6 +111,11 @@ $(document).ready(function() {
 			width:1099,
 	        buffer: "s-page",
 	        bufferCount: 20,
+	        event: {
+	 	    	dblclick: function(row, e) {
+	 	    		this.select(row.index);
+	 	    	}
+		 	},
 	        tpl: {
 	            row: $("#tpl_row_tab05").html(),
 	            none: $("#tpl_none_tab05").html()
@@ -190,6 +195,8 @@ $(document).ready(function() {
 			};
 		
 		counsel.counSeq = counSeq;
+		counsel.custNo = $("input[name=tab5_custNo]").val();
+		
 		$.ajax({
 			url : "/main/counselList",
 			type : "post",

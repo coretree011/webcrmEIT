@@ -16,6 +16,10 @@ $(document).ready(function() {
 			empNm : "",
 			sendComment : "",
 		};
+
+	var pap_smsParam = {
+			lcd : "",
+		};
 	
 	$("#pop_sendResDate").datepicker({
 	showMonthAfterYear : true,
@@ -40,42 +44,47 @@ $(document).ready(function() {
 	
 	$("input[name=pop_sendResDate]").val(date.getFullYear() +'-'+ month +'-'+ day);
 	$("input[name=pop_sendResHms]").val(hour +':'+ min);
-	
-	
+
+	pap_smsParam.lcd ="1003";
 	$.ajax({
-		url : "/popup/smsList",
+		url : "/code/selecCodeList",
 		type : "post",
-		data : "",
+		data : JSON.stringify(pap_smsParam),
 		contentType : 'application/json; charset=utf-8',
 		success : function(result) {
-			$('#pop_senTypCd').append('<option value=' + '' + '></option>');
+			$('#pop_cateCd').append('<option value=' + '' + '></option>');
 		    for ( var i = 0; i < result.length; i++) {
-					$('#pop_senTypCd').append('<option value='+result[i].cateCd+'>' + result[i].cateNm + '</option>');
+					$('#pop_cateCd').append('<option value='+result[i].scd+'>' + result[i].scdNm + '</option>');
 		    } 
+		    $('#pop_cateCd').css("width","110px");
 		}
 	});
 
 $("#bt_smsTransfer").click(function() {
 		papSmsTrnsfer.custNo = $("input[name=custNo]").val();
 		papSmsTrnsfer.custNm = $("input[name=custNm]").val();
-		papSmsTrnsfer.sendTelNo = $("input[name=tel1No]").val();
-		papSmsTrnsfer.sendTypCd = $('#pop_senTypCd option:selected').val();
+		papSmsTrnsfer.sendTelNo = $("input[name=pop_sendTelNo]").val();
+		papSmsTrnsfer.cateCd = $('#pop_cateCd option:selected').val();
+		papSmsTrnsfer.sendTypCd = "1001";
 		papSmsTrnsfer.sendResDate = $("input[name=pop_sendResDate]").val().replace(/-/gi, "");
 		papSmsTrnsfer.sendResHms = $("input[name=pop_sendResHms]").val();
-		papSmsTrnsfer.sendCd = "1001";
 		papSmsTrnsfer.sendCd = "1001";
 		papSmsTrnsfer.empNo = $("input[name=empNo]").val();
 		papSmsTrnsfer.empNm = $("input[name=empNm]").val();
 		papSmsTrnsfer.sendComment = $("textarea[name=sendComment]").val();
 
 		if(papSmsTrnsfer.sendResDate == ""){
-			alert("발송일시를 입력해주세요.");
+			msgboxActive('SMS 전송 등록', '발송일시를 입력해주세요.');
+			//alert("발송일시를 입력해주세요.");
 		}else if(papSmsTrnsfer.sendTypCd == ""){
-			alert("전송유형을 선택해주세요.");
+			msgboxActive('SMS 전송 등록', '전송유형을 선택해주세요.');
+			//alert("전송유형을 선택해주세요.");
 		}else if(papSmsTrnsfer.sendComment == ""){
-			alert("전송 내용이 없습니다.");
+			msgboxActive('SMS 전송 등록', '전송 내용이 없습니다.');
+			//alert("전송 내용이 없습니다.");
 		}else if(papSmsTrnsfer.sendTelNo == ""){
-			alert("전송 할 번호가 없습니다.");
+			msgboxActive('SMS 전송 등록', '전송 할 번호가 없습니다.');
+			//alert("전송 할 번호가 없습니다.");
 		}else{
 			if(regularCheck()){
 				$.ajax({
@@ -85,10 +94,13 @@ $("#bt_smsTransfer").click(function() {
 					data : JSON.stringify(papSmsTrnsfer),
 					success : function(result) {
 						if(result == 1){
-							alert("등록되었습니다.");
+							//alert("등록되었습니다.");
+							msgboxActive('SMS 전송 등록', 'SMS 전송 \"예약\"이 완료되었습니다.');
+							$("#win_14").hide();
 							$("#smsSearch").click();
 						}else{
-							alert("실패했습니다.");
+							msgboxActive('SMS 전송 등록', 'SMS 전송 \"예약\"이 완료되지 않았습니다. 다시 시도해주세요.');
+							//alert("실패했습니다.");
 						}
 					}
 				});
@@ -104,7 +116,7 @@ function senTypChange(){
 			customName : "",
 		};
 
-	popSmsCtg.cateCd = $('#pop_senTypCd option:selected').val();
+	popSmsCtg.cateCd = $('#pop_cateCd option:selected').val();
 	popSmsCtg.customName = $("input[name=custNm]").val();
 	$.ajax({
 		url : "/popup/smsOne",
@@ -132,9 +144,13 @@ function senTypChange(){
 <div class="body">
 	<table width="100%" border="0" cellspacing="0" cellpadding="0">
 		<tr>
-			<td width="50%" align="left" valign="top"><table border="0"
-					cellpadding="0" cellspacing="0">
+			<td width="100%" align="left" valign="top">
+				<table border="0"cell padding="0" cellspacing="0">
 					<tr>
+						<td class="td01" width="65">전송번호<sup style="color:red; font-weight: bold;">*</sup>&nbsp;</td>
+						<td height="22">
+							<input type="text" name="pop_sendTelNo" class="input mini" value="" style="width: 110px;"/> 
+						</td>
 						<td class="td01">발송일시<sup style="color:red; font-weight: bold;">*</sup>&nbsp;</td>
 						<td height="22">
 							<input type="text" id="pop_sendResDate" name="pop_sendResDate" class="input mini" value="" style="width: 82px" /> 
@@ -143,28 +159,25 @@ function senTypChange(){
 					</tr>
 					<tr>
 						<td class="td01">전송유형<sup style="color:red; font-weight: bold;">*</sup>&nbsp;</td>
-						<td height="28"><select id="pop_senTypCd" onchange="senTypChange();"></select><a id="bt_smsTransfer" class="btn small focus">전송</a></td>
+						<td height="28" colspan="3"><select id="pop_cateCd" onchange="senTypChange();"></select><a id="bt_smsTransfer" class="btn small focus">전송</a></td>
 					</tr>
 					<tr>
-						<td>&nbsp;</td>
-						<td align="left" valign="bottom"><textarea name="sendComment" class="input" style="height: 102px; width: 485px"></textarea></td>
+						<td class="td01">전송내용<sup style="color:red; font-weight: bold;">*</sup>&nbsp;</td>
+						<td align="left" valign="bottom" colspan="3">
+							<textarea name="sendComment" class="input" style="height: 98px; width: 485px" 
+										onkeyup="byteCheck(this.value,'trans_byte_chk','trans_byte_chk_warn')" onkeypress="byteCheck(this.value,'trans_byte_chk','trans_byte_chk_warn')"></textarea>
+						</td>
 					</tr>
-				</table></td>
-			<!-- <td width="50%" align="right">
-				<table class="table classic hover"width="99%">
-					<thead>
-						<tr>
-							<th class="th01">전화번호</th>
-							<th>이름</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="tr03">
-							<td>010-1111-2222</td>
-							<td>홍길동</td>
-						</tr>
-					</tbody>
-				</table></td> -->
+					<tr>
+						<td class="td01">&nbsp;</td>
+						<td style="font-size: 12" colspan="3">
+							90Byte 초과 시, 장문으로 전환됩니다. (<span id="trans_byte_chk">0</span>byte/90byte)<br>
+							<span id="trans_byte_chk_warn">&nbsp;</span>
+							<!-- <input type="text" class="input mini" id="cate_Comment" style="width: 300px; height:60px!important" /> -->
+						</td>
+					</tr>
+				</table>
+			</td>
 		</tr>
 	</table>
 </div>

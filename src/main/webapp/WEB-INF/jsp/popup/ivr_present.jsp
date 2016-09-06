@@ -10,8 +10,8 @@ jui.ready(["grid.xtable","ui.paging"], function(xtable, paging) {
 	tab_ivrList = xtable("#tab_ivrList", {
 		resize : true,
 		scrollHeight: 400,
-		width : 1105,
-        scrollWidth: 1100,
+		width : 1100,
+        scrollWidth: 1095,
         buffer: "s-page",
         bufferCount: 100,
         tpl: {
@@ -128,6 +128,11 @@ $(document).ready(function() {
 	});
 });
 </script>
+<style>
+#ivr_top_tr td {
+	padding-bottom: 5px;
+}
+</style>
 <div class="head">
 	<a href="#" class="close"><i class="icon-exit"></i></a>
 	<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
@@ -141,7 +146,7 @@ $(document).ready(function() {
 </div>
 <div class="body">
 	<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" style="margin-bottom: 2px;">
-		<tr>
+		<tr id="ivr_top_tr">
 			<td class="td01">인입일자</td>
 			<td class="td02">
 				<input type="text" class="input mini" id="txt_ivrStartDate"  style="width: 82px" /> 
@@ -165,13 +170,13 @@ $(document).ready(function() {
 				</span>
 			</td>
 			<td width="20%"></td>
-			<td width="150" align="right" class="td01">
+			<td width="150" align="right" class="td01" style="padding-right:9px;">
 				<a class="btn small focus" id="bt_ivrSelect">조 회</a> 
 				<a class="btn small focus" id="bt_ivrCSV">엑셀 다운로드</a>
 			</td>
 		</tr>
 	</table>
-	<table class="table classic hover" id="tab_ivrList" width="100%">
+	<table class="table classic hover" id="tab_ivrList" width="100%" style="padding-left: 5px;">
 		<thead>
 			<tr>
 				<th style="width:210px">인입일자</th>
@@ -184,7 +189,7 @@ $(document).ready(function() {
 		<tbody>
 		</tbody>
 	</table>
-	<div id="paging_ivr" class="paging" style="margin-top: 3px;">
+	<div id="paging_ivr" class="paging" style="margin-top: 4px; margin-right: 4px; width:1092px;">
 	    <a href="#" class="prev" style="left:0" onclick="fn_page();">이전</a>
 	    <div class="list"></div>
 	    <a href="#" class="next" onclick="fn_page();">다음</a>

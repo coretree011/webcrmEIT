@@ -152,7 +152,7 @@ public class WebUcService implements
 	public void queueCallMessage(UcMessage message, Principal principal) {
 		
 		//logger.debug("::::::queueCallMessage------>" + principal);
-		System.out.println("::::::queueCallMessage------>" + message.toString());
+		//System.out.println("::::::queueCallMessage------>" + message.toString());
 		logger.debug(message.cmd+ ":=================>>>" + message);
 		
 		switch (message.cmd) {

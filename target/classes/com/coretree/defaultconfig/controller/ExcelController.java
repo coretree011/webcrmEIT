@@ -179,18 +179,23 @@ public class ExcelController {
 						switch (curCell.getCellType()) {
 						case XSSFCell.CELL_TYPE_FORMULA:
 							value = curCell.getCellFormula();
+							System.out.println("1 : " + value);
 							break;
 						case XSSFCell.CELL_TYPE_NUMERIC:
 							value = ((int)curCell.getNumericCellValue())+"";
+							System.out.println("2 : " + value);
 							break;
 						case XSSFCell.CELL_TYPE_STRING:
 							value = curCell.getStringCellValue()+"";
+							System.out.println("3 : " + value);
 							break;
 						case XSSFCell.CELL_TYPE_BLANK:
 							value = curCell.getBooleanCellValue()+"";
+							System.out.println("4 : " + value);
 							break;
 						case XSSFCell.CELL_TYPE_ERROR:
 							value = curCell.getErrorCellValue()+"";
+							System.out.println("5 : " + value);
 							break;
 						default:
 							value = new String();
@@ -202,10 +207,10 @@ public class ExcelController {
 							cus.setCustCdNm(value);
 							break;
 						case 1:
-							cus.setCustNo(value);
+							cus.setCustNm(value);
 							break;
 						case 2:
-							cus.setCustNm(value);
+							cus.setCoRegNo(value);
 							break;
 						case 3:
 							cus.setTel1No(value);
@@ -220,12 +225,30 @@ public class ExcelController {
 							cus.setEmailId(value);
 							break;
 						case 7:
+							value = value.replaceAll("<", ".");
+							value = value.replaceAll(">", ".");
 							cus.setFaxNo(value);
+							//System.out.println("value : " + value);
 							break;
 						case 8:
 							cus.setAddr(value);
 							break;
 						case 9:
+							cus.setSexCd(value);
+							break;
+						case 10:
+							cus.setBirthDate(value);
+							break;
+						case 11:
+							cus.setGradeCd(value);
+							break;
+						case 12:
+							cus.setCustTypCd(value);
+							break;
+						case 13:
+							cus.setRecogTypCd(value);
+							break;
+						case 14:
 							cus.setCustNote(value);
 							break;
 						}
@@ -261,11 +284,15 @@ public class ExcelController {
 			map.get("tel1No");
 			map.get("tel2No");
 			map.get("tel3No");
-
-			dataChk = customerMapper.excelData(map);			
-			t.add(dataChk);
 			
-			//System.out.println(dataChk);
+			//고객번호가 존재하지 않는 경우에만 DB 실행
+			if(map.get("custNo").toString().length() == 0){
+				dataChk = customerMapper.excelData(map);
+				t.add(dataChk);
+			}else{
+				//String custNo = map.get("custNo").toString();
+				//System.out.println(custNo + " 의 갯수 : " + custNo.length());
+			}
 		}
 		return t;
 	}

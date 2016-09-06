@@ -28,7 +28,7 @@ jui.ready(["grid.xtable"], function(xtable) {
 		resize : true,
 		scrollHeight: 400,
 		width : 945,
-        scrollWidth: 940,
+        scrollWidth: 930,
         buffer: "s-page",
         bufferCount: 2000,
         event: {
@@ -37,6 +37,7 @@ jui.ready(["grid.xtable"], function(xtable) {
  	    		if($(id).hasClass("selected")) {
  	    			$(id).removeClass("selected");
  	    			$(id).find('input:checkbox[name="sms_chk"]').prop('checked', false);
+ 	    			document.getElementById("byte_chk").innerHTML = '0'; //byte check
  	    		}else{
 					$(id).addClass("selected");
 					$(id).find('input:checkbox[name="sms_chk"]').prop('checked', true);
@@ -48,6 +49,7 @@ jui.ready(["grid.xtable"], function(xtable) {
 			    	document.getElementById("cate_Comment").value = "";
 			    	document.getElementById("cate_Cd").value = "";
 			    	document.getElementById("cate_Cd").disabled = false;
+			    	document.getElementById("byte_chk").innerHTML = '0'; //byte check
 			    }else if(cnt == 1){
 			    	var cateCd = $('tr.selected').find('[name=cateCd]').html();
 			    	var cateNm = $('tr.selected').find('[name=cateNm]').html();
@@ -75,6 +77,8 @@ jui.ready(["grid.xtable"], function(xtable) {
 	
 	/*SMS 전송유형 최초 load 시 조회*/
 	$("#bt_smsPopup").click(function() {
+		byteCheck('', 'byte_chk', 'byte_chk_warn');
+		
 		document.getElementById("cate_Cd").disabled = false;
 		document.getElementById("cate_Cd").value= "";
 		document.getElementById("cate_Nm").value = "";
@@ -131,6 +135,8 @@ jui.ready(["grid.xtable"], function(xtable) {
 						//alert("삭제가 완료되지 않았습니다. 다시 시도해주세요.");
 						msgboxActive('SMS 전송유형', '\"삭제\"가 완료되지 않았습니다. 다시 시도해주세요.');	
 					}
+					
+					$("#tempUpdate").val('0');
 				}
 			});
 	    }
@@ -203,10 +209,10 @@ $(document).ready(function(){
     $("#sms_checkall").click(function(){
         if($("#sms_checkall").prop("checked")){
             $("input[name=sms_chk]").prop("checked",true);
-            $(".tr03").addClass("selected");
+            $(".trSms").addClass("selected");
         }else{
             $("input[name=sms_chk]").prop("checked",false);
-            $("tr.selected").removeClass("selected");
+            $(".trSms.selected").removeClass("selected");
         }
     }); 
     
@@ -215,7 +221,7 @@ $(document).ready(function(){
     	document.getElementById("cate_Nm").value = "";
     	document.getElementById("cate_Comment").value = "";
     	document.getElementById("cate_Cd").disabled = false;
-    	
+    	document.getElementById("byte_chk").innerHTML = '0'; //byte check
 		$.ajax({
 			url : "/popup/smsInitialization",
 			type : "post",
@@ -235,10 +241,13 @@ function smsData(cateCd, cateNm, cateComment){
 	document.getElementById("cate_Comment").value = cateComment;
 	document.getElementById("tempUpdate").value = '1'; 
 	document.getElementById("cate_Cd").disabled = true;
+	
+	byteCheck();
 }
+
 </script>
 <script data-jui="#tab_smsTransport" data-tpl="row" type="text/template">
-	<tr id="<!= row.index !>_sms"  class="tr03" onclick="smsData('<!= cateCd !>','<!= cateNm !>','<!= cateComment !>');">
+	<tr id="<!= row.index !>_sms"  class="trSms" onclick="smsData('<!= cateCd !>','<!= cateNm !>','<!= cateComment !>');">
 		<td><input type="checkbox" name="sms_chk" value="<!= cateCd !>"/></td>
 		<td name="cateCd" align ="center"><!= cateCd !></td>
 		<td name="cateNm"><!= cateNm !></td>
@@ -246,10 +255,18 @@ function smsData(cateCd, cateNm, cateComment){
 	</tr>
 </script>
 <script data-jui="#tab_smsTransport" data-tpl="none" type="text/template">
-    <tr height ="390">
+    <tr height ="300">
         <td colspan="4" class="none" align="center">데이터가 존재하지 않습니다.</td>
     </tr>
 </script>
+<style>
+#sms_top_tr td {
+	padding-bottom: 5px;
+}
+#sms_top_tr2 td {
+	padding-bottom: 10px;
+}
+</style>
 <div class="head">
 	<a href="#" class="close"><i class="icon-exit"></i></a>
 	<table width="100%" border="0" align="center" cellpadding="0"
@@ -263,18 +280,18 @@ function smsData(cateCd, cateNm, cateComment){
 	</table>
 </div>
 <div class="body">
-	<table width="100%" border="0" align="center" cellpadding="0"
-		cellspacing="0" style="margin-bottom: 2px;">
-		<tr>
+	<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" style="margin-bottom: 2px;">
+		<tr id="sms_top_tr">
 			<td width="60" class="td01">유형코드<sup style="color:red; font-weight: bold;">*</sup></td>
 			<td align="left" class="td02" width="90">
 				<input type="text" class="input mini" id="cate_Cd" style="width: 80px" />
 			</td>
 			<td width="50" class="td01">유형명<sup style="color:red; font-weight: bold;">*</sup></td>
-			<td align="left" class="td02">
-				<input type="text" class="input mini" id="cate_Nm" style="width: 150px" />
+			<td align="left" class="td02" width="150">
+				<input type="text" class="input mini" id="cate_Nm" style="width: 148px" />
 			</td>
-			<td width="220" align="right" class="td01">
+			<td></td>
+			<td width="220" align="right" class="td01" style="padding-right:9px;">
 				<a class="btn small focus" id ="smsInitialization">초기화</a> 
 				<a class="btn small focus" id="bt_smsInsert">저 장</a> 
 				<a class="btn small focus" id="bt_smsDelete">삭 제</a> 
@@ -282,16 +299,20 @@ function smsData(cateCd, cateNm, cateComment){
 				<a class="btn small focus" id="bt_smsSelect">조 회</a>
 			</td>
 		</tr>
-		<tr>
+		<tr id="sms_top_tr2">
 			<td width="50" class="td01">내용<sup style="color:red; font-weight: bold;">*</sup></td>
-			<td colspan="4" align="left" class="td02" width="200" style="height:90px">
-				<textarea id="cate_Comment" class="input mini" style="width: 300px; height:60px!important; resize: none;"></textarea>
+			<td colspan="3" align="left" class="td02" width="150">
+				<textarea id="cate_Comment" class="input mini" style="width: 300px; height:50px!important; resize: none;" onkeyup="byteCheck(this.value, 'byte_chk', 'byte_chk_warn')" onkeypress="byteCheck(this.value, 'byte_chk', 'byte_chk_warn')"></textarea>
+			</td>
+			<td align="left" style="font-size: 12">
+				<span id="byte_chk">0</span>byte/90byte <br>
+				90Byte 초과 시, 장문으로 전환됩니다. <br>
+				<span id="byte_chk_warn">&nbsp;</span>
 				<!-- <input type="text" class="input mini" id="cate_Comment" style="width: 300px; height:60px!important" /> -->
 			</td>
-			
 		</tr>
 	</table>
-	<table class="table classic hover" id="tab_smsTransport" width="100%">
+	<table class="table classic hover" id="tab_smsTransport" width="100%" style="padding-left:5px;">
 		<thead>
 			<tr>
 				<th style="width:20px;"><input type="checkbox" id="sms_checkall"/></th>
