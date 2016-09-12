@@ -175,7 +175,7 @@
 	function ctiTransfer() {
 		var extension = $("input[name=sp_extNo]").val();
 		console.log("ctiTransfer extensionNumber==>" + extension);
-		
+		/* 
 		var callee = extension;
 		console.log("ctiTransfer callee==>" + callee);
 
@@ -185,7 +185,13 @@
 		var unconditional = $("input[name=sp_telNo]").val();
 		console.log("ctiTransfer unconditional==>" + unconditional);
 		
-		requestCallTransfer(extension, caller, callee, unconditional);
+		requestCallTransfer(extension, caller, callee, unconditional); */
+
+		var unconditional = $("input[name=sp_telNo]").val();
+		console.log("ctiTransfer unconditional==>" + unconditional);
+		
+		requestCallInfo = getRequestCallInfo(extension, "ctiTransfer");
+		requestCallTransfer(extension, requestCallInfo.caller, requestCallInfo.callee, unconditional);
 	}
 	function test(){
 		requestQueryExtensionState("");
