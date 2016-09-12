@@ -1,5 +1,3 @@
-/.apt_generated/*
-/target/*
-/logs/*
+/.apt_generated/
 /logs/
 /target/

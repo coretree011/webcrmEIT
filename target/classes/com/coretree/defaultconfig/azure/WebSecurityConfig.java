@@ -54,6 +54,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		auth.inMemoryAuthentication().withUser("1000009").password("1").roles("USER");
 		auth.inMemoryAuthentication().withUser("1000010").password("1").roles("USER");
 		auth.inMemoryAuthentication().withUser("1000011").password("1").roles("USER");
+		auth.inMemoryAuthentication().withUser("1000012").password("1").roles("USER");
 		// System.err.println("Progress authenticate");
 	}
 

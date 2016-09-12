@@ -177,6 +177,7 @@ public class WebUcService implements
 			case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
 			case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
 				UpdateUsersStates(principal.getName());
+			case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
 			case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
 				Organization organization;
 				r.lock();
@@ -190,11 +191,6 @@ public class WebUcService implements
 
 				this.RequestToPbx(message);
 				organization.setTempval(message.cmd);
-				
-				UserLog userlog = new UserLog();
-				userlog.setEmpNo(principal.getName());
-				userlog.setAgentStatCd(String.valueOf(message.cmd));
-				this.WriteUserLogs(userlog);
 				break;
 			default:
 				this.RequestToPbx(message);
@@ -385,7 +381,7 @@ public class WebUcService implements
 			r.unlock();
 		}
 		
-		logger.info("******PassReportExtState:" + data.getCmd());
+		// logger.info("******PassReportExtState:" + data.getCmd());
 
 		switch (data.getCmd()) {
 			case Const4pbx.UC_REPORT_WAITING_COUNT:
@@ -412,6 +408,7 @@ public class WebUcService implements
 				}
 				break;
 			case Const4pbx.UC_REPORT_SRV_STATE:
+				/*
 				if (organization.getAgentStatCd().equals(Const4pbx.WS_VALUE_EXTENSION_STATE_READY)
 						|| organization.getAgentStatCd().equals(String.valueOf(Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER))
 						|| organization.getAgentStatCd().equals(String.valueOf(Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT)) 
@@ -421,6 +418,32 @@ public class WebUcService implements
 
 					this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 					this.usersState();
+				}
+				*/
+				if (data.getStatus() == Const4pbx.UC_STATUS_SUCCESS) {
+					if (organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_READY
+							|| organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER
+							|| organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT 
+							|| organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_REST
+							|| organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_EDU) {
+						
+						organization.setAgentStatCd(String.valueOf(organization.getTempval()));
+
+						UserLog userlog = new UserLog();
+						userlog.setEmpNo(organization.getEmpNm());
+						userlog.setAgentStatCd(organization.getAgentStatCd());
+						this.WriteUserLogs(userlog);
+						
+						payload.status = String.valueOf(organization.getTempval());
+
+						this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
+						this.usersState();
+					}
+				} else {
+					organization.setTempval(-1);
+					payload.status = String.valueOf(Const4pbx.UC_STATUS_FAIL);
+
+					this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 				}
 				break;
 			case Const4pbx.UC_REPORT_EXT_STATE:
