@@ -397,7 +397,29 @@ public class WebUcService implements
 				break;
 			case Const4pbx.UC_SET_SRV_RES:
 				if (data.getStatus() == Const4pbx.UC_STATUS_SUCCESS) {
+					
 					organization.setAgentStatCd(String.valueOf(organization.getTempval()));
+
+					UserLog userlog = new UserLog();
+					userlog.setEmpNo(organization.getEmpNm());
+					userlog.setAgentStatCd(organization.getAgentStatCd());
+					this.WriteUserLogs(userlog);
+					
+					// payload.status = organization.getAgentStatCd();
+					
+					switch (data.getResponseCode()) {
+						case Const4pbx.UC_SRV_UNCONDITIONAL:
+							organization.setTempstr(data.getUnconditional());
+							break;
+						case Const4pbx.UC_SRV_NOANSWER:
+							organization.setTempstr(data.getNoanswer());
+							break;
+						case Const4pbx.UC_SRV_BUSY:
+							organization.setTempstr(data.getBusy());
+							break;
+					}
+					
+					/*
 					if (data.getResponseCode() == Const4pbx.UC_SRV_UNCONDITIONAL) {
 						organization.setTempstr(data.getUnconditional());
 					} else if (data.getResponseCode() == Const4pbx.UC_SRV_NOANSWER) {
@@ -405,9 +427,14 @@ public class WebUcService implements
 					} else if (data.getResponseCode() == Const4pbx.UC_SRV_BUSY) {
 						organization.setTempstr(data.getBusy());
 					}
+					*/
 				}
 				break;
 			case Const4pbx.UC_REPORT_SRV_STATE:
+				payload.status = organization.getAgentStatCd();
+				this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), payload);
+				this.usersState();
+				
 				/*
 				if (organization.getAgentStatCd().equals(Const4pbx.WS_VALUE_EXTENSION_STATE_READY)
 						|| organization.getAgentStatCd().equals(String.valueOf(Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER))
@@ -420,6 +447,8 @@ public class WebUcService implements
 					this.usersState();
 				}
 				*/
+				
+				/*
 				if (data.getStatus() == Const4pbx.UC_STATUS_SUCCESS) {
 					if (organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_READY
 							|| organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER
@@ -445,6 +474,7 @@ public class WebUcService implements
 
 					this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 				}
+				*/
 				break;
 			case Const4pbx.UC_REPORT_EXT_STATE:
 				CallStat callstat = null;
