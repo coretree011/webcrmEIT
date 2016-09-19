@@ -135,14 +135,16 @@ public class WebUcService implements
     	OrgStatatistics orgstates = new OrgStatatistics();
     	
     	orgstates.setTotal(organizations.size());
-    	orgstates.setReady((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1001")).count());
-    	orgstates.setAfter((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1002")).count());
-    	orgstates.setBusy((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1006")).count());
-    	orgstates.setLeft((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1003")).count());
-    	orgstates.setRest((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1004")).count());
-    	orgstates.setEdu((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1005")).count());
-    	orgstates.setLogedin(orgstates.getReady() + orgstates.getAfter() + orgstates.getBusy() + orgstates.getLeft() + orgstates.getEdu());
-    	orgstates.setLogedout(orgstates.getTotal() - orgstates.getLogedin());
+    	orgstates.setReady((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1011")).count());
+    	orgstates.setAfter((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1012")).count());
+    	orgstates.setBusy((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1016")).count());
+    	orgstates.setLeft((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1013")).count());
+    	orgstates.setRest((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1014")).count());
+    	orgstates.setEdu((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1015")).count());
+    	orgstates.setLogedin((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1018")).count());
+    	orgstates.setLogedout((int)organizations.stream().filter(x -> x.getAgentStatCd().equals("1017")).count());
+    	// orgstates.setLogedin(orgstates.getReady() + orgstates.getAfter() + orgstates.getBusy() + orgstates.getLeft() + orgstates.getEdu());
+    	// orgstates.setLogedout(orgstates.getTotal() - orgstates.getLogedin());
 		
     	// this.msgTemplate.convertAndSendToUser("/topic/orgstates", orgstates);
     	this.messagingTemplate.convertAndSend("/topic/orgstates", orgstates);
@@ -155,45 +157,263 @@ public class WebUcService implements
 		//System.out.println("::::::queueCallMessage------>" + message.toString());
 		logger.debug(message.cmd+ ":=================>>>" + message);
 		
+		Organization organization = null;
+		r.lock();
+		try {
+			organization = organizations.stream().filter(x -> x.getExtensionNo().equals(message.extension)).findFirst().get();
+		} catch (NoSuchElementException | NullPointerException e) {
+			organization = null;
+		} finally {
+			r.unlock();
+		}
+		
 		switch (message.cmd) {
 			case Const4pbx.WS_REQ_EXTENSION_STATE:
 				message.cmd = Const4pbx.WS_RES_EXTENSION_STATE;
-				for (Organization m : organizations) {
-					message.extension = m.getExtensionNo();
-					message.status = m.getAgentStatCd();
+				for (Organization organ : organizations) {
+					message.extension = organ.getExtensionNo();
+					message.status = Integer.valueOf(organ.getAgentStatCd());
 					this.msgTemplate.convertAndSendToUser(principal.getName(), "/queue/groupware", message);
 				}
 				break;
 			case Const4pbx.WS_REQ_SET_EXTENSION_STATE:
-				Organization orgnization = organizations.stream().filter(x -> x.getExtensionNo().equals(message.extension)).findFirst().get();
-
-				logger.debug(orgnization);
+				// Organization orgnization = organizations.stream().filter(x -> x.getExtensionNo().equals(message.extension)).findFirst().get();
+				// logger.debug(orgnization);
 				break;
 			case Const4pbx.WS_REQ_RELOAD_USER:
 				break;
-			case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
-			case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
-			case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
-			case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
-			case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
-				UpdateUsersStates(principal.getName());
-			case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
-			case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
-				Organization organization;
-				r.lock();
-				try {
-					organization = organizations.stream().filter(x -> x.getExtensionNo().equals(message.extension)).findFirst().get();
-				} catch (NoSuchElementException | NullPointerException e) {
-					organization = null;
-				} finally {
-					r.unlock();
+			case Const4pbx.WS_REQ_CHANGE_EXTENSION_STATE:
+				message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
+				
+				switch (message.status) {
+					case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+						switch (Integer.valueOf(organization.getAgentStatCd())) {
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								organization.setTempval(message.status);
+								this.RequestToPbx(message);
+								break;
+							default:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								break;
+						}
+						break;
+					case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+						switch (Integer.valueOf(organization.getAgentStatCd())) {
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+								organization.setAgentStatCd(String.valueOf(message.status));
+								organization.setStartdate(new Date());
+								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								this.usersState();
+								
+								message.status = Const4pbx.UC_STATUS_SUCCESS;
+								message.statusmsg = message.status;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								organization.setTempval(message.status);
+								this.RequestToPbx(message);
+								break;
+							default:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+						}
+						break;
+					case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+						switch (Integer.valueOf(organization.getAgentStatCd())) {
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+								organization.setAgentStatCd(String.valueOf(message.status));
+								organization.setStartdate(new Date());
+								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								this.usersState();
+								
+								message.status = Const4pbx.UC_STATUS_SUCCESS;
+								message.statusmsg = message.status;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								organization.setTempval(message.status);
+								this.RequestToPbx(message);
+								break;
+							default:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+						}
+						break;
+					case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+						switch (Integer.valueOf(organization.getAgentStatCd())) {
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+								organization.setAgentStatCd(String.valueOf(message.status));
+								organization.setStartdate(new Date());
+								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								this.usersState();
+								
+								message.status = Const4pbx.UC_STATUS_SUCCESS;
+								message.statusmsg = message.status;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								organization.setTempval(message.status);
+								this.RequestToPbx(message);
+								break;
+							default:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+						}
+						break;
+					case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+						switch (Integer.valueOf(organization.getAgentStatCd())) {
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+								organization.setAgentStatCd(String.valueOf(message.status));
+								organization.setStartdate(new Date());
+								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								this.usersState();
+								
+								message.status = Const4pbx.UC_STATUS_SUCCESS;
+								message.statusmsg = message.status;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								organization.setTempval(message.status);
+								this.RequestToPbx(message);
+								break;
+							default:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+						}
+						break;
+					case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+						switch (Integer.valueOf(organization.getAgentStatCd())) {
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								organization.setTempval(message.status);
+								this.RequestToPbx(message);
+								break;
+							default:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+						}
+						break;
+					case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+						switch (Integer.valueOf(organization.getAgentStatCd())) {
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+								organization.setTempval(message.status);
+								this.RequestToPbx(message);
+								break;
+							default:
+								message.status = Const4pbx.UC_STATUS_FAIL;
+								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
+								// this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
+								break;
+						}
+						break;
+					default:
+	//					Organization organization;
+	//					r.lock();
+	//					try {
+	//						organization = organizations.stream().filter(x -> x.getExtensionNo().equals(message.extension)).findFirst().get();
+	//					} catch (NoSuchElementException | NullPointerException e) {
+	//						organization = null;
+	//					} finally {
+	//						r.unlock();
+	//					}
+	
+						this.RequestToPbx(message);
+						// organization.setTempval(message.cmd);
+						break;
 				}
-
-				this.RequestToPbx(message);
-				organization.setTempval(message.cmd);
-				break;
 			default:
-				this.RequestToPbx(message);
+				message.status = Const4pbx.UC_STATUS_FAIL;
+				message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
+				this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
 				break;
 		}
 	}
@@ -350,7 +570,7 @@ public class WebUcService implements
 				payload.extension = data.getExtension();
 				payload.caller = data.getCaller();
 				payload.callee = data.getCallee();
-				payload.status = data.getUserAgent();
+				payload.status = Integer.valueOf(data.getUserAgent());
 
 				logger.debug("******userName==>"+ organization.getEmpNo());
 				this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", payload);
@@ -366,7 +586,7 @@ public class WebUcService implements
 		payload.caller = data.getCaller();
 		payload.callee = data.getCallee();
 		payload.unconditional = data.getUnconditional();
-		payload.status = String.valueOf(data.getStatus());
+		payload.status = data.getStatus();
 		payload.responseCode = data.getResponseCode();
 
 		Organization organization = null;
@@ -391,23 +611,44 @@ public class WebUcService implements
 				if (data.getStatus() == Const4pbx.UC_STATUS_SUCCESS) {
 					organization.setAgentStatCd(String.valueOf(Const4pbx.WS_VALUE_EXTENSION_STATE_READY));
 					organization.setTempstr("");
-					payload.status = organization.getAgentStatCd();
+					
+					payload.status = Const4pbx.UC_STATUS_SUCCESS;
+					payload.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_READY;
 					this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 				}
 				break;
 			case Const4pbx.UC_SET_SRV_RES:
 				if (data.getStatus() == Const4pbx.UC_STATUS_SUCCESS) {
+					UserLog userlog = new UserLog();
+					userlog.setEmpNo(organization.getEmpNm());
+					userlog.setAgentStatCd(organization.getAgentStatCd());
+					userlog.setStartTimestamp(organization.getStartdate());
+					userlog.setEndTimestamp();
+					this.WriteUserLogs(userlog);
+					
+					UpdateUsersStates(organization.getEmpNo());
 					organization.setAgentStatCd(String.valueOf(organization.getTempval()));
-					if (data.getResponseCode() == Const4pbx.UC_SRV_UNCONDITIONAL) {
-						organization.setTempstr(data.getUnconditional());
-					} else if (data.getResponseCode() == Const4pbx.UC_SRV_NOANSWER) {
-						organization.setTempstr(data.getNoanswer());
-					} else if (data.getResponseCode() == Const4pbx.UC_SRV_BUSY) {
-						organization.setTempstr(data.getBusy());
+
+					switch (data.getResponseCode()) {
+						case Const4pbx.UC_SRV_UNCONDITIONAL:
+							organization.setTempstr(data.getUnconditional());
+							break;
+						case Const4pbx.UC_SRV_NOANSWER:
+							organization.setTempstr(data.getNoanswer());
+							break;
+						case Const4pbx.UC_SRV_BUSY:
+							organization.setTempstr(data.getBusy());
+							break;
 					}
+				} else {
+					this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", payload);
 				}
 				break;
 			case Const4pbx.UC_REPORT_SRV_STATE:
+				payload.status = Integer.valueOf(organization.getAgentStatCd());
+				this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), payload);
+				this.usersState();
+				
 				/*
 				if (organization.getAgentStatCd().equals(Const4pbx.WS_VALUE_EXTENSION_STATE_READY)
 						|| organization.getAgentStatCd().equals(String.valueOf(Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER))
@@ -420,6 +661,8 @@ public class WebUcService implements
 					this.usersState();
 				}
 				*/
+				
+				/*
 				if (data.getStatus() == Const4pbx.UC_STATUS_SUCCESS) {
 					if (organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_READY
 							|| organization.getTempval() == Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER
@@ -445,6 +688,7 @@ public class WebUcService implements
 
 					this.messagingTemplate.convertAndSend("/topic/ext.state." + data.getExtension(), payload);
 				}
+				*/
 				break;
 			case Const4pbx.UC_REPORT_EXT_STATE:
 				CallStat callstat = null;
@@ -695,7 +939,7 @@ public class WebUcService implements
 		UcMessage payload = new UcMessage();
 		payload.cmd = data.getCmd();
 		payload.extension = data.getFrom_ext();
-		payload.status = String.valueOf(data.getStatus());
+		payload.status = data.getStatus();
 
 		Sms_sample runningsms = null;
 
@@ -703,10 +947,10 @@ public class WebUcService implements
 		try {
 			runningsms = smsrunning.stream().filter(x -> x.getExt().equals(data.getFrom_ext())).findFirst().get();
 			runningsms.setResult(data.getStatus());
-			payload.status = String.valueOf(data.getStatus());
+			payload.status = data.getStatus();
 			smsMapper.setresult(runningsms);
 		} catch (NoSuchElementException | NullPointerException e) {
-			payload.status.equals(String.valueOf(Const4pbx.WS_STATUS_ING_NOTFOUND));
+			payload.status = Const4pbx.WS_STATUS_ING_NOTFOUND;
 		} catch (Exception e) {
 
 		} finally {
@@ -717,7 +961,7 @@ public class WebUcService implements
 		try {
 			smsrunning.removeIf(x -> x.equals(data.getFrom_ext()));
 		} catch (UnsupportedOperationException | NullPointerException e) {
-			payload.status.equals(String.valueOf(Const4pbx.WS_STATUS_ING_UNSUPPORTED));
+			payload.status = Const4pbx.WS_STATUS_ING_UNSUPPORTED;
 		} finally {
 			w.unlock();
 		}
@@ -732,7 +976,7 @@ public class WebUcService implements
 		UcMessage payload = new UcMessage();
 		payload.cmd = Const4pbx.UC_REPORT_EXT_STATE;
 		payload.extension = org.getExtensionNo();
-		payload.status = String.valueOf(Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT);
+		payload.status = Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT;
 		
 		this.messagingTemplate.convertAndSend("/topic/ext.state." + org.getExtensionNo(), payload);
 		this.usersState();

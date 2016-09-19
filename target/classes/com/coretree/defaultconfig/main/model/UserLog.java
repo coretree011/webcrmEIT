@@ -1,11 +1,16 @@
 package com.coretree.defaultconfig.main.model;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class UserLog {
 	private String agentStatCd;
 	private String empNo;
 	private String empNm;
+	private LocalDateTime startTimestamp;
 	private String startDate;
 	private String startHms;
+	private LocalDateTime endTimestamp;
 	private String endDate;
 	private String endHms;
 	private long agentStatSec;
@@ -20,11 +25,33 @@ public class UserLog {
 	public String getEmpNm() { return this.empNm; }
 	public void setEmpNm(String empNm) { this.empNm = empNm; }
 	
+	public LocalDateTime getStartTimestamp() { return this.startTimestamp; }
+	public void setStartTimestamp(LocalDateTime startTimestamp) {
+		this.startTimestamp = startTimestamp;
+		
+		LocalDateTime localdatetime = LocalDateTime.now();
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
+		this.setStartDate(localdatetime.format(df));
+		df = DateTimeFormatter.ofPattern("HHmmss");
+		this.setStartHms(localdatetime.format(df));
+	}
+	
 	public String getStartDate() { return this.startDate; }
 	public void setStartDate(String startDate) { this.startDate = startDate; }
 	
 	public String getStartHms() { return this.startHms; }
 	public void setStartHms(String startHms) { this.startHms = startHms; }
+	
+	public LocalDateTime getEndTimestamp() { return this.endTimestamp; }
+	public void setEndTimestamp() {
+		this.endTimestamp = LocalDateTime.now();
+
+		LocalDateTime localdatetime = endTimestamp;
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
+		this.setEndDate(localdatetime.format(df));
+		df = DateTimeFormatter.ofPattern("HHmmss");
+		this.setEndHms(localdatetime.format(df));
+	}
 	
 	public String getEndDate() { return this.endDate; }
 	public void setEndDate(String endDate) { this.endDate = endDate; }
