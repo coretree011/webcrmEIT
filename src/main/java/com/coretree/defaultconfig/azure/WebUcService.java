@@ -180,12 +180,11 @@ public class WebUcService implements
 			case Const4pbx.WS_REQ_RELOAD_USER:
 				break;
 			case Const4pbx.WS_REQ_CHANGE_EXTENSION_STATE:
-				message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
-				
 				switch (message.status) {
 					case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
 						switch (Integer.valueOf(organization.getAgentStatCd())) {
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_READY:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -200,6 +199,7 @@ public class WebUcService implements
 								this.RequestToPbx(message);
 								break;
 							default:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -209,6 +209,7 @@ public class WebUcService implements
 					case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
 						switch (Integer.valueOf(organization.getAgentStatCd())) {
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -223,6 +224,7 @@ public class WebUcService implements
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_SUCCESS;
 								message.statusmsg = message.status;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -234,6 +236,7 @@ public class WebUcService implements
 								this.RequestToPbx(message);
 								break;
 							default:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -244,6 +247,7 @@ public class WebUcService implements
 					case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
 						switch (Integer.valueOf(organization.getAgentStatCd())) {
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -258,6 +262,7 @@ public class WebUcService implements
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_SUCCESS;
 								message.statusmsg = message.status;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -269,6 +274,7 @@ public class WebUcService implements
 								this.RequestToPbx(message);
 								break;
 							default:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -279,6 +285,7 @@ public class WebUcService implements
 					case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
 						switch (Integer.valueOf(organization.getAgentStatCd())) {
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -293,6 +300,7 @@ public class WebUcService implements
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_SUCCESS;
 								message.statusmsg = message.status;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -304,6 +312,7 @@ public class WebUcService implements
 								this.RequestToPbx(message);
 								break;
 							default:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -314,6 +323,7 @@ public class WebUcService implements
 					case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
 						switch (Integer.valueOf(organization.getAgentStatCd())) {
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -328,6 +338,7 @@ public class WebUcService implements
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_SUCCESS;
 								message.statusmsg = message.status;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -339,6 +350,7 @@ public class WebUcService implements
 								this.RequestToPbx(message);
 								break;
 							default:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -349,6 +361,7 @@ public class WebUcService implements
 					case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
 						switch (Integer.valueOf(organization.getAgentStatCd())) {
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDON:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -364,6 +377,7 @@ public class WebUcService implements
 								this.RequestToPbx(message);
 								break;
 							default:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -374,6 +388,7 @@ public class WebUcService implements
 					case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
 						switch (Integer.valueOf(organization.getAgentStatCd())) {
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_SAMEASNOW;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -389,6 +404,7 @@ public class WebUcService implements
 								this.RequestToPbx(message);
 								break;
 							default:
+								message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 								message.status = Const4pbx.UC_STATUS_FAIL;
 								message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 								this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
@@ -412,6 +428,7 @@ public class WebUcService implements
 						break;
 				}
 			default:
+				message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
 				message.status = Const4pbx.UC_STATUS_FAIL;
 				message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
 				this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", message);
