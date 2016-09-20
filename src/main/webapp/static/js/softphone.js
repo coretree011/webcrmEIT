@@ -453,23 +453,31 @@ function getEventCmd(event) {
 		case WS_RES_RELOAD_USER:
 			message = event.cmd+ ":"+ "WS_RES_RELOAD_USER";
 			break;
+
+		//---------2016-09-20 추가 	
+		case WS_REQ_CHANGE_EXTENSION_STATE:
+			message = event.cmd+ ":"+ "WS_REQ_CHANGE_EXTENSION_STATE";
+			break;
+		case WS_RES_CHANGE_EXTENSION_STATE:
+			message = event.cmd+ ":"+ "WS_RES_CHANGE_EXTENSION_STATE";
+			break;			
 			
 		//etc state ; 2016-08-18 고이사님 설계 반영
-		case WS_VALUE_EXTENSION_STATE_READY:
-			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_READY";
-			break;
-		case WS_VALUE_EXTENSION_STATE_AFTER:
-			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_AFTER";
-			break;
-		case WS_VALUE_EXTENSION_STATE_LEFT:
-			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_LEFT";
-			break;
-		case WS_VALUE_EXTENSION_STATE_REST:
-			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_REST";
-			break;
-		case WS_VALUE_EXTENSION_STATE_EDU:
-			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_EDU";
-			break;
+//		case WS_VALUE_EXTENSION_STATE_READY:
+//			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_READY";
+//			break;
+//		case WS_VALUE_EXTENSION_STATE_AFTER:
+//			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_AFTER";
+//			break;
+//		case WS_VALUE_EXTENSION_STATE_LEFT:
+//			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_LEFT";
+//			break;
+//		case WS_VALUE_EXTENSION_STATE_REST:
+//			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_REST";
+//			break;
+//		case WS_VALUE_EXTENSION_STATE_EDU:
+//			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_EDU";
+//			break;
 			
 //		case WS_VALUE_EXTENSION_STATE_DND:
 //			message = event.cmd+ ":"+ "WS_VALUE_EXTENSION_STATE_DND";
@@ -596,6 +604,24 @@ function getEventExtensionStatus(event) {
 			break;
 		case WS_VALUE_EXTENSION_STATE_EDU:
 			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_EDU";
+			break;		
+			
+		//---------2016-09-20 추가 
+		case WS_VALUE_EXTENSION_STATE_BUSY:
+			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_BUSY";
+			break;			
+		case WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_LOGEDOUT";
+			break;			
+		case WS_VALUE_EXTENSION_STATE_LOGEDON:
+			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_LOGEDON";
+			break;		
+		//error	
+		case WS_VALUE_EXTENSION_STATE_SAMEASNOW:
+			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_SAMEASNOW";
+			break;			
+		case WS_VALUE_EXTENSION_STATE_WRONGREQ:
+			message = event.status+ ":"+ "WS_VALUE_EXTENSION_STATE_WRONGREQ";
 			break;			
 			
 //		case WS_VALUE_EXTENSION_STATE_DND:
@@ -608,6 +634,51 @@ function getEventExtensionStatus(event) {
 			
 		default:
 			message = event.status+ ":"+ "UC or WS _CALL_STATE_UNDEFINED!!!"; 
+			break;
+	}
+	return message;
+}
+
+
+//---------2016-09-20 추가 
+function getEventExtensionStatusMsg(event) {
+	var message = "";
+	switch (event.statusmsg){
+		case WS_VALUE_EXTENSION_STATE_READY:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_READY";
+			break;
+		case WS_VALUE_EXTENSION_STATE_AFTER:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_AFTER";
+			break;
+		case WS_VALUE_EXTENSION_STATE_LEFT:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_LEFT";
+			break;
+		case WS_VALUE_EXTENSION_STATE_REST:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_REST";
+			break;
+		case WS_VALUE_EXTENSION_STATE_EDU:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_EDU";
+			break;		
+			
+		case WS_VALUE_EXTENSION_STATE_BUSY:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_BUSY";
+			break;			
+		case WS_VALUE_EXTENSION_STATE_LOGEDOUT:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_LOGEDOUT";
+			break;			
+		case WS_VALUE_EXTENSION_STATE_LOGEDON:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_LOGEDON";
+			break;		
+		//error	
+		case WS_VALUE_EXTENSION_STATE_SAMEASNOW:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_SAMEASNOW";
+			break;			
+		case WS_VALUE_EXTENSION_STATE_WRONGREQ:
+			message = event.statusmsg+ ":"+ "WS_VALUE_EXTENSION_STATE_WRONGREQ";
+			break;			
+			
+		default:
+			message = event.statusmsg+ ":"+ "UC or WS _CALL_STATE_UNDEFINED!!!"; 
 			break;
 	}
 	return message;
@@ -1620,6 +1691,20 @@ function requestReloadUser(extension) {
 }
 //WS_RES_RELOAD_USER = 10006		;
 
+//---------2016-09-20 추가 
+function requestCallLogOn(extension) {
+	callreq = {
+			cmd: WS_REQ_CHANGE_EXTENSION_STATE,
+			extension: extension,
+			caller : '',
+			callee : '',
+			unconditional: '',
+			status: WS_VALUE_EXTENSION_STATE_LOGEDON,
+			responseCode: 4
+	};
+	
+	stompSend(JSON.stringify(callreq));
+}
 
 //---------2016-08-18 고이사님 설계 반영
 //기존 20001 ~ 20004 를
@@ -1634,14 +1719,15 @@ function requestReloadUser(extension) {
 //sample
 //{"cmd":1001,"extension":"3012","caller":"","callee":"","unconditional":"","status":-1,"responseCode":4}
 //
+//---------2016-09-20 변경 
 function requestCallReady(extension) {
 	callreq = {
-			cmd: WS_VALUE_EXTENSION_STATE_READY,
+			cmd: WS_REQ_CHANGE_EXTENSION_STATE,
 			extension: extension,
 			caller : '',
 			callee : '',
 			unconditional: '',
-			status: -1,
+			status: WS_VALUE_EXTENSION_STATE_READY,
 			responseCode: 4
 	};
 
@@ -1651,12 +1737,12 @@ function requestCallReady(extension) {
 
 
 //TODO: 이함수는 호환용 지울 예정
-function requestCallNotReady(extension) {
-	requestAferCallWork(extension);
+//function requestCallNotReady(extension) {
+//	requestAferCallWork(extension);
 	//requestCallNotReady_Left(extension);
 	//requestCallNotReady_Rest(extension);
 	//requestCallNotReady_Edu(extension);
-}
+//}
 
 
 //TODO: 기존 requestCallNotReady ==> requestAferCallWork 바꿔야함 (후처리 버튼 위치)
@@ -1666,14 +1752,15 @@ function requestCallNotReady(extension) {
 //sample
 //{"cmd":1002,"extension":"3012","caller":"","callee":"","unconditional":"","status":-1,"responseCode":4}
 //
+//---------2016-09-20 변경 
 function requestAferCallWork(extension) {
 	callreq = {
-			cmd: WS_VALUE_EXTENSION_STATE_AFTER,
+			cmd: WS_REQ_CHANGE_EXTENSION_STATE,
 			extension: extension,
 			caller : '',
 			callee : '',
 			unconditional: '',
-			status: -1,
+			status: WS_VALUE_EXTENSION_STATE_AFTER,
 			responseCode: 4
 	};
 
@@ -1688,14 +1775,16 @@ function requestAferCallWork(extension) {
 //
 //sample
 //{"cmd":1003,"extension":"3012","caller":"","callee":"","unconditional":"","status":-1,"responseCode":4}
+//
+//---------2016-09-20 변경 
 function requestCallNotReady_Left(extension) {
 	callreq = {
-			cmd: WS_VALUE_EXTENSION_STATE_LEFT,
+			cmd: WS_REQ_CHANGE_EXTENSION_STATE,
 			extension: extension,
 			caller : '',
 			callee : '',
 			unconditional: '',
-			status: -1,
+			status: WS_VALUE_EXTENSION_STATE_LEFT,
 			responseCode: 4
 	};
 
@@ -1706,14 +1795,15 @@ function requestCallNotReady_Left(extension) {
 
 //WS_VALUE_EXTENSION_STATE_REST = 1004; 
 //
+//---------2016-09-20 변경 
 function requestCallNotReady_Rest(extension) {
 	callreq = {
-			cmd: WS_VALUE_EXTENSION_STATE_REST,
+			cmd: WS_REQ_CHANGE_EXTENSION_STATE,
 			extension: extension,
 			caller : '',
 			callee : '',
 			unconditional: '',
-			status: -1,
+			status: WS_VALUE_EXTENSION_STATE_REST,
 			responseCode: 4
 	};
 
@@ -1725,14 +1815,16 @@ function requestCallNotReady_Rest(extension) {
 //
 //sample
 //{"cmd":1005,"extension":"3012","caller":"","callee":"","unconditional":"","status":-1,"responseCode":4}
+//
+//---------2016-09-20 변경 
 function requestCallNotReady_Edu(extension) {
 	callreq = {
-			cmd: WS_VALUE_EXTENSION_STATE_EDU,
+			cmd: WS_REQ_CHANGE_EXTENSION_STATE,
 			extension: extension,
 			caller : '',
 			callee : '',
 			unconditional: '',
-			status: -1,
+			status: WS_VALUE_EXTENSION_STATE_EDU,
 			responseCode: 4
 	};
 
@@ -1744,14 +1836,16 @@ function requestCallNotReady_Edu(extension) {
 //
 //sample
 //{"cmd":1005,"extension":"3012","caller":"","callee":"","unconditional":"","status":-1,"responseCode":4}
+//
+//---------2016-09-20 변경 
 function requestCallLogout(extension) {
 	callreq = {
-			cmd: WS_VALUE_EXTENSION_STATE_LOGEDOUT,
+			cmd: WS_REQ_CHANGE_EXTENSION_STATE,
 			extension: extension,
 			caller : '',
 			callee : '',
 			unconditional: '',
-			status: -1,
+			status: WS_VALUE_EXTENSION_STATE_LOGEDOUT,
 			responseCode: 4
 	};
 	

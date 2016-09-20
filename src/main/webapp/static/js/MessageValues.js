@@ -115,6 +115,26 @@ const WS_RES_SET_EXTENSION_STATE = 10004;
 const WS_REQ_RELOAD_USER = 10005;
 const WS_RES_RELOAD_USER = 10006;
 
+
+// ======= NEW; 2016-09-20
+const WS_REQ_CHANGE_EXTENSION_STATE = 1001;				// 상태 변경 명령
+const WS_RES_CHANGE_EXTENSION_STATE = 1002;				// 상태 변경 명령 결과
+// request + status
+const WS_VALUE_EXTENSION_STATE_READY = 1011;			// 대기 (온라인)
+const WS_VALUE_EXTENSION_STATE_AFTER = 1012;			// 후처리 (자리비움)
+const WS_VALUE_EXTENSION_STATE_LEFT = 1013;				// 이석 (자리비움)
+const WS_VALUE_EXTENSION_STATE_REST = 1014;				// 휴식 (자리비움)
+const WS_VALUE_EXTENSION_STATE_EDU = 1015;				// 교육 (자리비움)
+// normal status
+const WS_VALUE_EXTENSION_STATE_BUSY = 1016;				// 통화중
+// request + status 
+const WS_VALUE_EXTENSION_STATE_LOGEDOUT = 1017;			// 로그아웃
+const WS_VALUE_EXTENSION_STATE_LOGEDON = 1018;			// 로그온
+// error status
+const WS_VALUE_EXTENSION_STATE_SAMEASNOW = 1019;		// 같은 상태 요청함
+const WS_VALUE_EXTENSION_STATE_WRONGREQ = 1020;			// 잘못 된 요청
+
+
 //------ old
 //etc state
 //const WS_VALUE_EXTENSION_STATE_ONLINE = 20001;
@@ -122,14 +142,14 @@ const WS_RES_RELOAD_USER = 10006;
 //const WS_VALUE_EXTENSION_STATE_DND = 20003;
 //const WS_VALUE_EXTENSION_STATE_REDIRECTED = 20004;
 
-//------ new ; 2016-08-18
-const WS_VALUE_EXTENSION_STATE_READY = 1001;			// 대기 (온라인)
-const WS_VALUE_EXTENSION_STATE_AFTER = 1002;			// 후처리 (자리비움)
-const WS_VALUE_EXTENSION_STATE_LEFT = 1003;				// 이석 (자리비움)
-const WS_VALUE_EXTENSION_STATE_REST = 1004;				// 휴식 (자리비움)
-const WS_VALUE_EXTENSION_STATE_EDU = 1005;				// 교육 (자리비움)
-const WS_VALUE_EXTENSION_STATE_BUSY = 1006;				// 통화중 ; 2016-08-23 추가
-const WS_VALUE_EXTENSION_STATE_LOGEDOUT = 1007;				// 통화중 ; 2016-08-23 추가
+//------ old; 2016-08-18
+//const WS_VALUE_EXTENSION_STATE_READY = 1001;			// 대기 (온라인)
+//const WS_VALUE_EXTENSION_STATE_AFTER = 1002;			// 후처리 (자리비움)
+//const WS_VALUE_EXTENSION_STATE_LEFT = 1003;			// 이석 (자리비움)
+//const WS_VALUE_EXTENSION_STATE_REST = 1004;			// 휴식 (자리비움)
+//const WS_VALUE_EXTENSION_STATE_EDU = 1005;			// 교육 (자리비움)
+//const WS_VALUE_EXTENSION_STATE_BUSY = 1006;			// 통화중 ; 2016-08-23 추가
+//const WS_VALUE_EXTENSION_STATE_LOGEDOUT = 1007;		// 통화중 ; 2016-08-23 추가
 
 // uc websocket message
 const WS_STATUS_ING_NOTFOUND = 210001;
