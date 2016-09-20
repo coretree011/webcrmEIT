@@ -110,25 +110,22 @@ public class WebUcService implements
 
 ////////////////////////////
     
-    private void WriteUserLogs(UserLog userlog) {
-    	Organization organization;
+    private void LeaveLogs(Organization organization) {
+		UserLog userlog = new UserLog();
+		userlog.setEmpNo(organization.getEmpNo());
+		userlog.setAgentStatCd(organization.getAgentStatCd());
+		userlog.setStartTimestamp(organization.getStartdate());
+		userlog.setEndTimestamp();
     	
-    	try {
-        	userlogmapper.addUserLog(userlog);
-    	} catch (NoSuchElementException | NullPointerException e) {
-    		organization = null;
-    	} 
+    	userlogmapper.addUserLog(userlog);
     }
 
-    public static void UpdateUsersStates(String emp_no) {
-    	Organization organization;
+    public void UpdateOrganization(Organization organization) {
+    	organization.setPrevAgentStatCd(organization.getAgentStatCd());
+    	organization.setPrevStartdate(organization.getStartdate());
     	
-    	try {
-        	organization = organizations.stream().filter(x -> x.getEmpNo().equals(emp_no)).findFirst().get();
-        	organization.setStartdate(new Date());
-    	} catch (NoSuchElementException | NullPointerException e) {
-    		organization = null;
-    	}
+    	organization.setAgentStatCd(String.valueOf(organization.getTempval()));
+    	organization.setStartdate(LocalDateTime.now());
     }
     
 	private void usersState() {
@@ -220,8 +217,9 @@ public class WebUcService implements
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
-								organization.setAgentStatCd(String.valueOf(message.status));
-								organization.setStartdate(new Date());
+								this.LeaveLogs(organization);
+								organization.setTempval(message.status);
+								this.UpdateOrganization(organization);
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
@@ -254,8 +252,9 @@ public class WebUcService implements
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
-								organization.setAgentStatCd(String.valueOf(message.status));
-								organization.setStartdate(new Date());
+								this.LeaveLogs(organization);
+								organization.setTempval(message.status);
+								this.UpdateOrganization(organization);
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
@@ -288,8 +287,9 @@ public class WebUcService implements
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_EDU:
-								organization.setAgentStatCd(String.valueOf(message.status));
-								organization.setStartdate(new Date());
+								this.LeaveLogs(organization);
+								organization.setTempval(message.status);
+								this.UpdateOrganization(organization);
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
@@ -322,8 +322,9 @@ public class WebUcService implements
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_AFTER:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_LEFT:
 							case Const4pbx.WS_VALUE_EXTENSION_STATE_REST:
-								organization.setAgentStatCd(String.valueOf(message.status));
-								organization.setStartdate(new Date());
+								this.LeaveLogs(organization);
+								organization.setTempval(message.status);
+								this.UpdateOrganization(organization);
 								this.messagingTemplate.convertAndSend("/topic/ext.state." + organization.getExtensionNo(), message);
 								this.usersState();
 								
@@ -619,15 +620,11 @@ public class WebUcService implements
 				break;
 			case Const4pbx.UC_SET_SRV_RES:
 				if (data.getStatus() == Const4pbx.UC_STATUS_SUCCESS) {
-					UserLog userlog = new UserLog();
-					userlog.setEmpNo(organization.getEmpNm());
-					userlog.setAgentStatCd(organization.getAgentStatCd());
-					userlog.setStartTimestamp(organization.getStartdate());
-					userlog.setEndTimestamp();
-					this.WriteUserLogs(userlog);
 					
-					UpdateUsersStates(organization.getEmpNo());
-					organization.setAgentStatCd(String.valueOf(organization.getTempval()));
+					this.LeaveLogs(organization);
+					this.UpdateOrganization(organization);
+					
+					// organization.setAgentStatCd(String.valueOf(organization.getTempval()));
 
 					switch (data.getResponseCode()) {
 						case Const4pbx.UC_SRV_UNCONDITIONAL:

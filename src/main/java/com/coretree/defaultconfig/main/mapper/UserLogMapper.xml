@@ -37,4 +37,24 @@
     		, #{agentStatSec}
     	)
     </insert>
+    
+    <select id="leaveLog" resultType="java.lang.Void">
+    	{call LEAVE_LOG ( #{empNp, mode=IN, jdbcType=VARCHAR}
+    	, #{agentStatCd, mode=IN, jdbcType=VARCHAR}
+    	, #{startDate, mode=IN, jdbcType=VARCHAR}
+    	, #{startHms, mode=IN, jdbcType=VARCHAR}
+    	, #{endDate, mode=IN, jdbcType=VARCHAR}
+    	, #{endHms, mode=IN, jdbcType=VARCHAR} )}
+    </select>
+    
+    <select id="addLog" resultType="java.lang.Void">
+    	{call LOG_ADD ( #{agentStatCd, mode=IN, jdbcType=VARCHAR}
+    	, #{sdate, mode=IN, jdbcType=VARCHAR}
+    	, #{shms, mode=IN, jdbcType=VARCHAR}
+    	, #{prevAgentStatCd, mode=IN, jdbcType=VARCHAR}
+    	, #{pdate, mode=IN, jdbcType=VARCHAR}
+    	, #{phms, mode=IN, jdbcType=VARCHAR}
+    	, #{empNo, mode=IN, jdbcType=VARCHAR}
+    	) }
+    </select>
 </mapper>
