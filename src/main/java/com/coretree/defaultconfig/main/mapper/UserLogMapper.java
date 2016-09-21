@@ -10,6 +10,5 @@ import com.coretree.models.Organization;
 public interface UserLogMapper {
 	public List<UserLog> selectAllUserLogs();
 	public void addUserLog(UserLog userlog);
-	public void leaveLog(UserLog userlog);
 	public void addLog(Organization organization);
 }

@@ -29,11 +29,10 @@ public class UserLog {
 	public void setStartTimestamp(LocalDateTime startTimestamp) {
 		this.startTimestamp = startTimestamp;
 		
-		LocalDateTime localdatetime = LocalDateTime.now();
 		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
-		this.setStartDate(localdatetime.format(df));
+		this.setStartDate(this.startTimestamp.format(df));
 		df = DateTimeFormatter.ofPattern("HHmmss");
-		this.setStartHms(localdatetime.format(df));
+		this.setStartHms(this.startTimestamp.format(df));
 	}
 	
 	public String getStartDate() { return this.startDate; }
@@ -46,11 +45,10 @@ public class UserLog {
 	public void setEndTimestamp() {
 		this.endTimestamp = LocalDateTime.now();
 
-		LocalDateTime localdatetime = endTimestamp;
 		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
-		this.setEndDate(localdatetime.format(df));
+		this.setEndDate(this.endTimestamp.format(df));
 		df = DateTimeFormatter.ofPattern("HHmmss");
-		this.setEndHms(localdatetime.format(df));
+		this.setEndHms(this.endTimestamp.format(df));
 	}
 	
 	public String getEndDate() { return this.endDate; }

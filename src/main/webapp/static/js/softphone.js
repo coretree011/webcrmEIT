@@ -105,7 +105,7 @@ function stompConnect() {
 
 			console.log("connected!");
 			requestQueryExtensionState("");
-			requestQueryBusyExtensions();
+			//requestQueryBusyExtensions();
 		}
 		catch (err) {
 			console.log("connnect error: " + err);

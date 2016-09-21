@@ -54,12 +54,12 @@
     </select>
     
     <select id="selectLoginUser" resultMap="resultMap">
-    	select emp_no, emp_nm, password, grp_cd, enter_date, auth_cd, mobile_phoneno, emailid, extension_no, note, '1018' as AGENT_STAT_CD
+    	select emp_no, emp_nm, password, grp_cd, enter_date, auth_cd, mobile_phoneno, emailid, extension_no, note, '1017' as AGENT_STAT_CD
     		from torganization order by emp_nm asc
     </select>
     
     <select id="getUsers" resultMap="resultMap4">
-    	select emp_no, emp_nm, password, grp_cd, enter_date, auth_cd, mobile_phoneno, emailid, extension_no, note, '1018' as AGENT_STAT_CD
+    	select emp_no, emp_nm, password, grp_cd, enter_date, auth_cd, mobile_phoneno, emailid, extension_no, note, '1017' as AGENT_STAT_CD
     		from torganization order by emp_nm asc
     </select>
     
