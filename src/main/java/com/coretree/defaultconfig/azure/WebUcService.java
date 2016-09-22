@@ -440,10 +440,8 @@ public class WebUcService implements
 				}
 				break;
 			default:
-				message.cmd = Const4pbx.WS_RES_CHANGE_EXTENSION_STATE;
-				message.status = Const4pbx.UC_STATUS_FAIL;
-				message.statusmsg = Const4pbx.WS_VALUE_EXTENSION_STATE_WRONGREQ;
-				this.msgTemplate.convertAndSendToUser(principal.getName(), "/queue/groupware", message);
+				this.RequestToPbx(message);
+				organization.setTempval(message.cmd);
 				break;
 		}
 	}
@@ -600,7 +598,11 @@ public class WebUcService implements
 				payload.extension = data.getExtension();
 				payload.caller = data.getCaller();
 				payload.callee = data.getCallee();
-				payload.status = Integer.valueOf(data.getUserAgent());
+				try {
+					payload.status = Integer.valueOf(data.getUserAgent());
+				} catch (NumberFormatException e3) {
+					e3.printStackTrace();
+				}
 
 				logger.debug("******userName==>"+ organization.getEmpNo());
 				this.msgTemplate.convertAndSendToUser(organization.getEmpNo(), "/queue/groupware", payload);
